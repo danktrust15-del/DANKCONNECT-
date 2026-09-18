@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>DANKCONNECT</title>
 <meta name="theme-color" content="#0d00b3">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="icon" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
 <link rel="manifest" href="manifest.json">
@@ -49,7 +48,6 @@ body{background:var(--bg);height:100dvh;overflow:hidden}
 <input id="username" placeholder="Username e.g. dankboy">
 <input id="password" type="password" placeholder="Password min 6 chars">
 <button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button>
-<button id="guestBtn" style="width:100%;padding:14px;background:white;color:#0d00b3;border:1.5px solid #0d00b3;border-radius:12px;font-weight:700;margin-top:10px">Continue as Guest</button>
 <div id="loginMsg"></div>
 </div>
 </div>
@@ -80,7 +78,6 @@ function cleanU(u){return u.trim().toLowerCase().replace(/[^a-z0-9_]/g,'').slice
 function emailFromU(u){return cleanU(u)+"@dankconnect.app"}
 async function handleLogin(){let u=cleanU(document.getElementById('username').value),p=document.getElementById('password').value.trim(),msgEl=document.getElementById('loginMsg');if(u.length<3){msgEl.textContent="Username min 3";return}if(p.length<6){msgEl.textContent="Password min 6";return}document.getElementById('loginBtn').disabled=true;msgEl.textContent="Checking...";let email=emailFromU(u);try{await signInWithEmailAndPassword(auth,email,p);msgEl.style.color="green";msgEl.textContent="Welcome "+u}catch(err){if(err.code==='auth/invalid-credential'||err.code==='auth/user-not-found'){try{let cred=await createUserWithEmailAndPassword(auth,email,p);await setDoc(doc(db,"users",cred.user.uid),{username:u,created:serverTimestamp()},{merge:true});await setDoc(doc(db,"usernames",u),{uid:cred.user.uid,username:u},{merge:true});msgEl.style.color="green";msgEl.textContent="Created "+u}catch(cErr){msgEl.style.color="red";msgEl.textContent=cErr.message}}else{msgEl.style.color="red";msgEl.textContent=err.message}}document.getElementById('loginBtn').disabled=false}
 document.getElementById('loginBtn').addEventListener('click',handleLogin);
-document.getElementById('guestBtn').addEventListener('click',()=>{document.getElementById('username').value="guest_"+Math.floor(1000+Math.random()*9000);document.getElementById('password').value="guest123456";handleLogin()});
 onAuthStateChanged(auth,(user)=>{if(user){let uname=cleanU(user.email.split('@')[0]);currentUsername=uname;localStorage.setItem('dc_user',uname);document.getElementById('loginView').style.display='none';document.getElementById('mainView').style.display='flex';listenAllChats()}else{currentUsername=null;document.getElementById('loginView').style.display='flex';document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='none';let s=localStorage.getItem('dc_user');if(s)document.getElementById('username').value=s;if(unsubMsgs)unsubMsgs();if(unsubList)unsubList()}});
 function getPrivateChatId(a,b){a=cleanU(a);b=cleanU(b);if(a===b)return null;return "private_"+[a,b].sort().join("_")}
 function listenAllChats(){if(unsubList)unsubList();let qPrivate=query(collection(db,"private_chats"),where("participants","array-contains",currentUsername),orderBy("lastTime","desc"));let qGroups=query(collection(db,"group_chats"),where("members","array-contains",currentUsername),orderBy("lastTime","desc"));allCache=[];unsubList=onSnapshot(qPrivate,(snap)=>{cachePrivate=snap.docs.map(d=>({id:d.id,type:'private',...d.data()}));merge()});onSnapshot(qGroups,(snap)=>{cacheGroups=snap.docs.map(d=>({id:d.id,type:'group',...d.data()}));merge()})}
