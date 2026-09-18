@@ -59,24 +59,25 @@ body{background:#efeeff;height:100dvh;overflow:hidden}
 .input-bar{display:flex;gap:8px;padding:10px;background:#14142a;align-items:center;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .input-bar input{flex:1;padding:12px 16px;border-radius:25px;border:none;background:#23233a;color:white;outline:none}
 
-/* === DARK/LIGHT MODE ONLY ADDITION === */
-body.light-mode #mainView{background:#e8eaff;color:#0a0a14}
-body.light-mode.filter-chips{background:#e8eaff}
-body.light-mode.list{background:#e8eaff}
-body.light-mode.chat-row{border-bottom:1px solid rgba(13,0,179,0.08)}
-body.light-mode.chat-name{color:#0a0a14}
-body.light-mode.chat-last{color:#5a5a7a}
-body.light-mode.chat-time{color:#6b6b8a}
-body.light-mode.chip{background:#d1d3f0;color:#4a4a6a}
-body.light-mode.chip.active{background:var(--blue);color:white}
-body.light-mode.bottom-nav{background:#dfe1ff;border-top:1px solid rgba(13,0,179,0.12)}
-body.light-mode.nav-item{color:#6b6b8a}
-body.light-mode.nav-item.active{color:var(--blue)}
-body.light-mode #chatView{background:#e8eaff}
-body.light-mode.msgs{background:#e8eaff}
-body.light-mode.bubble.other{background:white;color:#0a0a14;box-shadow:0 1px 2px rgba(0,0,0,0.08)}
-body.light-mode.input-bar{background:#dfe1ff}
-body.light-mode.input-bar input{background:white;color:#0a0a14}
+/* === FIXED LIGHT MODE - CORRECTED WITH SPACE +!important === */
+body.light-mode #mainView{background:#e8eaff!important;color:#0a0a14!important}
+body.light-mode.filter-chips{background:#e8eaff!important}
+body.light-mode.list{background:#e8eaff!important}
+body.light-mode.chat-row{border-bottom:1px solid rgba(13,0,179,0.1)!important}
+body.light-mode.chat-name{color:#0a0a14!important}
+body.light-mode.chat-last{color:#5a5a7a!important}
+body.light-mode.chat-time{color:#6b6b8a!important}
+body.light-mode.chat-time.green{color:#0d00b3!important}
+body.light-mode.chip{background:#d1d3f0!important;color:#4a4a6a!important}
+body.light-mode.chip.active{background:#0d00b3!important;color:white!important}
+body.light-mode.bottom-nav{background:#dfe1ff!important;border-top:1px solid rgba(13,0,179,0.12)!important}
+body.light-mode.nav-item{color:#6b6b8a!important}
+body.light-mode.nav-item.active{color:#0d00b3!important}
+body.light-mode #chatView{background:#e8eaff!important}
+body.light-mode.msgs{background:#e8eaff!important}
+body.light-mode.bubble.other{background:white!important;color:#0a0a14!important;box-shadow:0 1px 3px rgba(0,0,0,0.1)!important}
+body.light-mode.input-bar{background:#dfe1ff!important}
+body.light-mode.input-bar input{background:white!important;color:#0a0a14!important}
 </style>
 </head>
 <body>
