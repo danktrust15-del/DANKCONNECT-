@@ -58,11 +58,30 @@ body{background:#efeeff;height:100dvh;overflow:hidden}
 .bubble.other{align-self:flex-start;background:#1e1e35;color:white;border-bottom-left-radius:4px}
 .input-bar{display:flex;gap:8px;padding:10px;background:#14142a;align-items:center;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .input-bar input{flex:1;padding:12px 16px;border-radius:25px;border:none;background:#23233a;color:white;outline:none}
+
+/* === DARK/LIGHT MODE ONLY ADDITION === */
+body.light-mode #mainView{background:#e8eaff;color:#0a0a14}
+body.light-mode.filter-chips{background:#e8eaff}
+body.light-mode.list{background:#e8eaff}
+body.light-mode.chat-row{border-bottom:1px solid rgba(13,0,179,0.08)}
+body.light-mode.chat-name{color:#0a0a14}
+body.light-mode.chat-last{color:#5a5a7a}
+body.light-mode.chat-time{color:#6b6b8a}
+body.light-mode.chip{background:#d1d3f0;color:#4a4a6a}
+body.light-mode.chip.active{background:var(--blue);color:white}
+body.light-mode.bottom-nav{background:#dfe1ff;border-top:1px solid rgba(13,0,179,0.12)}
+body.light-mode.nav-item{color:#6b6b8a}
+body.light-mode.nav-item.active{color:var(--blue)}
+body.light-mode #chatView{background:#e8eaff}
+body.light-mode.msgs{background:#e8eaff}
+body.light-mode.bubble.other{background:white;color:#0a0a14;box-shadow:0 1px 2px rgba(0,0,0,0.08)}
+body.light-mode.input-bar{background:#dfe1ff}
+body.light-mode.input-bar input{background:white;color:#0a0a14}
 </style>
 </head>
 <body>
 <div id="loginView"><img src="logo.png" class="login-logo"><h2 style="margin-top:16px;font-weight:900">DANKCONNECT</h2><p style="font-size:13px;opacity:0.9;text-align:center;margin-top:6px">Ghana's Secure Chat 🇬🇭<br>Username only • Text only • Free</p><div class="login-box"><input id="username" placeholder="Username e.g. dankboy"><input id="password" type="password" placeholder="Password min 6 chars"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="loginMsg"></div></div></div>
-<div id="mainView"><div class="m-top"><h1>Chats</h1><div style="display:flex;gap:8px"><div class="icon-btn">📷</div><div class="icon-btn" onclick="newPrivateChat()" style="background:white;color:#0d00b3;font-weight:900;font-size:24px">+</div></div></div><div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search" oninput="filterChats()"></div></div><div class="filter-chips"><div class="chip active" id="chipAll" onclick="switchTab('all')">All</div><div class="chip" id="chipChats" onclick="switchTab('chats')">Unread <span id="unreadCount">0</span></div><div class="chip">Favorites</div><div class="chip" id="chipGroups" onclick="switchTab('groups')">Groups <span id="groupCount">0</span></div><div class="chip" onclick="createGroup()">+</div></div><div class="list" id="chatList"></div><div class="bottom-nav"><div class="nav-item"><span>⭕</span>Updates</div><div class="nav-item"><span>📞</span>Calls</div><div class="nav-item"><span>🛠️</span>Tools</div><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" onclick="if(confirm('Logout?')) doLogout()"><span>⚙️</span>Settings</div></div></div>
+<div id="mainView"><div class="m-top"><h1>Chats</h1><div style="display:flex;gap:8px"><div class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Light/Dark">🌙</div><div class="icon-btn">📷</div><div class="icon-btn" onclick="newPrivateChat()" style="background:white;color:#0d00b3;font-weight:900;font-size:24px">+</div></div></div><div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search" oninput="filterChats()"></div></div><div class="filter-chips"><div class="chip active" id="chipAll" onclick="switchTab('all')">All</div><div class="chip" id="chipChats" onclick="switchTab('chats')">Unread <span id="unreadCount">0</span></div><div class="chip">Favorites</div><div class="chip" id="chipGroups" onclick="switchTab('groups')">Groups <span id="groupCount">0</span></div><div class="chip" onclick="createGroup()">+</div></div><div class="list" id="chatList"></div><div class="bottom-nav"><div class="nav-item"><span>⭕</span>Updates</div><div class="nav-item"><span>📞</span>Calls</div><div class="nav-item"><span>🛠️</span>Tools</div><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" onclick="if(confirm('Logout?')) doLogout()"><span>⚙️</span>Settings</div></div></div>
 <div id="chatView"><div class="chat-head"><div onclick="closeChat()" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8">tap message to delete • text only</div></div><div>📞</div><div style="margin-left:12px">🎥</div></div><div class="msgs" id="msgs"></div><div class="input-bar"><input type="text" id="msgInput" placeholder="Type message..." onkeydown="if(event.key==='Enter') sendMsg()"><button onclick="sendMsg()" style="width:42px;height:42px;border-radius:50%;background:#0d00b3;color:white;border:none">➤</button></div></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -71,6 +90,17 @@ import { getFirestore, collection, doc, setDoc, addDoc, query, onSnapshot, order
 const firebaseConfig = { apiKey: "AIzaSyDfWReJ-A4J2W5V_FahYjLwfXv3-sNvXZE", authDomain: "dankconnect.firebaseapp.com", projectId: "dankconnect", storageBucket: "dankconnect.firebasestorage.app", messagingSenderId: "248906319926", appId: "1:248906319926:web:704456ec90628c5f2a7097" };
 const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
 await setPersistence(auth, browserLocalPersistence);
+function applyTheme(t){
+  if(t==='light'){document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');let b=document.getElementById('themeBtn');if(b)b.textContent='☀️';}
+  else{document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');let b=document.getElementById('themeBtn');if(b)b.textContent='🌙';}
+}
+window.toggleTheme=()=>{let cur=document.body.classList.contains('light-mode')?'light':'dark';applyTheme(cur==='light'?'dark':'light')};
+(function(){
+  let saved=localStorage.getItem('dc_theme');
+  if(saved){applyTheme(saved);}
+  else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches){applyTheme('light');}
+  else{applyTheme('dark');}
+})();
 let currentUsername=null,currentChatId=null,currentChatType='private',currentChatOther=null,currentTab='all',unsubMsgs=null,unsubPriv=null,unsubGroup=null,cachePrivate=[],cacheGroups=[];
 function cleanU(u){return u.trim().toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20)}
 function emailFromU(u){return cleanU(u)+"@dankconnect.app"}
