@@ -32,7 +32,7 @@ body{background:var(--bg);height:100dvh;overflow:hidden}
 #chatView{display:none;height:100dvh;flex-direction:column;background:#dbe5ff}
 .chat-head{background:var(--blue);color:white;padding:10px 12px;display:flex;align-items:center;gap:10px}
 .msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.bubble{max-width:78%;padding:10px 12px;border-radius:18px;font-size:14px}
+.bubble{max-width:78%;padding:10px 12px;border-radius:18px;font-size:14px;word-break:break-word}
 .bubble.me{align-self:flex-end;background:var(--blue);color:white}
 .bubble.other{align-self:flex-start;background:white}
 .input-bar{display:flex;gap:8px;padding:10px;background:white}
@@ -43,7 +43,7 @@ body{background:var(--bg);height:100dvh;overflow:hidden}
 <div id="loginView">
 <img src="logo.png" class="login-logo">
 <h2 style="margin-top:18px">DANKCONNECT</h2>
-<p style="font-size:14px;opacity:0.9;text-align:center;margin-top:6px">Ghana's Secure Chat 🇬🇭<br>Username only</p>
+<p style="font-size:14px;opacity:0.9;text-align:center;margin-top:6px">Ghana's Secure Chat 🇬🇭<br>Username only - Text Only</p>
 <div class="login-box">
 <input id="username" placeholder="Username e.g. dankboy">
 <input id="password" type="password" placeholder="Password min 6 chars">
@@ -58,20 +58,18 @@ body{background:var(--bg);height:100dvh;overflow:hidden}
 <div class="list" id="chatList"></div>
 </div>
 <div id="chatView">
-<div class="chat-head"><div onclick="closeChat()" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px" id="chatStatus">online</div></div><div onclick="startVoiceCall()" style="cursor:pointer">📞</div><div onclick="startVideoCall()" style="cursor:pointer;margin-left:10px">🎥</div></div>
+<div class="chat-head"><div onclick="closeChat()" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px" id="chatStatus">online • text only</div></div><div onclick="startVoiceCall()" style="cursor:pointer">📞</div><div onclick="startVideoCall()" style="cursor:pointer;margin-left:10px">🎥</div></div>
 <div class="msgs" id="msgs"></div>
-<div class="input-bar"><button onclick="document.getElementById('filePic').click()" style="width:42px;height:42px;border-radius:50%;background:#eef;border:none">📎</button><input type="file" id="filePic" accept="image/*,video/*" style="display:none"><input type="text" id="msgInput" placeholder="Type message..." onkeydown="if(event.key==='Enter') sendMsg()"><button onclick="sendMsg()" style="width:42px;height:42px;border-radius:50%;background:#0d00b3;color:white;border:none">➤</button></div>
+<div class="input-bar"><input type="text" id="msgInput" placeholder="Type message..." onkeydown="if(event.key==='Enter') sendMsg()"><button onclick="sendMsg()" style="width:42px;height:42px;border-radius:50%;background:#0d00b3;color:white;border:none">➤</button></div>
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, addDoc, query, onSnapshot, orderBy, serverTimestamp, where, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getFirestore, collection, doc, setDoc, addDoc, query, onSnapshot, orderBy, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const firebaseConfig = { apiKey: "AIzaSyDfWReJ-A4J2W5V_FahYjLwfXv3-sNvXZE", authDomain: "dankconnect.firebaseapp.com", projectId: "dankconnect", storageBucket: "dankconnect.firebasestorage.app", messagingSenderId: "248906319926", appId: "1:248906319926:web:704456ec90628c5f2a7097" };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
 await setPersistence(auth, browserLocalPersistence);
 let currentUsername=null,currentChatId=null,currentChatType='private',currentTab='chats',unsubMsgs=null,unsubList=null,allCache=[],cachePrivate=[],cacheGroups=[];
 function cleanU(u){return u.trim().toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20)}
@@ -93,12 +91,11 @@ function openGroup(id,name){currentChatType='group';currentChatId=id;document.ge
 window.openGroup=openGroup;window.openPrivate=openPrivate;
 function showChat(){document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='flex'}
 window.closeChat=()=>{if(unsubMsgs)unsubMsgs();document.getElementById('chatView').style.display='none';document.getElementById('mainView').style.display='flex';currentChatId=null};
-function listenMessages(){if(unsubMsgs)unsubMsgs();let box=document.getElementById('msgs');box.innerHTML='Loading...';let col;if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");else col=collection(db,"messages");let q=query(col,orderBy("time","asc"));unsubMsgs=onSnapshot(q,(snap)=>{box.innerHTML='';snap.forEach(d=>{let data=d.data();let div=document.createElement('div');let isMe=data.sender===currentUsername||data.uid===auth.currentUser?.uid;div.className='bubble '+(isMe?'me':'other');if(data.type==='image')div.innerHTML=`<img src="${data.url}" style="max-width:100%;border-radius:10px"><br>${data.text||''}`;else if(data.type==='video')div.innerHTML=`<video controls src="${data.url}" style="max-width:100%;border-radius:10px"></video>`;else div.innerHTML=data.text;box.appendChild(div)});box.scrollTop=box.scrollHeight})}
+function listenMessages(){if(unsubMsgs)unsubMsgs();let box=document.getElementById('msgs');box.innerHTML='Loading...';let col;if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");else col=collection(db,"messages");let q=query(col,orderBy("time","asc"));unsubMsgs=onSnapshot(q,(snap)=>{box.innerHTML='';snap.forEach(d=>{let data=d.data();let div=document.createElement('div');let isMe=data.sender===currentUsername||data.uid===auth.currentUser?.uid;div.className='bubble '+(isMe?'me':'other');div.textContent=data.text;box.appendChild(div)});box.scrollTop=box.scrollHeight})}
 window.sendMsg=async()=>{let txt=document.getElementById('msgInput').value.trim();if(!txt||!currentChatId)return;document.getElementById('msgInput').value='';let col;if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");else col=collection(db,"messages");await addDoc(col,{text:txt,sender:currentUsername,uid:auth.currentUser.uid,time:serverTimestamp(),type:'text'});if(currentChatType==='private')await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:txt,lastTime:serverTimestamp(),participants:[currentUsername,...currentChatId.replace('private_','').split('_').filter(u=>u!==currentUsername)]},{merge:true});if(currentChatType==='group')await setDoc(doc(db,"group_chats",currentChatId),{lastMsg:currentUsername+": "+txt.slice(0,40),lastTime:serverTimestamp()},{merge:true})};
-document.getElementById('filePic').addEventListener('change',async(e)=>{let file=e.target.files[0];if(!file)return;try{let path=`chats/${currentChatId}/${Date.now()}_${file.name}`;let r=ref(storage,path);await uploadBytes(r,file);let url=await getDownloadURL(r);let col;if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");else col=collection(db,"messages");await addDoc(col,{url:url,sender:currentUsername,uid:auth.currentUser.uid,time:serverTimestamp(),type:file.type.startsWith('video')?'video':'image'});if(currentChatType==='private')await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:"📷 Photo",lastTime:serverTimestamp()},{merge:true})}catch(err){alert(err.message)}e.target.value=''});
 window.doLogout=()=>signOut(auth);
-window.startVoiceCall=()=>alert("Voice call to "+document.getElementById('chatName').textContent+" - WebRTC next step");
-window.startVideoCall=()=>alert("Video call - HD coming next");
+window.startVoiceCall=()=>alert("Voice call to "+document.getElementById('chatName').textContent+" - Coming soon! Text works 100% free for now");
+window.startVideoCall=()=>alert("Video call - Coming soon! Text works 100% free for now");
 </script>
 </body>
 </html>
