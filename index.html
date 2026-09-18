@@ -23,23 +23,21 @@ body{background:#efeeff;height:100dvh;overflow:hidden}
 #loginMsg{text-align:center;margin-top:10px;font-size:13px;font-weight:700;min-height:18px;color:#d00}
 #mainView{display:none;height:100dvh;flex-direction:column;background:#0a0a14;color:white}
 .m-top{padding:14px 16px 8px;display:flex;justify-content:space-between;align-items:center;background:var(--blue);padding-top:calc(14px + env(safe-area-inset-top))}
-.m-top h1{font-size:32px;font-weight:900;letter-spacing:-0.5px}
-.icon-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
+.m-top h1{font-size:32px;font-weight:900}
+.icon-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .search-wrap{padding:10px 14px;background:var(--blue);padding-bottom:14px}
 .sbox{background:rgba(0,0,0,0.28);border-radius:12px;display:flex;align-items:center;padding:10px 14px;gap:10px}
 .sbox input{flex:1;background:transparent;border:none;color:white;font-size:15px;outline:none}
-.sbox input::placeholder{color:rgba(255,255,255,0.6)}
 .filter-chips{display:flex;gap:8px;padding:10px 14px;overflow-x:auto;background:#0a0a14}
 .chip{white-space:nowrap;padding:8px 14px;border-radius:20px;background:#23233a;color:#9a9ab3;font-size:13px;font-weight:600;cursor:pointer}
 .chip.active{background:white;color:#0a0a14;font-weight:800}
 .list{flex:1;overflow-y:auto;background:#0a0a14;padding-bottom:90px}
 .chat-row{display:flex;gap:12px;padding:12px 14px;cursor:pointer;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)}
 .av{width:52px;height:52px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;overflow:hidden;flex-shrink:0}
-.av img{width:100%;height:100%;object-fit:cover}
 .chat-info{flex:1;min-width:0}
 .chat-top{display:flex;justify-content:space-between;align-items:center}
-.chat-name{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:white}
-.chat-time{font-size:12px;color:#8b8ba7;flex-shrink:0;margin-left:8px}
+.chat-name{font-weight:700;font-size:16px;color:white}
+.chat-time{font-size:12px;color:#8b8ba7;margin-left:8px}
 .chat-time.green{color:var(--green);font-weight:800}
 .chat-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
 .chat-last{font-size:14px;color:#8b8ba7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
@@ -64,7 +62,7 @@ body{background:#efeeff;height:100dvh;overflow:hidden}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, addDoc, query, onSnapshot, orderBy, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, addDoc, query, onSnapshot, orderBy, serverTimestamp, where, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const firebaseConfig = { apiKey: "AIzaSyDfWReJ-A4J2W5V_FahYjLwfXv3-sNvXZE", authDomain: "dankconnect.firebaseapp.com", projectId: "dankconnect", storageBucket: "dankconnect.firebasestorage.app", messagingSenderId: "248906319926", appId: "1:248906319926:web:704456ec90628c5f2a7097" };
 const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
 await setPersistence(auth, browserLocalPersistence);
@@ -77,7 +75,6 @@ onAuthStateChanged(auth,(user)=>{if(user){let uname=cleanU(user.email.split('@')
 function getPrivateChatId(a,b){a=cleanU(a);b=cleanU(b);if(a===b)return null;return "private_"+[a,b].sort().join("_")}
 function listenAllChats(){
 if(unsubPriv)unsubPriv(); if(unsubGroup)unsubGroup();
-// FIXED - NO ORDERBY - NO INDEX NEEDED - PRIVATE CHATS WILL SHOW!
 let qPrivate=query(collection(db,"private_chats"),where("participants","array-contains",currentUsername));
 let qGroups=query(collection(db,"group_chats"),where("members","array-contains",currentUsername));
 unsubPriv=onSnapshot(qPrivate,(snap)=>{cachePrivate=snap.docs.map(d=>({id:d.id,type:'private',...d.data()}));renderList()});
@@ -89,12 +86,16 @@ let q=document.getElementById('searchInput').value.toLowerCase();
 let all=[...cachePrivate,...cacheGroups].sort((a,b)=>(b.lastTime?.seconds||0)-(a.lastTime?.seconds||0));
 let filtered=all.filter(c=>{
 if(currentTab==='groups'&&c.type!=='group')return false;
-if(currentTab==='chats'&&c.type!=='private')return false;
+if(currentTab==='chats'){
+  let unread = c.unread && c.unread[currentUsername]? c.unread[currentUsername] : 0;
+  if(unread===0) return false;
+}
 if(!q)return true;
 if(c.type==='private'){let o=(c.participants||[]).find(p=>p!==currentUsername)||'';return o.includes(q)}
 else return (c.name||'').toLowerCase().includes(q)
 });
-document.getElementById('unreadCount').textContent=cachePrivate.length;
+let unreadChats = cachePrivate.filter(c=> c.unread && c.unread[currentUsername]>0).length;
+document.getElementById('unreadCount').textContent = unreadChats>0? unreadChats : "0";
 document.getElementById('groupCount').textContent=cacheGroups.length;
 let arch=document.createElement('div');arch.className='chat-row';
 arch.innerHTML=`<div style="width:52px;height:52px;border-radius:50%;background:#1e1e35;display:flex;align-items:center;justify-content:center">🗃️</div><div class="chat-info"><div class="chat-top"><span class="chat-name" style="color:#8b8ba7">Archived</span></div></div>`;
@@ -109,17 +110,28 @@ let row=document.createElement('div');row.className='chat-row';
 let timeStr=c.lastTime?new Date(c.lastTime.seconds*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'08:46';
 if(c.type==='private'){
 let other=(c.participants||[]).find(p=>p!==currentUsername)||'Unknown';
-row.innerHTML=`<div class="av">${other.slice(0,2).toUpperCase()}</div><div class="chat-info"><div class="chat-top"><span class="chat-name">${other} ❤️</span><span class="chat-time green">${timeStr}</span></div><div class="chat-bottom"><span class="chat-last">${c.lastMsg||'Hm'}</span><span class="badge">4</span></div></div>`;
+let unread = c.unread && c.unread[currentUsername]? c.unread[currentUsername] : 0;
+let timeCls = unread>0? "chat-time green" : "chat-time";
+let badge = unread>0? `<span class="badge">${unread>9?'9+':unread}</span>` : "";
+row.innerHTML=`<div class="av">${other.slice(0,2).toUpperCase()}</div><div class="chat-info"><div class="chat-top"><span class="chat-name">${other} ❤️</span><span class="${timeCls}">${timeStr}</span></div><div class="chat-bottom"><span class="chat-last">${c.lastMsg||'Hm'}</span>${badge}</div></div>`;
 row.onclick=()=>openPrivate(other);
 }else{
-row.innerHTML=`<div class="av" style="background:#5b5bff">${c.name?.slice(0,2).toUpperCase()}</div><div class="chat-info"><div class="chat-top"><span class="chat-name">${c.name} ❤️</span><span class="chat-time">${timeStr}</span></div><div class="chat-bottom"><span class="chat-last">${c.lastMsg||'Group'} • ${c.members?.length||0} members</span></div></div>`;
+let unread = c.unread && c.unread[currentUsername]? c.unread[currentUsername] : 0;
+let timeCls = unread>0? "chat-time green" : "chat-time";
+let badge = unread>0? `<span class="badge">${unread>9?'9+':unread}</span>` : "";
+row.innerHTML=`<div class="av" style="background:#5b5bff">${c.name?.slice(0,2).toUpperCase()}</div><div class="chat-info"><div class="chat-top"><span class="chat-name">${c.name} ❤️</span><span class="${timeCls}">${timeStr}</span></div><div class="chat-bottom"><span class="chat-last">${c.lastMsg||'Group'} • ${c.members?.length||0} members</span>${badge}</div></div>`;
 row.onclick=()=>openGroup(c.id,c.name);
 }
 list.appendChild(row);
 });
-if(filtered.length===0){
+if(filtered.length===0 && currentTab==='all'){
 let empty=document.createElement('div');empty.style="text-align:center;padding:24px;color:#6b6b8a;font-size:13px";
 empty.innerHTML=`No private chats yet<br>Private chats will appear here below Business assistant<br><br><button onclick="newPrivateChat()" style="padding:12px 20px;background:#0d00b3;color:white;border:none;border-radius:12px;font-weight:800">+ Start Private Chat</button>`;
+list.appendChild(empty);
+}
+if(filtered.length===0 && currentTab==='chats'){
+let empty=document.createElement('div');empty.style="text-align:center;padding:24px;color:#6b6b8a;font-size:13px";
+empty.innerHTML=`No unread chats 🎉<br>All messages read!`;
 list.appendChild(empty);
 }
 }
@@ -127,14 +139,37 @@ window.switchTab=(t)=>{currentTab=t;document.querySelectorAll('.chip').forEach(c
 window.filterChats=()=>renderList();
 window.newPrivateChat=async()=>{let o=prompt("Enter username:");if(!o)return;o=cleanU(o);if(!o||o===currentUsername){alert("Invalid");return}openPrivate(o)};
 window.createGroup=async()=>{let name=prompt("Group name:");if(!name)return;name=name.trim().slice(0,30);let membersRaw=prompt("Members comma separated:");let members=membersRaw?membersRaw.split(',').map(cleanU).filter(Boolean):[];members=[...new Set([currentUsername,...members])];let id="group_"+Date.now()+"_"+cleanU(name);await setDoc(doc(db,"group_chats",id),{name:name,members:members,createdBy:currentUsername,createdAt:serverTimestamp(),lastMsg:"Group created",lastTime:serverTimestamp()});openGroup(id,name)};
-function openPrivate(other){currentChatType='private';currentChatId=getPrivateChatId(currentUsername,other);document.getElementById('chatName').textContent=other;document.getElementById('chatAv').textContent=other.slice(0,2).toUpperCase();showChat();setDoc(doc(db,"private_chats",currentChatId),{participants:[currentUsername,other].sort(),lastTime:serverTimestamp()},{merge:true});listenMessages()}
+async function openPrivate(other){
+currentChatType='private';currentChatId=getPrivateChatId(currentUsername,other);
+document.getElementById('chatName').textContent=other;
+document.getElementById('chatAv').textContent=other.slice(0,2).toUpperCase();
+showChat();
+try{await setDoc(doc(db,"private_chats",currentChatId),{participants:[currentUsername,other].sort(),lastTime:serverTimestamp(),[`unread.${currentUsername}`]:0},{merge:true});}catch(e){}
+listenMessages()
+}
 window.openGeneral=()=>{currentChatType='general';currentChatId='general';document.getElementById('chatName').textContent='Business assistant';document.getElementById('chatAv').innerHTML='<img src="logo.png" style="width:100%;height:100%;object-fit:cover">';showChat();listenMessages()};
 function openGroup(id,name){currentChatType='group';currentChatId=id;document.getElementById('chatName').textContent=name;document.getElementById('chatAv').textContent=name.slice(0,2).toUpperCase();showChat();listenMessages()}
 window.openGroup=openGroup;window.openPrivate=openPrivate;
 function showChat(){document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='flex'}
 window.closeChat=()=>{if(unsubMsgs)unsubMsgs();document.getElementById('chatView').style.display='none';document.getElementById('mainView').style.display='flex';currentChatId=null};
 function listenMessages(){if(unsubMsgs)unsubMsgs();let box=document.getElementById('msgs');box.innerHTML='Loading...';let col;if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");else col=collection(db,"messages");let q=query(col,orderBy("time","asc"));unsubMsgs=onSnapshot(q,(snap)=>{box.innerHTML='';snap.forEach(d=>{let data=d.data();let div=document.createElement('div');let isMe=data.sender===currentUsername||data.uid===auth.currentUser?.uid;div.className='bubble '+(isMe?'me':'other');div.textContent=data.text;box.appendChild(div)});box.scrollTop=box.scrollHeight})}
-window.sendMsg=async()=>{let txt=document.getElementById('msgInput').value.trim();if(!txt||!currentChatId)return;document.getElementById('msgInput').value='';let col;if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");else col=collection(db,"messages");await addDoc(col,{text:txt,sender:currentUsername,uid:auth.currentUser.uid,time:serverTimestamp(),type:'text'});if(currentChatType==='private')await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:txt,lastTime:serverTimestamp(),participants:[currentUsername,...currentChatId.replace('private_','').split('_').filter(u=>u!==currentUsername)]},{merge:true});if(currentChatType==='group')await setDoc(doc(db,"group_chats",currentChatId),{lastMsg:currentUsername+": "+txt.slice(0,40),lastTime:serverTimestamp()},{merge:true})};
+window.sendMsg=async()=>{
+let txt=document.getElementById('msgInput').value.trim();if(!txt||!currentChatId)return;
+document.getElementById('msgInput').value='';
+let col;if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");else col=collection(db,"messages");
+await addDoc(col,{text:txt,sender:currentUsername,uid:auth.currentUser.uid,time:serverTimestamp(),type:'text'});
+if(currentChatType==='private'){
+  let other=currentChatId.replace('private_','').split('_').filter(u=>u!==currentUsername)[0];
+  await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:txt,lastTime:serverTimestamp(),participants:[currentUsername,other].sort(),[`unread.${other}`]: increment(1),[`unread.${currentUsername}`]:0},{merge:true});
+}
+if(currentChatType==='group'){
+  let g=cacheGroups.find(x=>x.id===currentChatId);let members=g?.members||[];
+  let upd={lastMsg:currentUsername+": "+txt.slice(0,40),lastTime:serverTimestamp()};
+  members.forEach(m=>{ if(m!==currentUsername) upd[`unread.${m}`]=increment(1); });
+  upd[`unread.${currentUsername}`]=0;
+  await setDoc(doc(db,"group_chats",currentChatId),upd,{merge:true});
+}
+};
 window.doLogout=()=>signOut(auth);
 </script>
 </body>
