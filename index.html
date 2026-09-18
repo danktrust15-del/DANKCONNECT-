@@ -5,12 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>DANKCONNECT</title>
 <meta name="theme-color" content="#0d00b3">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="DANKCONNECT">
-<link rel="apple-touch-icon" href="logo.png">
 <link rel="icon" href="logo.png">
-<link rel="manifest" href="manifest.json">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial}
 :root{--blue:#0d00b3;--green:#00d166}
@@ -52,10 +47,8 @@ body{background:#efeeff;height:100dvh;overflow:hidden}
 .bubble{max-width:78%;padding:10px 12px;border-radius:18px;font-size:14.5px;word-break:break-word;cursor:pointer}
 .bubble.me{align-self:flex-end;background:var(--blue);color:white;border-bottom-right-radius:4px}
 .bubble.other{align-self:flex-start;background:#1e1e35;color:white;border-bottom-left-radius:4px}
-.bubble.me:active{opacity:0.7}
 .input-bar{display:flex;gap:8px;padding:10px;background:#14142a;align-items:center;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .input-bar input{flex:1;padding:12px 16px;border-radius:25px;border:none;background:#23233a;color:white;outline:none}
-.del-hint{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;text-align:right}
 </style>
 </head>
 <body>
@@ -83,6 +76,15 @@ let qGroups=query(collection(db,"group_chats"),where("members","array-contains",
 unsubPriv=onSnapshot(qPrivate,(snap)=>{cachePrivate=snap.docs.map(d=>({id:d.id,type:'private',...d.data()}));renderList()});
 unsubGroup=onSnapshot(qGroups,(snap)=>{cacheGroups=snap.docs.map(d=>({id:d.id,type:'group',...d.data()}));renderList()});
 }
+function getUnreadCount(c){
+  if(!c) return 0;
+  if(c.unread && typeof c.unread === 'object' && c.unread[currentUsername]!== undefined){
+    return c.unread[currentUsername] || 0;
+  }
+  let dotKey = `unread.${currentUsername}`;
+  if(c[dotKey]!== undefined) return c[dotKey] || 0;
+  return 0;
+}
 function renderList(){
 let list=document.getElementById('chatList');list.innerHTML='';
 let q=document.getElementById('searchInput').value.toLowerCase();
@@ -90,15 +92,14 @@ let all=[...cachePrivate,...cacheGroups].sort((a,b)=>(b.lastTime?.seconds||0)-(a
 let filtered=all.filter(c=>{
 if(currentTab==='groups'&&c.type!=='group')return false;
 if(currentTab==='chats'){
-  let unread = c.unread && c.unread[currentUsername]? c.unread[currentUsername] : 0;
+  let unread = getUnreadCount(c);
   if(unread===0) return false;
 }
 if(!q)return true;
 if(c.type==='private'){let o=(c.participants||[]).find(p=>p!==currentUsername)||'';return o.includes(q)}
 else return (c.name||'').toLowerCase().includes(q)
 });
-let unreadChats = cachePrivate.filter(c=> c.unread && c.unread[currentUsername]>0).length;
-let totalUnreadCount = cachePrivate.reduce((sum,c)=> sum + (c.unread && c.unread[currentUsername]? c.unread[currentUsername] : 0), 0);
+let unreadChats = cachePrivate.filter(c=> getUnreadCount(c)>0).length;
 document.getElementById('unreadCount').textContent = unreadChats>0? unreadChats : "0";
 document.getElementById('groupCount').textContent=cacheGroups.length;
 let arch=document.createElement('div');arch.className='chat-row';
@@ -114,13 +115,13 @@ let row=document.createElement('div');row.className='chat-row';
 let timeStr=c.lastTime?new Date(c.lastTime.seconds*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'08:46';
 if(c.type==='private'){
 let other=(c.participants||[]).find(p=>p!==currentUsername)||'Unknown';
-let unread = c.unread && c.unread[currentUsername]? c.unread[currentUsername] : 0;
+let unread = getUnreadCount(c);
 let timeCls = unread>0? "chat-time green" : "chat-time";
 let badge = unread>0? `<span class="badge">${unread>9?'9+':unread}</span>` : "";
 row.innerHTML=`<div class="av">${other.slice(0,2).toUpperCase()}</div><div class="chat-info"><div class="chat-top"><span class="chat-name">${other} ❤️</span><span class="${timeCls}">${timeStr}</span></div><div class="chat-bottom"><span class="chat-last">${c.lastMsg||'Hm'}</span>${badge}</div></div>`;
 row.onclick=()=>openPrivate(other);
 }else{
-let unread = c.unread && c.unread[currentUsername]? c.unread[currentUsername] : 0;
+let unread = getUnreadCount(c);
 let timeCls = unread>0? "chat-time green" : "chat-time";
 let badge = unread>0? `<span class="badge">${unread>9?'9+':unread}</span>` : "";
 row.innerHTML=`<div class="av" style="background:#5b5bff">${c.name?.slice(0,2).toUpperCase()}</div><div class="chat-info"><div class="chat-top"><span class="chat-name">${c.name} ❤️</span><span class="${timeCls}">${timeStr}</span></div><div class="chat-bottom"><span class="chat-last">${c.lastMsg||'Group'} • ${c.members?.length||0} members</span>${badge}</div></div>`;
@@ -128,16 +129,6 @@ row.onclick=()=>openGroup(c.id,c.name);
 }
 list.appendChild(row);
 });
-if(filtered.length===0 && currentTab==='all'){
-let empty=document.createElement('div');empty.style="text-align:center;padding:24px;color:#6b6b8a;font-size:13px";
-empty.innerHTML=`No private chats yet<br>Private chats will appear here below Business assistant<br><br><button onclick="newPrivateChat()" style="padding:12px 20px;background:#0d00b3;color:white;border:none;border-radius:12px;font-weight:800">+ Start Private Chat</button>`;
-list.appendChild(empty);
-}
-if(filtered.length===0 && currentTab==='chats'){
-let empty=document.createElement('div');empty.style="text-align:center;padding:24px;color:#6b6b8a;font-size:13px";
-empty.innerHTML=`No unread chats 🎉<br>All messages read!`;
-list.appendChild(empty);
-}
 }
 window.switchTab=(t)=>{currentTab=t;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));let map={all:'chipAll',chats:'chipChats',groups:'chipGroups'};if(map[t])document.getElementById(map[t]).classList.add('active');renderList()}
 window.filterChats=()=>renderList();
@@ -149,11 +140,17 @@ currentChatType='private';currentChatId=getPrivateChatId(currentUsername,other);
 document.getElementById('chatName').textContent=other;
 document.getElementById('chatAv').textContent=other.slice(0,2).toUpperCase();
 showChat();
-try{await setDoc(doc(db,"private_chats",currentChatId),{participants:[currentUsername,other].sort(),lastTime:serverTimestamp(),[`unread.${currentUsername}`]:0},{merge:true});}catch(e){}
+try{
+  let existing = cachePrivate.find(c=>c.id===currentChatId);
+  let otherUnread = existing?.unread?.[other] || 0;
+  let dotOther = existing?.[`unread.${other}`] || 0;
+  if(!existing?.unread) otherUnread = dotOther;
+  await setDoc(doc(db,"private_chats",currentChatId),{participants:[currentUsername,other].sort(),lastTime:serverTimestamp(),unread:{[currentUsername]:0, [other]:otherUnread}},{merge:true});
+}catch(e){}
 listenMessages()
 }
 window.openGeneral=()=>{currentChatType='general';currentChatId='general';currentChatOther=null;document.getElementById('chatName').textContent='Business assistant';document.getElementById('chatAv').innerHTML='<img src="logo.png" style="width:100%;height:100%;object-fit:cover">';showChat();listenMessages()};
-function openGroup(id,name){currentChatType='group';currentChatId=id;currentChatOther=null;document.getElementById('chatName').textContent=name;document.getElementById('chatAv').textContent=name.slice(0,2).toUpperCase();showChat();setDoc(doc(db,"group_chats",currentChatId),{[`unread.${currentUsername}`]:0},{merge:true});listenMessages()}
+async function openGroup(id,name){currentChatType='group';currentChatId=id;currentChatOther=null;document.getElementById('chatName').textContent=name;document.getElementById('chatAv').textContent=name.slice(0,2).toUpperCase();showChat();try{let existing=cacheGroups.find(c=>c.id===id);let unreadMap={};if(existing?.unread){Object.keys(existing.unread).forEach(k=>{unreadMap[k]=existing.unread[k]});}unreadMap[currentUsername]=0;await setDoc(doc(db,"group_chats",currentChatId),{unread:unreadMap},{merge:true});}catch(e){}listenMessages()}
 window.openGroup=openGroup;window.openPrivate=openPrivate;
 function showChat(){document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='flex'}
 window.closeChat=()=>{if(unsubMsgs)unsubMsgs();document.getElementById('chatView').style.display='none';document.getElementById('mainView').style.display='flex';currentChatId=null;currentChatOther=null};
@@ -174,11 +171,7 @@ unsubMsgs=onSnapshot(q,(snap)=>{
   div.className='bubble '+(isMe?'me':'other');
   div.textContent=data.text;
   if(isMe){
-   div.onclick=async()=>{
-    if(confirm('Delete this message?\n\n"'+data.text.slice(0,30)+'"')){
-     await deleteDoc(doc(col,d.id));
-    }
-   };
+   div.onclick=async()=>{ if(confirm('Delete? "'+data.text.slice(0,30)+'"')){ await deleteDoc(doc(col,d.id)); } };
   }
   box.appendChild(div)
  });
@@ -199,14 +192,18 @@ if(currentChatType==='private'){
   let parts = currentChatId.replace('private_','').split('_');
   other = parts.find(p=>p!==currentUsername) || parts[0];
  }
- await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:txt,lastTime:serverTimestamp(),participants:[currentUsername,other].sort(),[`unread.${other}`]: increment(1),[`unread.${currentUsername}`]:0},{merge:true});
+ let existing = cachePrivate.find(c=>c.id===currentChatId);
+ let unreadMap = existing?.unread? {...existing.unread} : {};
+ unreadMap[other] = (unreadMap[other]||0) + 1;
+ unreadMap[currentUsername] = 0;
+ await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:txt,lastTime:serverTimestamp(),participants:[currentUsername,other].sort(),unread:unreadMap},{merge:true});
 }
 if(currentChatType==='group'){
  let g=cacheGroups.find(x=>x.id===currentChatId);let members=g?.members||[];
- let upd={lastMsg:currentUsername+": "+txt.slice(0,40),lastTime:serverTimestamp()};
- members.forEach(m=>{ if(m!==currentUsername) upd[`unread.${m}`]=increment(1); });
- upd[`unread.${currentUsername}`]=0;
- await setDoc(doc(db,"group_chats",currentChatId),upd,{merge:true});
+ let existing=g?.unread? {...g.unread} : {};
+ members.forEach(m=>{ if(m!==currentUsername) existing[m]=(existing[m]||0)+1; });
+ existing[currentUsername]=0;
+ await setDoc(doc(db,"group_chats",currentChatId),{lastMsg:currentUsername+": "+txt.slice(0,40),lastTime:serverTimestamp(),unread:existing},{merge:true});
 }
 };
 window.doLogout=()=>signOut(auth);
