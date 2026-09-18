@@ -20,7 +20,7 @@ body{background:#efeeff;height:100dvh;overflow:hidden}
 .login-box{background:white;width:100%;max-width:380px;border-radius:24px;padding:22px;margin-top:22px;color:#111}
 .login-box input{width:100%;padding:15px;border-radius:12px;border:1.5px solid #d1d5db;font-size:16px;margin-bottom:12px}
 .btn-primary{width:100%;padding:15px;background:var(--blue);color:white;border:none;border-radius:12px;font-weight:800;font-size:16px}
-#loginMsg{text-align:center;margin-top:10px;font-size:13px;font-weight:700;min-height:18px;color:#d00}
+#loginMsg{text-align:center;margin-top:10px;font-size:13px;font-weight:700;min-height:18px;color:#ffeb3b}
 #mainView{display:none;height:100dvh;flex-direction:column;background:#0a0a14;color:white}
 .m-top{padding:14px 16px 8px;display:flex;justify-content:space-between;align-items:center;background:var(--blue);padding-top:calc(14px + env(safe-area-inset-top))}
 .m-top h1{font-size:32px;font-weight:900}
@@ -34,6 +34,7 @@ body{background:#efeeff;height:100dvh;overflow:hidden}
 .list{flex:1;overflow-y:auto;background:#0a0a14;padding-bottom:90px}
 .chat-row{display:flex;gap:12px;padding:12px 14px;cursor:pointer;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)}
 .av{width:52px;height:52px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;overflow:hidden;flex-shrink:0}
+.av img{width:100%;height:100%;object-fit:cover}
 .chat-info{flex:1;min-width:0}
 .chat-top{display:flex;justify-content:space-between;align-items:center}
 .chat-name{font-weight:700;font-size:16px;color:white}
@@ -48,25 +49,27 @@ body{background:#efeeff;height:100dvh;overflow:hidden}
 #chatView{display:none;height:100dvh;flex-direction:column;background:#0f0f23}
 .chat-head{background:var(--blue);color:white;padding:10px 12px;display:flex;align-items:center;gap:10px;padding-top:calc(10px + env(safe-area-inset-top))}
 .msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#0a0a14}
-.bubble{max-width:78%;padding:10px 12px;border-radius:18px;font-size:14.5px;word-break:break-word}
+.bubble{max-width:78%;padding:10px 12px;border-radius:18px;font-size:14.5px;word-break:break-word;cursor:pointer}
 .bubble.me{align-self:flex-end;background:var(--blue);color:white;border-bottom-right-radius:4px}
 .bubble.other{align-self:flex-start;background:#1e1e35;color:white;border-bottom-left-radius:4px}
+.bubble.me:active{opacity:0.7}
 .input-bar{display:flex;gap:8px;padding:10px;background:#14142a;align-items:center;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .input-bar input{flex:1;padding:12px 16px;border-radius:25px;border:none;background:#23233a;color:white;outline:none}
+.del-hint{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;text-align:right}
 </style>
 </head>
 <body>
 <div id="loginView"><img src="logo.png" class="login-logo"><h2 style="margin-top:16px;font-weight:900">DANKCONNECT</h2><p style="font-size:13px;opacity:0.9;text-align:center;margin-top:6px">Ghana's Secure Chat 🇬🇭<br>Username only • Text only • Free</p><div class="login-box"><input id="username" placeholder="Username e.g. dankboy"><input id="password" type="password" placeholder="Password min 6 chars"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="loginMsg"></div></div></div>
 <div id="mainView"><div class="m-top"><h1>Chats</h1><div style="display:flex;gap:8px"><div class="icon-btn">📷</div><div class="icon-btn" onclick="newPrivateChat()" style="background:white;color:#0d00b3;font-weight:900;font-size:24px">+</div></div></div><div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search" oninput="filterChats()"></div></div><div class="filter-chips"><div class="chip active" id="chipAll" onclick="switchTab('all')">All</div><div class="chip" id="chipChats" onclick="switchTab('chats')">Unread <span id="unreadCount">0</span></div><div class="chip">Favorites</div><div class="chip" id="chipGroups" onclick="switchTab('groups')">Groups <span id="groupCount">0</span></div><div class="chip" onclick="createGroup()">+</div></div><div class="list" id="chatList"></div><div class="bottom-nav"><div class="nav-item"><span>⭕</span>Updates</div><div class="nav-item"><span>📞</span>Calls</div><div class="nav-item"><span>🛠️</span>Tools</div><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" onclick="if(confirm('Logout?')) doLogout()"><span>⚙️</span>Settings</div></div></div>
-<div id="chatView"><div class="chat-head"><div onclick="closeChat()" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8">online • text only</div></div><div>📞</div><div style="margin-left:12px">🎥</div></div><div class="msgs" id="msgs"></div><div class="input-bar"><input type="text" id="msgInput" placeholder="Type message..." onkeydown="if(event.key==='Enter') sendMsg()"><button onclick="sendMsg()" style="width:42px;height:42px;border-radius:50%;background:#0d00b3;color:white;border:none">➤</button></div></div>
+<div id="chatView"><div class="chat-head"><div onclick="closeChat()" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8">tap message to delete • text only</div></div><div>📞</div><div style="margin-left:12px">🎥</div></div><div class="msgs" id="msgs"></div><div class="input-bar"><input type="text" id="msgInput" placeholder="Type message..." onkeydown="if(event.key==='Enter') sendMsg()"><button onclick="sendMsg()" style="width:42px;height:42px;border-radius:50%;background:#0d00b3;color:white;border:none">➤</button></div></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, addDoc, query, onSnapshot, orderBy, serverTimestamp, where, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, addDoc, query, onSnapshot, orderBy, serverTimestamp, where, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const firebaseConfig = { apiKey: "AIzaSyDfWReJ-A4J2W5V_FahYjLwfXv3-sNvXZE", authDomain: "dankconnect.firebaseapp.com", projectId: "dankconnect", storageBucket: "dankconnect.firebasestorage.app", messagingSenderId: "248906319926", appId: "1:248906319926:web:704456ec90628c5f2a7097" };
 const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
 await setPersistence(auth, browserLocalPersistence);
-let currentUsername=null,currentChatId=null,currentChatType='private',currentTab='all',unsubMsgs=null,unsubPriv=null,unsubGroup=null,cachePrivate=[],cacheGroups=[];
+let currentUsername=null,currentChatId=null,currentChatType='private',currentChatOther=null,currentTab='all',unsubMsgs=null,unsubPriv=null,unsubGroup=null,cachePrivate=[],cacheGroups=[];
 function cleanU(u){return u.trim().toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20)}
 function emailFromU(u){return cleanU(u)+"@dankconnect.app"}
 async function handleLogin(){let u=cleanU(document.getElementById('username').value),p=document.getElementById('password').value.trim(),msgEl=document.getElementById('loginMsg');if(u.length<3){msgEl.textContent="Username min 3";return}if(p.length<6){msgEl.textContent="Password min 6";return}document.getElementById('loginBtn').disabled=true;msgEl.textContent="Checking...";let email=emailFromU(u);try{await signInWithEmailAndPassword(auth,email,p);msgEl.style.color="#00ff88";msgEl.textContent="Welcome "+u}catch(err){if(err.code==='auth/invalid-credential'||err.code==='auth/user-not-found'){try{let cred=await createUserWithEmailAndPassword(auth,email,p);await setDoc(doc(db,"users",cred.user.uid),{username:u,created:serverTimestamp()},{merge:true});await setDoc(doc(db,"usernames",u),{uid:cred.user.uid,username:u},{merge:true});msgEl.style.color="#00ff88";msgEl.textContent="Created "+u}catch(cErr){msgEl.textContent=cErr.message}}else{msgEl.textContent=err.message}}document.getElementById('loginBtn').disabled=false}
@@ -95,6 +98,7 @@ if(c.type==='private'){let o=(c.participants||[]).find(p=>p!==currentUsername)||
 else return (c.name||'').toLowerCase().includes(q)
 });
 let unreadChats = cachePrivate.filter(c=> c.unread && c.unread[currentUsername]>0).length;
+let totalUnreadCount = cachePrivate.reduce((sum,c)=> sum + (c.unread && c.unread[currentUsername]? c.unread[currentUsername] : 0), 0);
 document.getElementById('unreadCount').textContent = unreadChats>0? unreadChats : "0";
 document.getElementById('groupCount').textContent=cacheGroups.length;
 let arch=document.createElement('div');arch.className='chat-row';
@@ -140,6 +144,7 @@ window.filterChats=()=>renderList();
 window.newPrivateChat=async()=>{let o=prompt("Enter username:");if(!o)return;o=cleanU(o);if(!o||o===currentUsername){alert("Invalid");return}openPrivate(o)};
 window.createGroup=async()=>{let name=prompt("Group name:");if(!name)return;name=name.trim().slice(0,30);let membersRaw=prompt("Members comma separated:");let members=membersRaw?membersRaw.split(',').map(cleanU).filter(Boolean):[];members=[...new Set([currentUsername,...members])];let id="group_"+Date.now()+"_"+cleanU(name);await setDoc(doc(db,"group_chats",id),{name:name,members:members,createdBy:currentUsername,createdAt:serverTimestamp(),lastMsg:"Group created",lastTime:serverTimestamp()});openGroup(id,name)};
 async function openPrivate(other){
+currentChatOther=other;
 currentChatType='private';currentChatId=getPrivateChatId(currentUsername,other);
 document.getElementById('chatName').textContent=other;
 document.getElementById('chatAv').textContent=other.slice(0,2).toUpperCase();
@@ -147,27 +152,61 @@ showChat();
 try{await setDoc(doc(db,"private_chats",currentChatId),{participants:[currentUsername,other].sort(),lastTime:serverTimestamp(),[`unread.${currentUsername}`]:0},{merge:true});}catch(e){}
 listenMessages()
 }
-window.openGeneral=()=>{currentChatType='general';currentChatId='general';document.getElementById('chatName').textContent='Business assistant';document.getElementById('chatAv').innerHTML='<img src="logo.png" style="width:100%;height:100%;object-fit:cover">';showChat();listenMessages()};
-function openGroup(id,name){currentChatType='group';currentChatId=id;document.getElementById('chatName').textContent=name;document.getElementById('chatAv').textContent=name.slice(0,2).toUpperCase();showChat();listenMessages()}
+window.openGeneral=()=>{currentChatType='general';currentChatId='general';currentChatOther=null;document.getElementById('chatName').textContent='Business assistant';document.getElementById('chatAv').innerHTML='<img src="logo.png" style="width:100%;height:100%;object-fit:cover">';showChat();listenMessages()};
+function openGroup(id,name){currentChatType='group';currentChatId=id;currentChatOther=null;document.getElementById('chatName').textContent=name;document.getElementById('chatAv').textContent=name.slice(0,2).toUpperCase();showChat();setDoc(doc(db,"group_chats",currentChatId),{[`unread.${currentUsername}`]:0},{merge:true});listenMessages()}
 window.openGroup=openGroup;window.openPrivate=openPrivate;
 function showChat(){document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='flex'}
-window.closeChat=()=>{if(unsubMsgs)unsubMsgs();document.getElementById('chatView').style.display='none';document.getElementById('mainView').style.display='flex';currentChatId=null};
-function listenMessages(){if(unsubMsgs)unsubMsgs();let box=document.getElementById('msgs');box.innerHTML='Loading...';let col;if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");else col=collection(db,"messages");let q=query(col,orderBy("time","asc"));unsubMsgs=onSnapshot(q,(snap)=>{box.innerHTML='';snap.forEach(d=>{let data=d.data();let div=document.createElement('div');let isMe=data.sender===currentUsername||data.uid===auth.currentUser?.uid;div.className='bubble '+(isMe?'me':'other');div.textContent=data.text;box.appendChild(div)});box.scrollTop=box.scrollHeight})}
+window.closeChat=()=>{if(unsubMsgs)unsubMsgs();document.getElementById('chatView').style.display='none';document.getElementById('mainView').style.display='flex';currentChatId=null;currentChatOther=null};
+function listenMessages(){
+if(unsubMsgs)unsubMsgs();
+let box=document.getElementById('msgs');box.innerHTML='Loading...';
+let col;
+if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");
+else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");
+else col=collection(db,"messages");
+let q=query(col,orderBy("time","asc"));
+unsubMsgs=onSnapshot(q,(snap)=>{
+ box.innerHTML='';
+ snap.forEach(d=>{
+  let data=d.data();
+  let div=document.createElement('div');
+  let isMe=data.sender===currentUsername||data.uid===auth.currentUser?.uid;
+  div.className='bubble '+(isMe?'me':'other');
+  div.textContent=data.text;
+  if(isMe){
+   div.onclick=async()=>{
+    if(confirm('Delete this message?\n\n"'+data.text.slice(0,30)+'"')){
+     await deleteDoc(doc(col,d.id));
+    }
+   };
+  }
+  box.appendChild(div)
+ });
+ box.scrollTop=box.scrollHeight
+})
+}
 window.sendMsg=async()=>{
 let txt=document.getElementById('msgInput').value.trim();if(!txt||!currentChatId)return;
 document.getElementById('msgInput').value='';
-let col;if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");else col=collection(db,"messages");
+let col;
+if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");
+else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");
+else col=collection(db,"messages");
 await addDoc(col,{text:txt,sender:currentUsername,uid:auth.currentUser.uid,time:serverTimestamp(),type:'text'});
 if(currentChatType==='private'){
-  let other=currentChatId.replace('private_','').split('_').filter(u=>u!==currentUsername)[0];
-  await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:txt,lastTime:serverTimestamp(),participants:[currentUsername,other].sort(),[`unread.${other}`]: increment(1),[`unread.${currentUsername}`]:0},{merge:true});
+ let other = currentChatOther;
+ if(!other){
+  let parts = currentChatId.replace('private_','').split('_');
+  other = parts.find(p=>p!==currentUsername) || parts[0];
+ }
+ await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:txt,lastTime:serverTimestamp(),participants:[currentUsername,other].sort(),[`unread.${other}`]: increment(1),[`unread.${currentUsername}`]:0},{merge:true});
 }
 if(currentChatType==='group'){
-  let g=cacheGroups.find(x=>x.id===currentChatId);let members=g?.members||[];
-  let upd={lastMsg:currentUsername+": "+txt.slice(0,40),lastTime:serverTimestamp()};
-  members.forEach(m=>{ if(m!==currentUsername) upd[`unread.${m}`]=increment(1); });
-  upd[`unread.${currentUsername}`]=0;
-  await setDoc(doc(db,"group_chats",currentChatId),upd,{merge:true});
+ let g=cacheGroups.find(x=>x.id===currentChatId);let members=g?.members||[];
+ let upd={lastMsg:currentUsername+": "+txt.slice(0,40),lastTime:serverTimestamp()};
+ members.forEach(m=>{ if(m!==currentUsername) upd[`unread.${m}`]=increment(1); });
+ upd[`unread.${currentUsername}`]=0;
+ await setDoc(doc(db,"group_chats",currentChatId),upd,{merge:true});
 }
 };
 window.doLogout=()=>signOut(auth);
