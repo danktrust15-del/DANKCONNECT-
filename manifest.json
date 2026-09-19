@@ -1,13 +1,24 @@
 {
-  "name": "DANKCONNECT",
+  "name": "DANKCONNECT - Ghana's Secure Chat",
   "short_name": "DANKCONNECT",
-  "start_url": "/",
+  "description": "Ghana's Secure Chat 🇬🇭 - Username only",
+  "start_url": "./index.html?v=12",
   "display": "standalone",
   "background_color": "#0d00b3",
   "theme_color": "#0d00b3",
-  "orientation": "portrait",
+  "scope": "./",
   "icons": [
-    { "src": "logo.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "logo.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "logo.png?v=12",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png?v=12",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
