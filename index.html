@@ -2,10 +2,10 @@
 <title>DANKCONNECT - Ghana's Secure Chat</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta property="og:title" content="DANKCONNECT - Ghana's Secure Chat 🇬🇭">
-<meta property="og:image" content="https://danktrust15-del.github.io/DANKCONNECT/logo.png?v=17">
-<meta property="og:url" content="https://danktrust15-del.github.io/DANKCONNECT/?v=17">
-<meta name="theme-color" content="#0d00b3"><link rel="icon" href="logo.png?v=17"><link rel="apple-touch-icon" href="apple-touch-icon.png?v=17"><link rel="manifest" href="manifest.json?v=17">
-<style>/* V17.1 FREE - NO QUEUE */*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial}:root{--blue:#0d00b3}body{height:100dvh;overflow:hidden;background:#0a0a14;margin:0}
+<meta property="og:image" content="https://danktrust15-del.github.io/DANKCONNECT/logo.png?v=18">
+<meta property="og:url" content="https://danktrust15-del.github.io/DANKCONNECT/?v=18">
+<meta name="theme-color" content="#0d00b3"><link rel="icon" href="logo.png?v=18"><link rel="apple-touch-icon" href="apple-touch-icon.png?v=18"><link rel="manifest" href="manifest.json?v=18">
+<style>/* V18 FREE VOICE CALLS */*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial}:root{--blue:#0d00b3}body{height:100dvh;overflow:hidden;background:#0a0a14;margin:0}
 #splashView{height:100dvh;background:#0d00b3;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px;color:white}
 .splash-logo{width:92px;height:92px;border-radius:22px;background:white;padding:8px;object-fit:contain;border:3px solid white}
 .splash-title{margin-top:18px;font-weight:900;font-size:28px;text-align:center}
@@ -35,17 +35,39 @@
 .profile-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:20px}.profile-modal.active{display:flex}.profile-modal-img{width:280px;height:280px;border-radius:50%;object-fit:cover;border:4px solid white;max-width:80vw;max-height:50vh;background:#0d00b3;display:flex;align-items:center;justify-content:center;font-size:80px;color:white}.profile-modal-name{margin-top:18px;font-size:24px;font-weight:900;color:white}.profile-modal-status{margin-top:8px;font-size:13px;font-weight:700}.profile-modal-actions{display:flex;gap:12px;margin-top:22px}.profile-modal-btn{padding:12px 20px;border-radius:25px;border:none;font-weight:800;cursor:pointer}.profile-modal-btn.primary{background:#0d00b3;color:white}.profile-modal-btn.secondary{background:#23233a;color:white}.profile-modal-close{position:absolute;top:20px;left:20px;font-size:32px;color:white;cursor:pointer}
 .bubble-actions{position:absolute;top:-14px;right:8px;background:#23233a;border-radius:16px;padding:4px 8px;display:none;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,0.5);z-index:5}.bubble:hover.bubble-actions{display:flex}.bubble-action{width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;border-radius:50%}
 #deleteModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;padding:20px}#deleteModal.active{display:flex}.delete-box{background:#1e1e35;width:100%;max-width:320px;border-radius:20px;padding:20px;color:white;text-align:center}.delete-title{font-weight:900;font-size:18px;margin-bottom:8px}.delete-text{font-size:13px;color:#9a9ab3;margin-bottom:18px}.delete-btns{display:flex;flex-direction:column;gap:10px}.d-btn{padding:14px;border-radius:12px;border:none;font-weight:800;cursor:pointer;font-size:14px}.d-btn.danger{background:#ff3b30;color:white}.d-btn.neutral{background:#23233a;color:white}.d-btn.cancel{background:transparent;color:#9a9ab3}
+/* CALL STYLES V18 */
+#callBtn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
+#incomingCall{ display:none; position:fixed; inset:0; background:rgba(10,10,20,0.98); z-index:10001; flex-direction:column; align-items:center; justify-content:center; padding:20px; color:white }#incomingCall.active{display:flex}
+.in-call-av{width:110px;height:110px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;color:white;overflow:hidden;border:3px solid white}
+.in-call-name{margin-top:18px;font-size:28px;font-weight:900}
+.in-call-status{margin-top:6px;font-size:14px;color:#53bdeb;font-weight:700;animation:blink 1s infinite}
+.call-actions{display:flex;gap:18px;margin-top:32px}
+.call-action{width:64px;height:64px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;font-weight:900}
+.call-action.accept{background:#00c950;color:white}
+.call-action.decline{background:#ff3b30;color:white}
+.call-action.end{background:#ff3b30;color:white}
+#activeCall{ display:none; position:fixed; inset:0; background:#0a0a14; z-index:10002; flex-direction:column; align-items:center; justify-content:space-between; padding:40px 20px; color:white }#activeCall.active{display:flex}
+.call-timer{font-size:16px;color:#9a9ab3;margin-top:10px;font-weight:700}
+.call-controls{display:flex;gap:16px;align-items:center;justify-content:center;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+.ctrl-btn{width:54px;height:54px;border-radius:50%;border:none;background:#23233a;color:white;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ctrl-btn.active{background:#53bdeb;color:#0a0a14}
 </style></head><body>
 <div id="pushToast"></div>
-<div id="splashView"><img src="logo.png?v=17" class="splash-logo"><div class="splash-title">DANKCONNECT</div><div class="splash-sub">Ghana's Secure Chat 🇬🇭<br>Username only</div><div class="splash-box"><button id="goToAuthBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button></div></div>
-<div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=17" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy"><input id="password" type="password" placeholder="Password min 6 chars"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
+<div id="splashView"><img src="logo.png?v=18" class="splash-logo"><div class="splash-title">DANKCONNECT</div><div class="splash-sub">Ghana's Secure Chat 🇬🇭<br>Username only</div><div class="splash-box"><button id="goToAuthBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button></div></div>
+<div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=18" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy"><input id="password" type="password" placeholder="Password min 6 chars"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
 <div id="mainView"><div class="m-top"><h1>Chats</h1><div style="display:flex;gap:8px"><div class="icon-btn" id="myProfileBtn"><img id="myAvImg" class="my-av" style="display:none"><span id="myAvTxt">ME</span></div><div class="icon-btn" id="themeBtn">🌙</div><div class="icon-btn" id="newChatBtn" style="background:white;color:#0d00b3;font-weight:900;font-size:24px">+</div></div></div>
 <div id="pushBanner"><div class="push-text">🔔 Enable notifications to know when someone messages you 🇬🇭</div><button class="push-btn" id="enablePushBtn">Allow</button></div>
 <div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search"></div></div><div class="filter-chips"><div class="chip active" id="chipAll">All</div><div class="chip" id="chipChats">Unread <span id="unreadCount">0</span></div><div class="chip" id="chipGroups">Groups <span id="groupCount">0</span></div><div class="chip" id="chipAddGroup">+</div></div><div class="list" id="chatList"></div><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="logoutBtn"><span>⚙️</span>Settings</div></div></div>
-<div id="chatView"><div class="chat-head"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div></div><div class="msgs" id="msgs"></div><div id="typingIndicator">typing...</div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div><div class="input-bar"><button id="imgBtn">📎</button><input type="text" id="msgInput" placeholder="Type message..."><div class="recording-bar" id="recordingBar"><div class="rec-dot"></div><span class="rec-timer" id="recTimer">0:00</span><span>recording...</span></div><button id="micBtn">🎤</button><button id="sendBtn">➤</button></div></div>
+<div id="chatView"><div class="chat-head"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div><div id="callBtn">📞</div></div><div class="msgs" id="msgs"></div><div id="typingIndicator">typing...</div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div><div class="input-bar"><button id="imgBtn">📎</button><input type="text" id="msgInput" placeholder="Type message..."><div class="recording-bar" id="recordingBar"><div class="rec-dot"></div><span class="rec-timer" id="recTimer">0:00</span><span>recording...</span></div><button id="micBtn">🎤</button><button id="sendBtn">➤</button></div></div>
 <input type="file" id="profileInput" accept="image/*" style="display:none"><input type="file" id="imageInput" accept="image/*" style="display:none">
 <div id="profileModal" class="profile-modal"><div class="profile-modal-close" id="closeProfileBtn">‹</div><img id="profileModalImg" class="profile-modal-img" style="display:none"><div id="profileModalFallback" class="profile-modal-img" style="display:none">DC</div><div id="profileModalName" class="profile-modal-name"></div><div id="profileModalStatus" class="profile-modal-status"></div><div class="profile-modal-actions" id="profileModalActions"></div></div>
 <div id="deleteModal"><div class="delete-box"><div class="delete-title" id="deleteTitle">Delete message?</div><div class="delete-text" id="deleteText">Choose delete option</div><div class="delete-btns" id="deleteBtns"></div></div></div>
+
+<!-- VOICE CALL UI -->
+<div id="incomingCall"><div id="incAv" class="in-call-av">DC</div><div id="incName" class="in-call-name">Incoming</div><div class="in-call-status">Incoming voice call... 📞</div><div class="call-actions"><button class="call-action decline" id="declineCallBtn">✕</button><button class="call-action accept" id="acceptCallBtn">📞</button></div></div>
+<div id="activeCall"><div style="display:flex;flex-direction:column;align-items:center;margin-top:40px"><div id="activeAv" class="in-call-av">DC</div><div id="activeName" class="in-call-name">Name</div><div id="activeStatus" class="in-call-status">Calling...</div><div id="callTimer" class="call-timer">00:00</div></div><div class="call-controls"><button class="ctrl-btn" id="muteBtn">🎤</button><button class="call-action end" id="endCallBtn">✕</button><button class="ctrl-btn" id="speakerBtn">🔊</button></div></div>
+<audio id="remoteAudio" autoplay playsinline></audio>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -59,14 +81,14 @@ await setPersistence(auth, browserLocalPersistence);
 function applyTheme(t){ if(t==='light'){document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');document.getElementById('themeBtn').textContent='☀️';} else {document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');document.getElementById('themeBtn').textContent='🌙';}}
 document.getElementById('themeBtn').addEventListener('click',()=>{let cur=document.body.classList.contains('light-mode')?'light':'dark';applyTheme(cur==='light'?'dark':'light')});
 (function(){let saved=localStorage.getItem('dc_theme');if(saved) applyTheme(saved); else applyTheme('dark');})();
-// PUSH V17.1 FREE - NO QUEUE
+// PUSH V18 FREE - NO QUEUE
 function showPushToast(title,body){
   const toast=document.getElementById('pushToast');
   toast.innerHTML='<b>'+title+'</b><br><span style="font-size:12px;color:#9a9ab3">'+body+'</span>';
   toast.classList.add('show');
   setTimeout(()=>toast.classList.remove('show'),4000);
   if(Notification && Notification.permission==='granted'){
-    try{ new Notification(title,{body:body,icon:'logo.png?v=17'}); }catch(e){}
+    try{ new Notification(title,{body:body,icon:'logo.png?v=18'}); }catch(e){}
   }
 }
 async function saveFCMToken(){
@@ -74,7 +96,6 @@ async function saveFCMToken(){
     const token = await getToken(messaging, { vapidKey: VAPID_KEY });
     if(token && currentUsername){
       await setDoc(doc(db,"fcm_tokens",currentUsername),{username:currentUsername,token:token,updated:serverTimestamp()},{merge:true});
-      console.log('[DANKCONNECT V17.1 FREE] FCM token saved');
       localStorage.setItem('dc_fcm_token', token);
     }
     return token;
@@ -106,7 +127,7 @@ async function requestPush(){
   }
 }
 document.getElementById('enablePushBtn').addEventListener('click',requestPush);
-let currentUsername=null,currentChatId=null,currentChatType='private',currentChatOther=null,currentTab='all',unsubMsgs=null,unsubPriv=null,unsubGroup=null,unsubProfiles=null,unsubPresence=null,cachePrivate=[],cacheGroups=[],typingTimeout=null,presenceInterval=null;
+let currentUsername=null,currentChatId=null,currentChatType='private',currentChatOther=null,currentTab='all',unsubMsgs=null,unsubPriv=null,unsubGroup=null,unsubProfiles=null,unsubPresence=null,unsubCalls=null,cachePrivate=[],cacheGroups=[],typingTimeout=null,presenceInterval=null;
 let mediaRecorder=null,audioChunks=[],isRecording=false,recStartTime=0,recTimerInterval=null,currentAudio=null,currentPlayingId=null;
 let profilesCache={},presenceCache={},replyingTo=null;let longPressTimer=null,pendingDelete={id:null,isMe:false,col:null};const MAX_DURATION=30;
 function cleanU(u){return u.trim().toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20)}function emailFromU(u){return cleanU(u)+"@dankconnect.app"}
@@ -133,7 +154,7 @@ document.getElementById('newChatBtn').addEventListener('click',()=>newPrivateCha
 document.getElementById('chipAll').addEventListener('click',()=>switchTab('all'));document.getElementById('chipChats').addEventListener('click',()=>switchTab('chats'));document.getElementById('chipGroups').addEventListener('click',()=>switchTab('groups'));document.getElementById('chipAddGroup').addEventListener('click',()=>createGroup());
 document.getElementById('logoutBtn').addEventListener('click',()=>{if(confirm('Logout?')) doLogout()});document.getElementById('closeChatBtn').addEventListener('click',()=>closeChat());document.getElementById('closeProfileBtn').addEventListener('click',()=>closeProfileModal());document.getElementById('imgBtn').addEventListener('click',()=>document.getElementById('imageInput').click());document.getElementById('sendBtn').addEventListener('click',()=>sendMsg());document.getElementById('searchInput').addEventListener('input',()=>filterChats());
 document.getElementById('msgInput').addEventListener('input',()=>{toggleInputButtons(); if(!currentChatId) return; let metaCol=currentChatType==='private'?"private_chats":"group_chats";let metaDoc2=doc(db,metaCol,currentChatId); setDoc(metaDoc2,{typing:{[currentUsername]:true}},{merge:true}); if(typingTimeout) clearTimeout(typingTimeout); typingTimeout=setTimeout(()=>{setDoc(metaDoc2,{typing:{[currentUsername]:false}},{merge:true});},1500);});
-onAuthStateChanged(auth,(user)=>{if(user){let uname=cleanU(user.email.split('@')[0]);currentUsername=uname;document.getElementById('splashView').style.display='none';document.getElementById('authView').style.display='none';document.getElementById('mainView').style.display='flex';listenAllChats();listenProfiles();listenPresence();loadMyProfile();setPresence(true);startPresenceHeartbeat();initPush();}else{setPresence(false);if(presenceInterval) clearInterval(presenceInterval);currentUsername=null;document.getElementById('splashView').style.display='flex';document.getElementById('authView').style.display='none';document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='none';if(unsubMsgs)unsubMsgs();if(unsubPriv)unsubPriv();if(unsubGroup)unsubGroup();if(unsubProfiles)unsubProfiles();if(unsubPresence)unsubPresence()}});
+onAuthStateChanged(auth,(user)=>{if(user){let uname=cleanU(user.email.split('@')[0]);currentUsername=uname;document.getElementById('splashView').style.display='none';document.getElementById('authView').style.display='none';document.getElementById('mainView').style.display='flex';listenAllChats();listenProfiles();listenPresence();listenCalls();loadMyProfile();setPresence(true);startPresenceHeartbeat();initPush();}else{setPresence(false);if(presenceInterval) clearInterval(presenceInterval);currentUsername=null;document.getElementById('splashView').style.display='flex';document.getElementById('authView').style.display='none';document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='none';if(unsubMsgs)unsubMsgs();if(unsubPriv)unsubPriv();if(unsubGroup)unsubGroup();if(unsubProfiles)unsubProfiles();if(unsubPresence)unsubPresence();if(unsubCalls)unsubCalls()}});
 function getPrivateChatId(a,b){a=cleanU(a);b=cleanU(b);if(a===b)return null;return "private_"+[a,b].sort().join("_")}
 async function setPresence(online){if(!currentUsername) return; try{await setDoc(doc(db,"presence",currentUsername),{username:currentUsername,online:online,lastSeen:serverTimestamp()},{merge:true});}catch(e){}}
 function startPresenceHeartbeat(){if(presenceInterval) clearInterval(presenceInterval); presenceInterval=setInterval(()=>{setPresence(true);},15000); setInterval(()=>{ renderList(); if(currentChatId&&currentChatType==='private') updateChatHeaderPic(); }, 10000);}
@@ -200,4 +221,173 @@ function closeProfileModal(){document.getElementById('profileModal').classList.r
 function openChatFromModal(){let u=document.getElementById('profileModal').dataset.username; if(!u) return; closeProfileModal(); if(u!==currentUsername) openPrivate(u); }
 async function doLogout(){await setPresence(false); if(presenceInterval) clearInterval(presenceInterval); signOut(auth);}
 window.openProfileModal=openProfileModal; window.closeProfileModal=closeProfileModal; window.openChatFromModal=openChatFromModal; window.doLogout=doLogout;
+
+// ===== VOICE CALL LOGIC V18 FREE =====
+let pc=null, localStream=null, remoteStream=null, currentCallId=null, callTimerInt=null, callSeconds=0, isMuted=false, isSpeaker=false, incomingCallData=null, callUnsub=null, candidatesUnsub=null;
+const rtcConfig={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
+
+function listenCalls(){
+ if(unsubCalls) unsubCalls();
+ let qCalls=query(collection(db,"calls"), where("participants","array-contains", currentUsername));
+ unsubCalls=onSnapshot(qCalls,(snap)=>{
+   snap.docChanges().forEach(change=>{
+     let data=change.doc.data(); let id=change.doc.id;
+     if(data.status==='ringing' && data.receiver===currentUsername && data.caller!==currentUsername){
+       // incoming call
+       if(document.getElementById('incomingCall').classList.contains('active') || document.getElementById('activeCall').classList.contains('active')) return;
+       incomingCallData={id:id,...data};
+       showIncomingCall(data.caller);
+     }
+     if(data.status==='ended' && (currentCallId===id || incomingCallData?.id===id)){
+       endCallUI();
+     }
+     if(data.status==='accepted' && currentCallId===id){
+       document.getElementById('activeStatus').textContent='Connected';
+     }
+   });
+ });
+}
+
+function showIncomingCall(caller){
+ document.getElementById('incName').textContent=caller;
+ document.getElementById('incAv').textContent=caller.slice(0,2).toUpperCase();
+ let prof=profilesCache[caller];
+ if(prof&&prof.photo){ document.getElementById('incAv').innerHTML='<img src="data:image/jpeg;base64,'+prof.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; }
+ document.getElementById('incomingCall').classList.add('active');
+ playRingtone();
+}
+
+let ringtoneAudio=null;
+function playRingtone(){
+ try{
+   let ctx=new (window.AudioContext||window.webkitAudioContext)();
+   ringtoneAudio=ctx;
+   let osc=ctx.createOscillator(); osc.frequency.value=440;
+   osc.connect(ctx.destination); osc.start();
+   setTimeout(()=>{try{osc.stop();}catch(e){}}, 1500);
+ }catch(e){}
+ showPushToast('Incoming call 📞', 'From '+incomingCallData.caller);
+}
+function stopRingtone(){ if(ringtoneAudio){ try{ringtoneAudio.close();}catch(e){} ringtoneAudio=null; } }
+
+document.getElementById('callBtn').addEventListener('click',()=>{ if(currentChatType!=='private' ||!currentChatOther){alert('Open a private chat to call');return} startCall(currentChatOther); });
+
+async function startCall(other){
+ if(pc) {alert('Already in call');return}
+ try{
+   localStream=await navigator.mediaDevices.getUserMedia({audio:true});
+ }catch(e){ alert('Mic needed for call: '+e.message); return }
+ currentCallId='call_'+Date.now()+'_'+cleanU(currentUsername)+'_'+cleanU(other);
+ document.getElementById('activeName').textContent=other;
+ document.getElementById('activeAv').textContent=other.slice(0,2).toUpperCase();
+ document.getElementById('activeStatus').textContent='Calling...';
+ document.getElementById('activeCall').classList.add('active');
+ startCallTimer();
+ pc=new RTCPeerConnection(rtcConfig);
+ remoteStream=new MediaStream();
+ document.getElementById('remoteAudio').srcObject=remoteStream;
+ localStream.getTracks().forEach(t=>pc.addTrack(t, localStream));
+ pc.ontrack=e=>{ e.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t)); };
+ pc.onicecandidate=e=>{ if(e.candidate){ addDoc(collection(db,"calls",currentCallId,"callerCandidates"), e.candidate.toJSON()); } };
+ let offer=await pc.createOffer(); await pc.setLocalDescription(offer);
+ await setDoc(doc(db,"calls",currentCallId),{caller:currentUsername,receiver:other,participants:[currentUsername,other],status:'ringing',offer:{type:offer.type,sdp:offer.sdp},created:serverTimestamp()});
+ // listen for answer
+ callUnsub=onSnapshot(doc(db,"calls",currentCallId), async(snap)=>{
+   let d=snap.data(); if(!d) return;
+   if(d.answer &&!pc.currentRemoteDescription){
+     await pc.setRemoteDescription(new RTCSessionDescription(d.answer));
+   }
+   if(d.status==='accepted'){ document.getElementById('activeStatus').textContent='Connected'; }
+   if(d.status==='declined'){ alert('Call declined'); endCallUI(); }
+   if(d.status==='ended'){ endCallUI(); }
+ });
+ candidatesUnsub=onSnapshot(collection(db,"calls",currentCallId,"calleeCandidates"), (snap)=>{
+   snap.docChanges().forEach(async c=>{ if(c.type==='added'){ try{ await pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); }catch(e){} } });
+ });
+}
+
+async function acceptCall(){
+ stopRingtone();
+ if(!incomingCallData) return;
+ currentCallId=incomingCallData.id;
+ let caller=incomingCallData.caller;
+ try{ localStream=await navigator.mediaDevices.getUserMedia({audio:true}); }catch(e){ alert('Mic needed'); return; }
+ document.getElementById('incomingCall').classList.remove('active');
+ document.getElementById('activeName').textContent=caller;
+ document.getElementById('activeAv').textContent=caller.slice(0,2).toUpperCase();
+ document.getElementById('activeStatus').textContent='Connecting...';
+ document.getElementById('activeCall').classList.add('active');
+ startCallTimer();
+ pc=new RTCPeerConnection(rtcConfig);
+ remoteStream=new MediaStream();
+ document.getElementById('remoteAudio').srcObject=remoteStream;
+ localStream.getTracks().forEach(t=>pc.addTrack(t, localStream));
+ pc.ontrack=e=>{ e.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t)); };
+ pc.onicecandidate=e=>{ if(e.candidate){ addDoc(collection(db,"calls",currentCallId,"calleeCandidates"), e.candidate.toJSON()); } };
+ await pc.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
+ let answer=await pc.createAnswer(); await pc.setLocalDescription(answer);
+ await updateDoc(doc(db,"calls",currentCallId),{answer:{type:answer.type,sdp:answer.sdp},status:'accepted'});
+ candidatesUnsub=onSnapshot(collection(db,"calls",currentCallId,"callerCandidates"), (snap)=>{
+   snap.docChanges().forEach(async c=>{ if(c.type==='added'){ try{ await pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); }catch(e){} } });
+ });
+ callUnsub=onSnapshot(doc(db,"calls",currentCallId), (snap)=>{
+   let d=snap.data(); if(!d) return;
+   if(d.status==='ended'){ endCallUI(); }
+ });
+ incomingCallData=null;
+}
+
+async function declineCall(){
+ stopRingtone();
+ if(incomingCallData){
+   await updateDoc(doc(db,"calls",incomingCallData.id),{status:'declined'});
+   incomingCallData=null;
+ }
+ document.getElementById('incomingCall').classList.remove('active');
+}
+
+async function endCall(){
+ if(currentCallId){
+   try{ await updateDoc(doc(db,"calls",currentCallId),{status:'ended',endedAt:serverTimestamp()}); }catch(e){}
+ }
+ endCallUI();
+}
+
+function endCallUI(){
+ stopRingtone();
+ if(callTimerInt) clearInterval(callTimerInt);
+ callSeconds=0;
+ document.getElementById('incomingCall').classList.remove('active');
+ document.getElementById('activeCall').classList.remove('active');
+ document.getElementById('callTimer').textContent='00:00';
+ if(pc){ try{pc.close();}catch(e){} pc=null; }
+ if(localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
+ if(callUnsub) {callUnsub(); callUnsub=null}
+ if(candidatesUnsub){candidatesUnsub(); candidatesUnsub=null}
+ currentCallId=null;
+ incomingCallData=null;
+}
+
+function startCallTimer(){
+ callSeconds=0;
+ if(callTimerInt) clearInterval(callTimerInt);
+ callTimerInt=setInterval(()=>{ callSeconds++; let m=Math.floor(callSeconds/60).toString().padStart(2,'0'); let s=(callSeconds%60).toString().padStart(2,'0'); document.getElementById('callTimer').textContent=m+':'+s; },1000);
+}
+
+document.getElementById('acceptCallBtn').addEventListener('click', acceptCall);
+document.getElementById('declineCallBtn').addEventListener('click', declineCall);
+document.getElementById('endCallBtn').addEventListener('click', endCall);
+document.getElementById('muteBtn').addEventListener('click', ()=>{
+ if(!localStream) return;
+ isMuted=!isMuted;
+ localStream.getAudioTracks().forEach(t=>t.enabled=!isMuted);
+ document.getElementById('muteBtn').classList.toggle('active', isMuted);
+ document.getElementById('muteBtn').textContent=isMuted?'🔇':'🎤';
+});
+document.getElementById('speakerBtn').addEventListener('click', ()=>{
+ isSpeaker=!isSpeaker;
+ document.getElementById('speakerBtn').classList.toggle('active', isSpeaker);
+ // speaker toggle not fully supported on web, but we toggle
+});
+
 </script></body></html>
