@@ -3,13 +3,13 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta property="og:title" content="DANKCONNECT - Ghana's Secure Chat 🇬🇭">
 <meta property="og:description" content="Ghana's Secure Chat - Username only, fast & secure.">
-<meta property="og:image" content="https://danktrust15-del.github.io/DANKCONNECT/logo.png?v=13">
+<meta property="og:image" content="https://danktrust15-del.github.io/DANKCONNECT/logo.png?v=14">
 <meta property="og:image:width" content="512"><meta property="og:image:height" content="512">
-<meta property="og:url" content="https://danktrust15-del.github.io/DANKCONNECT/?v=13">
+<meta property="og:url" content="https://danktrust15-del.github.io/DANKCONNECT/?v=14">
 <meta property="og:type" content="website"><meta property="og:site_name" content="DANKCONNECT">
 <meta name="description" content="DANKCONNECT - Ghana's Secure Chat. Username only.">
 <meta name="theme-color" content="#0d00b3"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="DANKCONNECT">
-<link rel="apple-touch-icon" href="logo.png?v=13"><link rel="icon" type="image/png" href="logo.png?v=13"><link rel="manifest" href="manifest.json?v=13">
+<link rel="apple-touch-icon" href="logo.png?v=14"><link rel="icon" type="image/png" href="logo.png?v=14"><link rel="manifest" href="manifest.json?v=14">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial}:root{--blue:#0d00b3}body{height:100dvh;overflow:hidden;background:#0a0a14;margin:0}
 #splashView{height:100dvh;background:#0d00b3;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px;color:white}
@@ -27,7 +27,6 @@
 .auth-box input:focus{border-color:#0d00b3;background:white}
 .btn-primary{width:100%;padding:16px;background:#0d00b3;color:white;border:none;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer}
 #authMsg{text-align:center;margin-top:10px;font-size:13px;font-weight:700;min-height:18px;color:#0d00b3}
-/* PUSH BANNER - NEW V13 */
 #pushBanner{display:none;background:#1e1e35;border:1px solid #53bdeb;margin:10px 14px;padding:12px 14px;border-radius:14px;align-items:center;justify-content:space-between;gap:10px}
 #pushBanner.show{display:flex}
 .push-text{font-size:13px;font-weight:700;color:white;line-height:1.3}
@@ -46,10 +45,9 @@
 #deleteModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;padding:20px}#deleteModal.active{display:flex}.delete-box{background:#1e1e35;width:100%;max-width:320px;border-radius:20px;padding:20px;color:white;text-align:center}.delete-title{font-weight:900;font-size:18px;margin-bottom:8px}.delete-text{font-size:13px;color:#9a9ab3;margin-bottom:18px}.delete-btns{display:flex;flex-direction:column;gap:10px}.d-btn{padding:14px;border-radius:12px;border:none;font-weight:800;cursor:pointer;font-size:14px}.d-btn.danger{background:#ff3b30;color:white}.d-btn.neutral{background:#23233a;color:white}.d-btn.cancel{background:transparent;color:#9a9ab3}
 </style></head><body>
 <div id="pushToast"></div>
-<div id="splashView"><img src="logo.png?v=13" class="splash-logo" alt="DANKCONNECT"><div class="splash-title">DANKCONNECT</div><div class="splash-sub">Ghana's Secure Chat 🇬🇭<br>Username only</div><div class="splash-box"><button id="goToAuthBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button></div></div>
-<div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=13" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy"><input id="password" type="password" placeholder="Password min 6 chars"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
+<div id="splashView"><img src="logo.png?v=14" class="splash-logo" alt="DANKCONNECT"><div class="splash-title">DANKCONNECT</div><div class="splash-sub">Ghana's Secure Chat 🇬🇭<br>Username only</div><div class="splash-box"><button id="goToAuthBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button></div></div>
+<div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=14" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy"><input id="password" type="password" placeholder="Password min 6 chars"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
 <div id="mainView"><div class="m-top"><h1>Chats</h1><div style="display:flex;gap:8px"><div class="icon-btn" id="myProfileBtn"><img id="myAvImg" class="my-av" style="display:none"><span id="myAvTxt">ME</span></div><div class="icon-btn" id="themeBtn">🌙</div><div class="icon-btn" id="newChatBtn" style="background:white;color:#0d00b3;font-weight:900;font-size:24px">+</div></div></div>
-<!-- PUSH BANNER V13 -->
 <div id="pushBanner"><div class="push-text">🔔 Enable notifications to know when someone messages you 🇬🇭</div><button class="push-btn" id="enablePushBtn">Allow</button></div>
 <div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search"></div></div><div class="filter-chips"><div class="chip active" id="chipAll">All</div><div class="chip" id="chipChats">Unread <span id="unreadCount">0</span></div><div class="chip" id="chipGroups">Groups <span id="groupCount">0</span></div><div class="chip" id="chipAddGroup">+</div></div><div class="list" id="chatList"></div><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="logoutBtn"><span>⚙️</span>Settings</div></div></div>
 <div id="chatView"><div class="chat-head"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div></div><div class="msgs" id="msgs"></div><div id="typingIndicator">typing...</div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div><div class="input-bar"><button id="imgBtn">📎</button><input type="text" id="msgInput" placeholder="Type message..."><div class="recording-bar" id="recordingBar"><div class="rec-dot"></div><span class="rec-timer" id="recTimer">0:00</span><span>recording...</span></div><button id="micBtn">🎤</button><button id="sendBtn">➤</button></div></div>
@@ -60,22 +58,35 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, addDoc, query, onSnapshot, orderBy, serverTimestamp, where, deleteDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 const firebaseConfig = { apiKey: "AIzaSyDfWReJ-A4J2W5V_FahYjLwfXv3-sNvXZE", authDomain: "dankconnect.firebaseapp.com", projectId: "dankconnect", storageBucket: "dankconnect.firebasestorage.app", messagingSenderId: "248906319926", appId: "1:248906319926:web:704456ec90628c5f2a7097" };
+const VAPID_KEY = "BN-Saty-5GQ_jpyEV4HWQcI3U6nHbkC-kGfLDoHWZRvmdKaxMBDRl0vrvhfmqUlYIGm8beL62hjGsf4UaGTbovs";
 const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+const messaging = getMessaging(app);
 await setPersistence(auth, browserLocalPersistence);
 function applyTheme(t){ if(t==='light'){document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');document.getElementById('themeBtn').textContent='☀️';} else {document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');document.getElementById('themeBtn').textContent='🌙';}}
 document.getElementById('themeBtn').addEventListener('click',()=>{let cur=document.body.classList.contains('light-mode')?'light':'dark';applyTheme(cur==='light'?'dark':'light')});
 (function(){let saved=localStorage.getItem('dc_theme');if(saved) applyTheme(saved); else applyTheme('dark');})();
-// PUSH V13 - Phase 1
+// PUSH V14 - FCM Token + Foreground
 function showPushToast(title,body){
   const toast=document.getElementById('pushToast');
   toast.innerHTML='<b>'+title+'</b><br><span style="font-size:12px;color:#9a9ab3">'+body+'</span>';
   toast.classList.add('show');
   setTimeout(()=>toast.classList.remove('show'),4000);
-  // Native notification if granted
   if(Notification && Notification.permission==='granted'){
-    try{ new Notification(title,{body:body,icon:'logo.png?v=13'}); }catch(e){}
+    try{ new Notification(title,{body:body,icon:'logo.png?v=14'}); }catch(e){}
   }
+}
+async function saveFCMToken(){
+  try{
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+    if(token && currentUsername){
+      await setDoc(doc(db,"fcm_tokens",currentUsername),{username:currentUsername,token:token,updated:serverTimestamp()},{merge:true});
+      console.log('[DANKCONNECT] FCM token saved:', token.slice(0,20)+'...');
+      localStorage.setItem('dc_fcm_token', token);
+    }
+    return token;
+  }catch(e){ console.log('FCM token error', e); }
 }
 async function initPush(){
   if(!('Notification' in window)) return;
@@ -83,9 +94,15 @@ async function initPush(){
   if(Notification.permission==='granted'){
     banner.classList.remove('show');
     localStorage.setItem('dc_push','granted');
+    await saveFCMToken();
   } else if(Notification.permission!=='denied'){
     banner.classList.add('show');
   }
+  // Foreground message listener
+  onMessage(messaging, (payload)=>{
+    console.log('[DANKCONNECT] Foreground push', payload);
+    showPushToast(payload.notification?.title || 'DANKCONNECT', payload.notification?.body || 'New message');
+  });
 }
 async function requestPush(){
   if(!('Notification' in window)){ alert('Notifications not supported'); return; }
@@ -94,7 +111,8 @@ async function requestPush(){
   if(perm==='granted'){
     banner.classList.remove('show');
     localStorage.setItem('dc_push','granted');
-    showPushToast('DANKCONNECT 🇬🇭','Notifications enabled! You will be alerted.');
+    const token = await saveFCMToken();
+    showPushToast('DANKCONNECT 🇬🇭','Notifications enabled! Token saved.');
   } else {
     banner.classList.remove('show');
     localStorage.setItem('dc_push','denied');
