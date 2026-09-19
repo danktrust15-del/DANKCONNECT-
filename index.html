@@ -1,16 +1,15 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>DANKCONNECT - Ghana's Secure Chat</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
-<!-- FORCE DANKCONNECT FOR WHATSAPP -->
 <meta property="og:title" content="DANKCONNECT - Ghana's Secure Chat 🇬🇭">
 <meta property="og:description" content="Ghana's Secure Chat - Username only, fast & secure.">
-<meta property="og:image" content="https://danktrust15-del.github.io/DANKCONNECT/logo.png?v=12">
+<meta property="og:image" content="https://danktrust15-del.github.io/DANKCONNECT/logo.png?v=13">
 <meta property="og:image:width" content="512"><meta property="og:image:height" content="512">
-<meta property="og:url" content="https://danktrust15-del.github.io/DANKCONNECT/?v=12">
+<meta property="og:url" content="https://danktrust15-del.github.io/DANKCONNECT/?v=13">
 <meta property="og:type" content="website"><meta property="og:site_name" content="DANKCONNECT">
 <meta name="description" content="DANKCONNECT - Ghana's Secure Chat. Username only.">
 <meta name="theme-color" content="#0d00b3"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="DANKCONNECT">
-<link rel="apple-touch-icon" href="logo.png?v=12"><link rel="icon" type="image/png" href="logo.png?v=12"><link rel="manifest" href="manifest.json?v=12">
+<link rel="apple-touch-icon" href="logo.png?v=13"><link rel="icon" type="image/png" href="logo.png?v=13"><link rel="manifest" href="manifest.json?v=13">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial}:root{--blue:#0d00b3}body{height:100dvh;overflow:hidden;background:#0a0a14;margin:0}
 #splashView{height:100dvh;background:#0d00b3;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px;color:white}
@@ -28,6 +27,14 @@
 .auth-box input:focus{border-color:#0d00b3;background:white}
 .btn-primary{width:100%;padding:16px;background:#0d00b3;color:white;border:none;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer}
 #authMsg{text-align:center;margin-top:10px;font-size:13px;font-weight:700;min-height:18px;color:#0d00b3}
+/* PUSH BANNER - NEW V13 */
+#pushBanner{display:none;background:#1e1e35;border:1px solid #53bdeb;margin:10px 14px;padding:12px 14px;border-radius:14px;align-items:center;justify-content:space-between;gap:10px}
+#pushBanner.show{display:flex}
+.push-text{font-size:13px;font-weight:700;color:white;line-height:1.3}
+.push-btn{padding:8px 14px;background:#53bdeb;color:#0a0a14;border:none;border-radius:10px;font-weight:900;font-size:12px;cursor:pointer;white-space:nowrap}
+#pushToast{position:fixed;top:calc(10px + env(safe-area-inset-top));left:14px;right:14px;background:#1e1e35;border-left:4px solid #53bdeb;padding:12px 14px;border-radius:12px;color:white;display:none;z-index:9998;box-shadow:0 4px 20px rgba(0,0,0,0.4)}
+#pushToast.show{display:block;animation:slideDown 0.3s}
+@keyframes slideDown{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
 #mainView{display:none;height:100dvh;flex-direction:column;background:#0a0a14;color:white}.m-top{padding:14px 16px 8px;display:flex;justify-content:space-between;align-items:center;background:var(--blue);padding-top:calc(14px + env(safe-area-inset-top))}.m-top h1{font-size:32px;font-weight:900}.icon-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}.my-av{width:38px;height:38px;border-radius:50%;object-fit:cover;background:white}.search-wrap{padding:10px 14px;background:var(--blue);padding-bottom:14px}.sbox{background:rgba(0,0,0,0.28);border-radius:12px;display:flex;align-items:center;padding:10px 14px;gap:10px}.sbox input{flex:1;background:transparent;border:none;color:white;font-size:15px;outline:none}.filter-chips{display:flex;gap:8px;padding:10px 14px;overflow-x:auto;background:#0a0a14}.chip{white-space:nowrap;padding:8px 14px;border-radius:20px;background:#23233a;color:#9a9ab3;font-size:13px;font-weight:600;cursor:pointer}.chip.active{background:white;color:#0a0a14;font-weight:800}.list{flex:1;overflow-y:auto;background:#0a0a14;padding-bottom:90px}.chat-row{display:flex;gap:12px;padding:12px 14px;cursor:pointer;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)}.av{width:52px;height:52px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;overflow:hidden;flex-shrink:0}.av img{width:100%;height:100%;object-fit:cover}.av-wrapper{position:relative;flex-shrink:0}.online-dot{position:absolute;bottom:1px;right:1px;width:13px;height:13px;background:#53bdeb;border-radius:50%;border:2px solid #0a0a14}.chat-info{flex:1;min-width:0}.chat-top{display:flex;justify-content:space-between;align-items:center}.chat-name{font-weight:700;font-size:16px;color:white}.chat-time{font-size:12px;color:#8b8ba7}.chat-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:4px}.chat-last{font-size:14px;color:#8b8ba7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}.badge{background:var(--blue);color:white;border-radius:50%;min-width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;padding:0 6px;margin-left:8px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#14142a;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom))}.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;color:#6b6b8a;font-size:10px;cursor:pointer}.nav-item.active{color:white}
 #chatView{display:none;height:100dvh;flex-direction:column;background:#0f0f23}.chat-head{background:var(--blue);color:white;padding:10px 12px;display:flex;align-items:center;gap:10px;padding-top:calc(10px + env(safe-area-inset-top))}.msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#0a0a14}.bubble{max-width:78%;padding:10px 12px;border-radius:18px;font-size:14.5px;word-break:break-word;cursor:pointer;position:relative;display:flex;flex-direction:column;user-select:none;-webkit-touch-callout:none}.bubble.me{align-self:flex-end;background:var(--blue);color:white;border-bottom-right-radius:4px}.bubble.other{align-self:flex-start;background:#1e1e35;color:white;border-bottom-left-radius:4px}.bubble.image-bubble{padding:4px;border-radius:12px;overflow:hidden}.bubble.image-bubble img{max-width:220px;max-height:260px;border-radius:10px;display:block}.msg-footer{display:flex;justify-content:flex-end;align-items:center;gap:4px;margin-top:4px}.msg-time{font-size:10px;opacity:0.7}.ticks{font-size:11px;font-weight:800}.ticks.grey{color:rgba(255,255,255,0.6)}.ticks.blue{color:#53bdeb}
 .reply-quote{background:rgba(0,0,0,0.25);border-left:3px solid #53bdeb;border-radius:8px;padding:6px 8px;margin-bottom:6px;cursor:pointer}.reply-sender{font-size:11px;font-weight:900;color:#53bdeb}.reply-text{font-size:12px;opacity:0.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
@@ -38,9 +45,13 @@
 .bubble-actions{position:absolute;top:-14px;right:8px;background:#23233a;border-radius:16px;padding:4px 8px;display:none;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,0.5);z-index:5}.bubble:hover.bubble-actions{display:flex}.bubble-action{width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;border-radius:50%}
 #deleteModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;padding:20px}#deleteModal.active{display:flex}.delete-box{background:#1e1e35;width:100%;max-width:320px;border-radius:20px;padding:20px;color:white;text-align:center}.delete-title{font-weight:900;font-size:18px;margin-bottom:8px}.delete-text{font-size:13px;color:#9a9ab3;margin-bottom:18px}.delete-btns{display:flex;flex-direction:column;gap:10px}.d-btn{padding:14px;border-radius:12px;border:none;font-weight:800;cursor:pointer;font-size:14px}.d-btn.danger{background:#ff3b30;color:white}.d-btn.neutral{background:#23233a;color:white}.d-btn.cancel{background:transparent;color:#9a9ab3}
 </style></head><body>
-<div id="splashView"><img src="logo.png?v=12" class="splash-logo" alt="DANKCONNECT"><div class="splash-title">DANKCONNECT</div><div class="splash-sub">Ghana's Secure Chat 🇬🇭<br>Username only</div><div class="splash-box"><button id="goToAuthBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button></div></div>
-<div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=12" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy"><input id="password" type="password" placeholder="Password min 6 chars"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
-<div id="mainView"><div class="m-top"><h1>Chats</h1><div style="display:flex;gap:8px"><div class="icon-btn" id="myProfileBtn"><img id="myAvImg" class="my-av" style="display:none"><span id="myAvTxt">ME</span></div><div class="icon-btn" id="themeBtn">🌙</div><div class="icon-btn" id="newChatBtn" style="background:white;color:#0d00b3;font-weight:900;font-size:24px">+</div></div></div><div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search"></div></div><div class="filter-chips"><div class="chip active" id="chipAll">All</div><div class="chip" id="chipChats">Unread <span id="unreadCount">0</span></div><div class="chip" id="chipGroups">Groups <span id="groupCount">0</span></div><div class="chip" id="chipAddGroup">+</div></div><div class="list" id="chatList"></div><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="logoutBtn"><span>⚙️</span>Settings</div></div></div>
+<div id="pushToast"></div>
+<div id="splashView"><img src="logo.png?v=13" class="splash-logo" alt="DANKCONNECT"><div class="splash-title">DANKCONNECT</div><div class="splash-sub">Ghana's Secure Chat 🇬🇭<br>Username only</div><div class="splash-box"><button id="goToAuthBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button></div></div>
+<div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=13" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy"><input id="password" type="password" placeholder="Password min 6 chars"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
+<div id="mainView"><div class="m-top"><h1>Chats</h1><div style="display:flex;gap:8px"><div class="icon-btn" id="myProfileBtn"><img id="myAvImg" class="my-av" style="display:none"><span id="myAvTxt">ME</span></div><div class="icon-btn" id="themeBtn">🌙</div><div class="icon-btn" id="newChatBtn" style="background:white;color:#0d00b3;font-weight:900;font-size:24px">+</div></div></div>
+<!-- PUSH BANNER V13 -->
+<div id="pushBanner"><div class="push-text">🔔 Enable notifications to know when someone messages you 🇬🇭</div><button class="push-btn" id="enablePushBtn">Allow</button></div>
+<div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search"></div></div><div class="filter-chips"><div class="chip active" id="chipAll">All</div><div class="chip" id="chipChats">Unread <span id="unreadCount">0</span></div><div class="chip" id="chipGroups">Groups <span id="groupCount">0</span></div><div class="chip" id="chipAddGroup">+</div></div><div class="list" id="chatList"></div><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="logoutBtn"><span>⚙️</span>Settings</div></div></div>
 <div id="chatView"><div class="chat-head"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div></div><div class="msgs" id="msgs"></div><div id="typingIndicator">typing...</div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div><div class="input-bar"><button id="imgBtn">📎</button><input type="text" id="msgInput" placeholder="Type message..."><div class="recording-bar" id="recordingBar"><div class="rec-dot"></div><span class="rec-timer" id="recTimer">0:00</span><span>recording...</span></div><button id="micBtn">🎤</button><button id="sendBtn">➤</button></div></div>
 <input type="file" id="profileInput" accept="image/*" style="display:none"><input type="file" id="imageInput" accept="image/*" style="display:none">
 <div id="profileModal" class="profile-modal"><div class="profile-modal-close" id="closeProfileBtn">‹</div><img id="profileModalImg" class="profile-modal-img" src="" style="display:none"><div id="profileModalFallback" class="profile-modal-img" style="display:none">DC</div><div id="profileModalName" class="profile-modal-name"></div><div id="profileModalStatus" class="profile-modal-status"></div><div class="profile-modal-actions" id="profileModalActions"></div></div>
@@ -55,6 +66,41 @@ await setPersistence(auth, browserLocalPersistence);
 function applyTheme(t){ if(t==='light'){document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');document.getElementById('themeBtn').textContent='☀️';} else {document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');document.getElementById('themeBtn').textContent='🌙';}}
 document.getElementById('themeBtn').addEventListener('click',()=>{let cur=document.body.classList.contains('light-mode')?'light':'dark';applyTheme(cur==='light'?'dark':'light')});
 (function(){let saved=localStorage.getItem('dc_theme');if(saved) applyTheme(saved); else applyTheme('dark');})();
+// PUSH V13 - Phase 1
+function showPushToast(title,body){
+  const toast=document.getElementById('pushToast');
+  toast.innerHTML='<b>'+title+'</b><br><span style="font-size:12px;color:#9a9ab3">'+body+'</span>';
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),4000);
+  // Native notification if granted
+  if(Notification && Notification.permission==='granted'){
+    try{ new Notification(title,{body:body,icon:'logo.png?v=13'}); }catch(e){}
+  }
+}
+async function initPush(){
+  if(!('Notification' in window)) return;
+  const banner=document.getElementById('pushBanner');
+  if(Notification.permission==='granted'){
+    banner.classList.remove('show');
+    localStorage.setItem('dc_push','granted');
+  } else if(Notification.permission!=='denied'){
+    banner.classList.add('show');
+  }
+}
+async function requestPush(){
+  if(!('Notification' in window)){ alert('Notifications not supported'); return; }
+  const perm=await Notification.requestPermission();
+  const banner=document.getElementById('pushBanner');
+  if(perm==='granted'){
+    banner.classList.remove('show');
+    localStorage.setItem('dc_push','granted');
+    showPushToast('DANKCONNECT 🇬🇭','Notifications enabled! You will be alerted.');
+  } else {
+    banner.classList.remove('show');
+    localStorage.setItem('dc_push','denied');
+  }
+}
+document.getElementById('enablePushBtn').addEventListener('click',requestPush);
 let currentUsername=null,currentChatId=null,currentChatType='private',currentChatOther=null,currentTab='all',unsubMsgs=null,unsubPriv=null,unsubGroup=null,unsubProfiles=null,unsubPresence=null,cachePrivate=[],cacheGroups=[],typingTimeout=null,presenceInterval=null;
 let mediaRecorder=null,audioChunks=[],isRecording=false,recStartTime=0,recTimerInterval=null,currentAudio=null,currentPlayingId=null;
 let profilesCache={},presenceCache={},replyingTo=null;let longPressTimer=null,pendingDelete={id:null,isMe:false,col:null};const MAX_DURATION=30;
@@ -82,11 +128,35 @@ document.getElementById('newChatBtn').addEventListener('click',()=>newPrivateCha
 document.getElementById('chipAll').addEventListener('click',()=>switchTab('all'));document.getElementById('chipChats').addEventListener('click',()=>switchTab('chats'));document.getElementById('chipGroups').addEventListener('click',()=>switchTab('groups'));document.getElementById('chipAddGroup').addEventListener('click',()=>createGroup());
 document.getElementById('logoutBtn').addEventListener('click',()=>{if(confirm('Logout?')) doLogout()});document.getElementById('closeChatBtn').addEventListener('click',()=>closeChat());document.getElementById('closeProfileBtn').addEventListener('click',()=>closeProfileModal());document.getElementById('imgBtn').addEventListener('click',()=>document.getElementById('imageInput').click());document.getElementById('sendBtn').addEventListener('click',()=>sendMsg());document.getElementById('searchInput').addEventListener('input',()=>filterChats());
 document.getElementById('msgInput').addEventListener('input',()=>{toggleInputButtons(); if(!currentChatId) return; let metaCol=currentChatType==='private'?"private_chats":"group_chats";let metaDoc2=doc(db,metaCol,currentChatId); setDoc(metaDoc2,{typing:{[currentUsername]:true}},{merge:true}); if(typingTimeout) clearTimeout(typingTimeout); typingTimeout=setTimeout(()=>{setDoc(metaDoc2,{typing:{[currentUsername]:false}},{merge:true});},1500);});
-onAuthStateChanged(auth,(user)=>{if(user){let uname=cleanU(user.email.split('@')[0]);currentUsername=uname;document.getElementById('splashView').style.display='none';document.getElementById('authView').style.display='none';document.getElementById('mainView').style.display='flex';listenAllChats();listenProfiles();listenPresence();loadMyProfile();setPresence(true);startPresenceHeartbeat();}else{setPresence(false);if(presenceInterval) clearInterval(presenceInterval);currentUsername=null;document.getElementById('splashView').style.display='flex';document.getElementById('authView').style.display='none';document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='none';if(unsubMsgs)unsubMsgs();if(unsubPriv)unsubPriv();if(unsubGroup)unsubGroup();if(unsubProfiles)unsubProfiles();if(unsubPresence)unsubPresence()}});
+onAuthStateChanged(auth,(user)=>{if(user){let uname=cleanU(user.email.split('@')[0]);currentUsername=uname;document.getElementById('splashView').style.display='none';document.getElementById('authView').style.display='none';document.getElementById('mainView').style.display='flex';listenAllChats();listenProfiles();listenPresence();loadMyProfile();setPresence(true);startPresenceHeartbeat();initPush();}else{setPresence(false);if(presenceInterval) clearInterval(presenceInterval);currentUsername=null;document.getElementById('splashView').style.display='flex';document.getElementById('authView').style.display='none';document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='none';if(unsubMsgs)unsubMsgs();if(unsubPriv)unsubPriv();if(unsubGroup)unsubGroup();if(unsubProfiles)unsubProfiles();if(unsubPresence)unsubPresence()}});
 function getPrivateChatId(a,b){a=cleanU(a);b=cleanU(b);if(a===b)return null;return "private_"+[a,b].sort().join("_")}
 async function setPresence(online){if(!currentUsername) return; try{await setDoc(doc(db,"presence",currentUsername),{username:currentUsername,online:online,lastSeen:serverTimestamp()},{merge:true});}catch(e){}}
 function startPresenceHeartbeat(){if(presenceInterval) clearInterval(presenceInterval); presenceInterval=setInterval(()=>{setPresence(true);},15000); setInterval(()=>{ renderList(); if(currentChatId&&currentChatType==='private') updateChatHeaderPic(); }, 10000);}
-function listenAllChats(){if(unsubPriv)unsubPriv(); if(unsubGroup)unsubGroup();let qPrivate=query(collection(db,"private_chats"),where("participants","array-contains",currentUsername));let qGroups=query(collection(db,"group_chats"),where("members","array-contains",currentUsername));unsubPriv=onSnapshot(qPrivate,(snap)=>{cachePrivate=snap.docs.map(d=>({id:d.id,type:'private',...d.data()}));renderList()});unsubGroup=onSnapshot(qGroups,(snap)=>{cacheGroups=snap.docs.map(d=>({id:d.id,type:'group',...d.data()}));renderList()});}
+let lastChatIds={};
+function listenAllChats(){if(unsubPriv)unsubPriv(); if(unsubGroup)unsubGroup();let qPrivate=query(collection(db,"private_chats"),where("participants","array-contains",currentUsername));let qGroups=query(collection(db,"group_chats"),where("members","array-contains",currentUsername));unsubPriv=onSnapshot(qPrivate,(snap)=>{snap.docChanges().forEach(change=>{
+  if(change.type!=='modified' && change.type!=='added') return;
+  const data=change.doc.data(); const id=change.doc.id;
+  if(data.lastMsg && lastChatIds[id] && lastChatIds[id]!==data.lastMsg){
+    if(!currentChatId || currentChatId!==id){
+      const other=(data.participants||[]).find(p=>p!==currentUsername)||'New';
+      if(Notification && Notification.permission==='granted'){
+        showPushToast(other, data.lastMsg.slice(0,60));
+      }
+    }
+  }
+  lastChatIds[id]=data.lastMsg;
+});cachePrivate=snap.docs.map(d=>({id:d.id,type:'private',...d.data()}));renderList()});unsubGroup=onSnapshot(qGroups,(snap)=>{snap.docChanges().forEach(change=>{
+  if(change.type!=='modified' && change.type!=='added') return;
+  const data=change.doc.data(); const id=change.doc.id;
+  if(data.lastMsg && lastChatIds[id] && lastChatIds[id]!==data.lastMsg){
+    if(!currentChatId || currentChatId!==id){
+      if(Notification && Notification.permission==='granted'){
+        showPushToast(data.name||'Group', data.lastMsg.slice(0,60));
+      }
+    }
+  }
+  lastChatIds[id]=data.lastMsg;
+});cacheGroups=snap.docs.map(d=>({id:d.id,type:'group',...d.data()}));renderList()});}
 function listenProfiles(){if(unsubProfiles)unsubProfiles();let qProf=collection(db,"user_profiles");unsubProfiles=onSnapshot(qProf,(snap)=>{profilesCache={};snap.forEach(d=>{profilesCache[d.id]=d.data()});renderList();if(currentChatId&&currentChatType==='private') updateChatHeaderPic();let my=profilesCache[currentUsername];if(my&&my.photo){document.getElementById('myAvImg').src='data:image/jpeg;base64,'+my.photo;document.getElementById('myAvImg').style.display='block';document.getElementById('myAvTxt').style.display='none';}});}
 function listenPresence(){if(unsubPresence) unsubPresence(); let qPres=collection(db,"presence"); unsubPresence=onSnapshot(qPres,(snap)=>{presenceCache={}; snap.forEach(d=>{presenceCache[d.id]=d.data()}); renderList(); if(currentChatId&&currentChatType==='private') updateChatHeaderPic();});}
 async function loadMyProfile(){try{let d=await getDoc(doc(db,"user_profiles",currentUsername));if(d.exists()&&d.data().photo){document.getElementById('myAvImg').src='data:image/jpeg;base64,'+d.data().photo;document.getElementById('myAvImg').style.display='block';document.getElementById('myAvTxt').style.display='none';}}catch(e){}}
