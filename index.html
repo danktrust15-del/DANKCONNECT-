@@ -53,7 +53,7 @@
 .call-controls{display:flex;gap:16px;align-items:center;justify-content:center;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
 .ctrl-btn{width:54px;height:54px;border-radius:50%;border:none;background:#23233a;color:white;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .ctrl-btn.active{background:#53bdeb;color:#0a0a14}
-#groupInfoModal .group-box{background:#1e1e35;width:100%;max-width:390px;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;max-height:85vh}
+#groupInfoModal.group-box{background:#1e1e35;width:100%;max-width:390px;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;max-height:85vh}
 .group-info-header{background:var(--blue);padding:16px;text-align:center;color:white;position:relative}
 .group-info-av{width:78px;height:78px;border-radius:50%;background:white;color:var(--blue);margin:0 auto;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px}
 .group-info-name{margin-top:10px;font-size:20px;font-weight:900}
@@ -96,7 +96,6 @@ function applyTheme(t){ if(t==='light'){document.body.classList.add('light-mode'
 document.getElementById('themeBtn').addEventListener('click',()=>{let cur=document.body.classList.contains('light-mode')?'light':'dark';applyTheme(cur==='light'?'dark':'light')});
 (function(){let saved=localStorage.getItem('dc_theme');if(saved) applyTheme(saved); else applyTheme('dark');})();
 
-// === PATCHED KEYBOARD FIX FOR NIMAT iPHONE ===
 function setupKeyboardFix(){
   if(!window.visualViewport) return;
   window.visualViewport.addEventListener('resize', ()=>{
@@ -112,12 +111,9 @@ function setupKeyboardFix(){
       mainV.style.height = vh + 'px';
     }
   });
-  window.visualViewport.addEventListener('scroll', ()=>{
-    window.scrollTo(0,0);
-  });
+  window.visualViewport.addEventListener('scroll', ()=>{ window.scrollTo(0,0); });
 }
 setupKeyboardFix();
-
 const msgInputEl = document.getElementById('msgInput');
 msgInputEl.addEventListener('focus',()=>{
   setTimeout(()=>{
@@ -129,7 +125,6 @@ msgInputEl.addEventListener('focus',()=>{
   },350);
 });
 msgInputEl.addEventListener('blur',()=>{ setTimeout(()=>{ window.scrollTo(0,0); },100); });
-
 function showPushToast(title,body){ const toast=document.getElementById('pushToast'); toast.innerHTML='<b>'+title+'</b><br><span style="font-size:12px;color:#9a9ab3">'+body+'</span>'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),4000); if(Notification && Notification.permission==='granted'){ try{ new Notification(title,{body:body,icon:'logo.png?v=20'}); }catch(e){} } }
 async function saveFCMToken(){ try{ const token = await getToken(messaging, { vapidKey: VAPID_KEY }); if(token && currentUsername){ await setDoc(doc(db,"fcm_tokens",currentUsername),{username:currentUsername,token:token,updated:serverTimestamp()},{merge:true}); localStorage.setItem('dc_fcm_token', token); } return token; }catch(e){ console.log('FCM token error', e); } }
 async function initPush(){ if(!('Notification' in window)) return; const banner=document.getElementById('pushBanner'); if(Notification.permission==='granted'){ banner.classList.remove('show'); await saveFCMToken(); } else if(Notification.permission!=='denied'){ banner.classList.add('show'); } onMessage(messaging, (payload)=>{ showPushToast(payload.notification?.title || 'DANKCONNECT', payload.notification?.body || 'New message'); }); }
@@ -175,7 +170,33 @@ function getUnreadCount(c){if(!c) return 0;if(c.unread && typeof c.unread === 'o
 function renderList(){let list=document.getElementById('chatList');list.innerHTML='';let q=document.getElementById('searchInput').value.toLowerCase();let all=[...cachePrivate,...cacheGroups].sort((a,b)=>(b.lastTime?.seconds||0)-(a.lastTime?.seconds||0));let filtered=all.filter(c=>{if(currentTab==='groups'&&c.type!=='group')return false;if(currentTab==='chats'){let unread=getUnreadCount(c);if(unread===0) return false;}if(!q)return true;if(c.type==='private'){let o=(c.participants||[]).find(p=>p!==currentUsername)||'';return o.includes(q)}else return (c.name||'').toLowerCase().includes(q)});document.getElementById('unreadCount').textContent=cachePrivate.filter(c=>getUnreadCount(c)>0).length;document.getElementById('groupCount').textContent=cacheGroups.length;filtered.forEach(c=>{let row=document.createElement('div');row.className='chat-row';let timeStr=c.lastTime?new Date(c.lastTime.seconds*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';let isTyping=c.typing && Object.keys(c.typing).some(u=>u!==currentUsername && c.typing[u]);let lastText=isTyping?'<span style="color:#8ab4ff;font-weight:700">typing...</span>':(c.lastMsg||'');if(c.type==='private'){let other=(c.participants||[]).find(p=>p!==currentUsername)||'Unknown';let unread=getUnreadCount(c);let timeCls=unread>0?"chat-time green":"chat-time";let badge=unread>0?'<span class="badge">'+(unread>9?'9+':unread)+'</span>':"";let prof=profilesCache[other];let pres=presenceCache[other];let onlineDot=isUserOnline(pres)?'<div class="online-dot"></div>':"";let avInner=prof&&prof.photo?'<img src="data:image/jpeg;base64,'+prof.photo+'">':other.slice(0,2).toUpperCase();let avHtml='<div class="av-wrapper"><div class="av profile-trigger" data-user="'+other+'">'+avInner+'</div>'+onlineDot+'</div>';row.innerHTML=avHtml+'<div class="chat-info"><div class="chat-top"><span class="chat-name">'+other+'</span><span class="'+timeCls+'">'+timeStr+'</span></div><div class="chat-bottom"><span class="chat-last">'+lastText+'</span>'+badge+'</div></div>';row.addEventListener('click',()=>openPrivate(other));let avEl=row.querySelector('.profile-trigger');if(avEl){avEl.addEventListener('click',(e)=>{e.stopPropagation();openProfileModal(e,other);});}}else{let unread=getUnreadCount(c);let timeCls=unread>0?"chat-time green":"chat-time";let badge=unread>0?'<span class="badge">'+(unread>9?'9+':unread)+'</span>':"";row.innerHTML='<div class="av" style="background:#5b5bff">'+c.name.slice(0,2).toUpperCase()+'</div><div class="chat-info"><div class="chat-top"><span class="chat-name">'+c.name+'</span><span class="'+timeCls+'">'+timeStr+'</span></div><div class="chat-bottom"><span class="chat-last">'+lastText+'</span>'+badge+'</div></div>';row.addEventListener('click',()=>openGroup(c.id,c.name));}list.appendChild(row);});}
 function switchTab(t){currentTab=t;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));let map={all:'chipAll',chats:'chipChats',groups:'chipGroups'};if(map[t])document.getElementById(map[t]).classList.add('active');renderList()}
 function filterChats(){renderList()}
-async function newPrivateChat(){let o=prompt("Enter username:");if(!o)return;o=cleanU(o);if(!o||o===currentUsername){alert("Invalid");return}document.getElementById('searchInput').value='';switchTab('all');openPrivate(o)}
+
+// ===== FIXED - NOW WITH FIREBASE CHECK =====
+async function newPrivateChat(){
+  let o=prompt("Enter username:");
+  if(!o) return;
+  o=cleanU(o);
+  if(!o || o===currentUsername){
+    alert("Invalid username");
+    return;
+  }
+  try{
+    let ref = doc(db,"usernames",o);
+    let snap = await getDoc(ref);
+    if(!snap.exists()){
+      alert("❌ User @"+o+" doesn't exist on DANKCONNECT\n\nCheck spelling.");
+      return;
+    }
+  }catch(e){
+    console.log("Check failed", e);
+    alert("Cannot verify user (check rules): "+e.message);
+    return;
+  }
+  document.getElementById('searchInput').value='';
+  switchTab('all');
+  openPrivate(o);
+}
+
 async function createGroup(){let name=prompt("Group name:");if(!name)return;name=name.trim().slice(0,30);let membersRaw=prompt("Members comma separated:");let members=membersRaw?membersRaw.split(',').map(cleanU).filter(Boolean):[];members=[...new Set([currentUsername,...members])];let id="group_"+Date.now()+"_"+cleanU(name);await setDoc(doc(db,"group_chats",id),{name:name,members:members,createdBy:currentUsername,createdAt:serverTimestamp(),lastMsg:"Group created",lastTime:serverTimestamp()});openGroup(id,name)}
 function updateChatHeaderPic(){if(currentChatType!=='private') return;let other=currentChatOther;let prof=profilesCache[other];let pres=presenceCache[other];let avEl=document.getElementById('chatAv');avEl.style.cursor='pointer'; avEl.onclick=(e)=>openProfileModal(e,other); if(prof&&prof.photo){avEl.innerHTML='<img src="data:image/jpeg;base64,'+prof.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';}else{avEl.textContent=other.slice(0,2).toUpperCase();} let statusEl=document.getElementById('chatStatus'); if(isUserOnline(pres)){statusEl.textContent='online'; statusEl.style.color='#53bdeb';} else if(pres&&pres.lastSeen){statusEl.textContent=formatLastSeen(pres.lastSeen); statusEl.style.color='#8b8ba7';} else {statusEl.textContent='offline'; statusEl.style.color='#8b8ba7';}}
 let currentGroupDoc=null;
@@ -254,10 +275,23 @@ document.getElementById('addMembersBtn').addEventListener('click',addMoreMembers
 document.getElementById('leaveGroupBtn').addEventListener('click',leaveGroup);
 document.getElementById('groupInfoModal').addEventListener('click',(e)=>{ if(e.target.id==='groupInfoModal') closeGroupInfoModal(); });
 
+// ===== FIXED openPrivate with check =====
 async function openPrivate(other){
-currentChatOther=other;currentChatType='private';currentChatId=getPrivateChatId(currentUsername,other);
-document.getElementById('chatName').textContent=other;updateChatHeaderPic();showChat();
-try{let existing=cachePrivate.find(c=>c.id===currentChatId);let otherUnread=existing?.unread?.[other]||0;await setDoc(doc(db,"private_chats",currentChatId),{participants:[currentUsername,other].sort(),lastTime:serverTimestamp(),unread:{[currentUsername]:0,[other]:otherUnread}},{merge:true});}catch(e){}listenMessages()}
+  other=cleanU(other);
+  if(!other || other===currentUsername) return;
+  try{
+    let snap=await getDoc(doc(db,"usernames",other));
+    if(!snap.exists()){
+      alert("❌ @"+other+" doesn't exist on DANKCONNECT");
+      return;
+    }
+  }catch(e){
+    console.log("Verify failed", e);
+  }
+  currentChatOther=other;currentChatType='private';currentChatId=getPrivateChatId(currentUsername,other);
+  document.getElementById('chatName').textContent=other;updateChatHeaderPic();showChat();
+  try{let existing=cachePrivate.find(c=>c.id===currentChatId);let otherUnread=existing?.unread?.[other]||0;await setDoc(doc(db,"private_chats",currentChatId),{participants:[currentUsername,other].sort(),lastTime:serverTimestamp(),unread:{[currentUsername]:0,[other]:otherUnread}},{merge:true});}catch(e){}listenMessages()
+}
 async function openGroup(id,name){currentChatType='group';currentChatId=id;currentChatOther=null;document.getElementById('chatName').textContent=name;document.getElementById('chatAv').textContent=name.slice(0,2).toUpperCase();document.getElementById('chatAv').onclick=null;document.getElementById('chatStatus').textContent='Tap to see members 👥';document.getElementById('chatStatus').style.color='rgba(255,255,255,0.7)';showChat();try{let existing=cacheGroups.find(c=>c.id===id);let unreadMap={};if(existing?.unread){Object.keys(existing.unread).forEach(k=>{unreadMap[k]=existing.unread[k]});}unreadMap[currentUsername]=0;await setDoc(doc(db,"group_chats",currentChatId),{unread:unreadMap},{merge:true});}catch(e){}listenMessages()}
 function showChat(){document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='flex'; if(window.visualViewport){ document.getElementById('chatView').style.height = window.visualViewport.height + 'px'; }}
 function closeChat(){
