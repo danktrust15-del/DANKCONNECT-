@@ -2,10 +2,10 @@
 <title>DANKCONNECT - Ghana's Secure Chat</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta property="og:title" content="DANKCONNECT - Ghana's Secure Chat 🇬🇭">
-<meta property="og:image" content="logo.png?v=25">
-<meta property="og:url" content="https://danktrust15-del.github.io/DANKCONNECT/?v=25">
-<meta name="theme-color" content="#0d00b3"><link rel="icon" href="logo.png?v=25"><link rel="apple-touch-icon" href="logo.png?v=25"><link rel="manifest" href="manifest.json?v=25">
-<style>/* V25 - Official logo fix */
+<meta property="og:image" content="logo.png?v=26">
+<meta property="og:url" content="https://danktrust15-del.github.io/DANKCONNECT/?v=26">
+<meta name="theme-color" content="#0d00b3"><link rel="icon" href="logo.png?v=26"><link rel="apple-touch-icon" href="logo.png?v=26"><link rel="manifest" href="manifest.json?v=26">
+<style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial}:root{--blue:#0d00b3}html{height:100%;-webkit-text-size-adjust:100%}body{height:100dvh;height:100svh;width:100%;background:#0a0a14;margin:0;overscroll-behavior:none;position:relative;overflow:hidden}
 #splashView,#authView,#mainView,#chatView{position:fixed;inset:0;width:100%;height:100dvh;height:100svh;overflow:hidden}
 #splashView{overflow-y:auto;-webkit-overflow-scrolling:touch;background:#0d00b3;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px;color:white}
@@ -80,21 +80,24 @@
 .role-admin{color:#53bdeb}.role-member{color:#8b8ba7}
 .remove-btn{background:#ff3b30;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:900;cursor:pointer}
 .add-members-btn{margin:14px 16px;padding:12px;background:var(--blue);color:white;border:none;border-radius:12px;font-weight:800;cursor:pointer;width:calc(100% - 32px)}
+#offlineBar{display:none;position:fixed;top:0;left:0;right:0;background:#ff3b30;color:white;text-align:center;padding:6px 10px;font-size:11px;font-weight:800;z-index:10003}
+#offlineBar.show{display:block}
 </style></head><body>
+<div id="offlineBar">📴 Offline — reading from phone storage. New messages will appear when data returns</div>
 <div id="pushToast"></div>
-<div id="splashView"><img src="logo.png?v=25" class="splash-logo"><div class="splash-title">DANKCONNECT</div><div class="splash-sub">Ghana's Secure Chat 🇬🇭<br>Username only</div><div class="splash-box"><button id="goToAuthBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button></div></div>
-<div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=25" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy" autocomplete="username"><input id="password" type="password" placeholder="Password min 6 chars" autocomplete="current-password"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
+<div id="splashView"><img src="logo.png?v=26" class="splash-logo"><div class="splash-title">DANKCONNECT</div><div class="splash-sub">Ghana's Secure Chat 🇬🇭<br>Username only</div><div class="splash-box"><button id="goToAuthBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button></div></div>
+<div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=26" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy" autocomplete="username"><input id="password" type="password" placeholder="Password min 6 chars" autocomplete="current-password"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
 <div id="mainView"><div class="m-top"><h1>Chats</h1><div style="display:flex;gap:8px"><div class="icon-btn" id="myProfileBtn"><img id="myAvImg" class="my-av" style="display:none"><span id="myAvTxt">ME</span></div><div class="icon-btn" id="themeBtn">🌙</div><div class="icon-btn" id="newChatBtn" style="background:white;color:#0d00b3;font-weight:900;font-size:24px">+</div></div></div>
-<div id="pushBanner"><div class="push-text">🔔 Enable notifications to know when someone messages you 🇬🇭</div><button class="push-btn" id="enablePushBtn">Allow</button></div>
+<div id="pushBanner"><div class="push-text">🔔 Enable notifications</div><button class="push-btn" id="enablePushBtn">Allow</button></div>
 <div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search"></div></div><div class="filter-chips"><div class="chip active" id="chipAll">All</div><div class="chip" id="chipChats">Unread <span id="unreadCount">0</span></div><div class="chip" id="chipGroups">Groups <span id="groupCount">0</span></div><div class="chip" id="chipAddGroup">+</div></div><div class="list" id="chatList"></div><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="logoutBtn"><span>⚙️</span>Settings</div></div></div>
-<div id="chatView"><div class="chat-head" id="chatHead"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv" style="background:white;padding:3px"><img src="logo.png?v=25" style="width:100%;height:100%;object-fit:contain"></div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div><div id="voiceCallBtn" class="call-btn">📞</div><div id="videoCallBtn" class="call-btn">🎥</div></div><div class="msgs" id="msgs"></div><div id="typingIndicator">typing...</div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div>
+<div id="chatView"><div class="chat-head" id="chatHead"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv" style="background:white;padding:3px"><img src="logo.png?v=26" style="width:100%;height:100%;object-fit:contain"></div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div><div id="voiceCallBtn" class="call-btn">📞</div><div id="videoCallBtn" class="call-btn">🎥</div></div><div class="msgs" id="msgs"></div><div id="typingIndicator">typing...</div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div>
 <div class="input-bar" id="inputBar"><button id="imgBtn">📎</button><input type="text" id="msgInput" placeholder="Type message..."><div class="recording-bar" id="recordingBar"><div class="rec-dot"></div><span class="rec-timer" id="recTimer">0:00</span><span>recording...</span></div><button id="micBtn">🎤</button><button id="sendBtn">➤</button></div>
-<div id="viewOnlyBar">🔒 This is a view-only channel — Only DankBoss can post</div>
+<div id="viewOnlyBar">🔒 View-only — Only DankBoss can post</div>
 </div>
 <input type="file" id="profileInput" accept="image/*" style="display:none"><input type="file" id="imageInput" accept="image/*" style="display:none">
 <div id="profileModal" class="profile-modal"><div class="profile-modal-close" id="closeProfileBtn">‹</div><img id="profileModalImg" class="profile-modal-img" style="display:none"><div id="profileModalFallback" class="profile-modal-img" style="display:none">DC</div><div id="profileModalName" class="profile-modal-name"></div><div id="profileModalStatus" class="profile-modal-status"></div><div class="profile-modal-actions" id="profileModalActions"></div></div>
 <div id="groupInfoModal" class="profile-modal"><div class="profile-modal-close" id="closeGroupInfoBtn">‹</div><div class="group-box"><div class="group-info-header"><div id="groupInfoAv" class="group-info-av">GP</div><div id="groupInfoName" class="group-info-name">Group</div><div id="groupInfoCount" class="group-info-count">0 members</div></div><div id="groupInfoList" class="group-info-body"></div><button id="addMembersBtn" class="add-members-btn">+ Add Members</button><button id="leaveGroupBtn" class="add-members-btn" style="background:#23233a;margin-top:0">Leave Group</button></div></div>
-<div id="deleteModal"><div class="delete-box"><div class="delete-title" id="deleteTitle">Delete message?</div><div class="delete-text" id="deleteText">Choose delete option</div><div class="delete-btns" id="deleteBtns"></div></div></div>
+<div id="deleteModal"><div class="delete-box"><div class="delete-title" id="deleteTitle">Delete?</div><div class="delete-text" id="deleteText">Choose</div><div class="delete-btns" id="deleteBtns"></div></div></div>
 <div id="incomingCall"><div id="incAv" class="in-call-av">DC</div><div id="incName" class="in-call-name">Incoming</div><div id="incType" class="in-call-status">Incoming voice call... 📞</div><div class="call-actions"><button class="call-action decline" id="declineCallBtn">✕</button><button class="call-action accept" id="acceptCallBtn">📞</button></div></div>
 <div id="activeCall"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay playsinline muted></video><audio id="remoteAudio" autoplay playsinline></audio><div class="call-overlay"><div style="display:flex;flex-direction:column;align-items:center;margin-top:40px"><div id="activeAv" class="in-call-av">DC</div><div id="activeName" class="in-call-name">Name</div><div id="activeStatus" class="in-call-status">Calling...</div><div id="callTimer" class="call-timer">00:00</div></div><div class="call-controls"><button class="ctrl-btn" id="muteBtn">🎤</button><button class="call-action end" id="endCallBtn">✕</button><button class="ctrl-btn" id="speakerBtn">🔊</button><button class="ctrl-btn" id="switchCamBtn">🔄</button></div></div></div><script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -107,15 +110,18 @@ const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db =
 const messaging = getMessaging(app);
 await setPersistence(auth, browserLocalPersistence);
 enableIndexedDbPersistence(db).catch(err=>{ console.log('Persistence', err.code); });
-// V25 OWNER - only DankBoss + LOGO FIX
 const ADMIN_USERNAMES = ['dankboss'];
-const OFFICIAL_LOGO = 'logo.png?v=25';
+const OFFICIAL_LOGO = 'logo.png?v=26';
 function isAdminUser(u){ return ADMIN_USERNAMES.includes((u||'').toLowerCase()); }
 function applyTheme(t){ if(t==='light'){document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');document.getElementById('themeBtn').textContent='☀️';} else {document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');document.getElementById('themeBtn').textContent='🌙';}}
 document.getElementById('themeBtn').addEventListener('click',()=>{let cur=document.body.classList.contains('light-mode')?'light':'dark';applyTheme(cur==='light'?'dark':'light')});
 (function(){let saved=localStorage.getItem('dc_theme');if(saved) applyTheme(saved); else applyTheme('dark');})();
 function setupKeyboardFix(){ if(!window.visualViewport) return; window.visualViewport.addEventListener('resize', ()=>{ let vh = window.visualViewport.height; let chatV = document.getElementById('chatView'); let mainV = document.getElementById('mainView'); if(chatV && chatV.style.display==='flex'){ chatV.style.height = vh + 'px'; let msgs = document.getElementById('msgs'); if(msgs){ setTimeout(()=>{ msgs.scrollTop = msgs.scrollHeight; }, 120); } } if(mainV && mainV.style.display==='flex'){ mainV.style.height = vh + 'px'; } }); window.visualViewport.addEventListener('scroll', ()=>{ window.scrollTo(0,0); }); }
 setupKeyboardFix();
+function updateOfflineBar(){ const bar=document.getElementById('offlineBar'); if(!navigator.onLine){ bar.classList.add('show'); } else { bar.classList.remove('show'); } }
+window.addEventListener('online', updateOfflineBar);
+window.addEventListener('offline', updateOfflineBar);
+updateOfflineBar();
 const msgInputEl = document.getElementById('msgInput');
 msgInputEl.addEventListener('focus',()=>{ setTimeout(()=>{ let msgs=document.getElementById('msgs'); if(msgs) msgs.scrollTop = msgs.scrollHeight; if(window.visualViewport){ document.getElementById('chatView').style.height = window.visualViewport.height + 'px'; } },350); });
 msgInputEl.addEventListener('blur',()=>{ setTimeout(()=>{ window.scrollTo(0,0); },100); });
@@ -135,7 +141,7 @@ function saveInstantCache(chatId, docList){
       let data = typeof d.data==='function'? d.data() : d;
       return { id: d.id, sender: data.sender||'', text: data.text||'', type: data.type||'text', timeSec: data.time?.seconds || Math.floor(Date.now()/1000), duration: data.duration||0, deletedFor: data.deletedFor||[], hasAudio:!!data.audioBase64, hasImage:!!data.imageBase64 };
     });
-    localStorage.setItem(instantKey(chatId), JSON.stringify(plain.slice(-35)));
+    localStorage.setItem(instantKey(chatId), JSON.stringify(plain.slice(-100)));
   }catch(e){ console.log('instant save fail', e); }
 }
 function renderInstantCache(chatId){
@@ -173,239 +179,435 @@ function setReply(msgData){replyingTo={id:msgData.id,sender:msgData.sender,text:
 window.clearReply=()=>{replyingTo=null;document.getElementById('replyPreview').classList.remove('active');};
 document.getElementById('replyClose').addEventListener('click',()=>clearReply());
 window.scrollToMessage=(id)=>{let el=document.getElementById('msg-'+id);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='2px solid #53bdeb';setTimeout(()=>el.style.outline='none',1000);} };
-function openDeleteModal(msgId,isMe,colPath){pendingDelete={id:msgId,isMe:isMe,col:colPath};let titleEl=document.getElementById('deleteTitle'); let textEl=document.getElementById('deleteText'); let btnsEl=document.getElementById('deleteBtns');if(isMe){ titleEl.textContent='Delete message?'; textEl.textContent='This will delete for everyone'; btnsEl.innerHTML='<button class="d-btn danger" id="btnDeleteAll">Delete for everyone 🗑️</button><button class="d-btn cancel" id="btnCancelDel">Cancel</button>'; } else { titleEl.textContent='Delete message?'; textEl.textContent='Delete this message for you only'; btnsEl.innerHTML='<button class="d-btn neutral" id="btnDeleteMe">Delete for me</button><button class="d-btn cancel" id="btnCancelDel">Cancel</button>'; }document.getElementById('deleteModal').classList.add('active');document.getElementById('btnCancelDel').addEventListener('click',closeDeleteModal);let btnAll=document.getElementById('btnDeleteAll'); let btnMe=document.getElementById('btnDeleteMe');if(btnAll) btnAll.addEventListener('click',doDeleteForEveryone);if(btnMe) btnMe.addEventListener('click',doDeleteForMe);}
-function closeDeleteModal(){document.getElementById('deleteModal').classList.remove('active');pendingDelete={id:null,isMe:false,col:null};}
-async function doDeleteForEveryone(){ if(!pendingDelete.id) return; try{ let colRef; if(currentChatId==='official'){ colRef=collection(db,"announcement_messages"); } else if(currentChatType==='private') colRef=collection(db,"private_chats",currentChatId,"messages"); else colRef=collection(db,"group_chats",currentChatId,"messages"); await deleteDoc(doc(colRef,pendingDelete.id)); }catch(e){alert('Delete failed: '+e.message);} closeDeleteModal(); }
-async function doDeleteForMe(){ if(!pendingDelete.id) return; try{ if(currentChatId==='official'){ await updateDoc(doc(db,"announcement_messages",pendingDelete.id),{deletedFor:arrayUnion(currentUsername)}); } else { let colRef; if(currentChatType==='private') colRef=collection(db,"private_chats",currentChatId,"messages"); else colRef=collection(db,"group_chats",currentChatId,"messages"); await updateDoc(doc(colRef,pendingDelete.id),{deletedFor:arrayUnion(currentUsername)}); } }catch(e){alert('Delete failed: '+e.message);} closeDeleteModal(); }
-document.getElementById('deleteModal').addEventListener('click',(e)=>{if(e.target.id==='deleteModal') closeDeleteModal();});
+function openDeleteModal(msgId,isMe,col,hasForEveryone){
+  pendingDelete={id:msgId,isMe:isMe,col:col};
+  let title=document.getElementById('deleteTitle'); title.textContent=isMe?'Delete message?':'Delete?';
+  let text=document.getElementById('deleteText'); text.textContent=isMe?'Choose how to delete':'Delete for you?';
+  let btns=document.getElementById('deleteBtns'); btns.innerHTML='';
+  let b1=document.createElement('button'); b1.className='d-btn neutral'; b1.textContent='🗑️ Delete for me'; b1.onclick=()=>deleteForMe();
+  btns.appendChild(b1);
+  if(isMe && hasForEveryone){
+    let b2=document.createElement('button'); b2.className='d-btn danger'; b2.textContent='🚫 Delete for everyone'; b2.onclick=()=>deleteForEveryone();
+    btns.appendChild(b2);
+  }
+  let b3=document.createElement('button'); b3.className='d-btn cancel'; b3.textContent='Cancel'; b3.onclick=()=>closeDeleteModal();
+  btns.appendChild(b3);
+  document.getElementById('deleteModal').classList.add('active');
+}
+function closeDeleteModal(){ document.getElementById('deleteModal').classList.remove('active'); pendingDelete={id:null,isMe:false,col:null}; }
+async function deleteForMe(){ if(!pendingDelete.id) return; try{ let ref=doc(db, pendingDelete.col, pendingDelete.id); await updateDoc(ref, { deletedFor: arrayUnion(currentUsername) }); }catch(e){ console.log('deleteForMe fail',e);} closeDeleteModal(); }
+async function deleteForEveryone(){ if(!pendingDelete.id ||!pendingDelete.isMe) return; try{ let ref=doc(db, pendingDelete.col, pendingDelete.id); await deleteDoc(ref); }catch(e){ console.log('deleteForEveryone fail',e);} closeDeleteModal(); }
+document.getElementById('deleteModal').addEventListener('click', (e)=>{ if(e.target.id==='deleteModal') closeDeleteModal(); });
 document.getElementById('goToAuthBtn').addEventListener('click',()=>{document.getElementById('splashView').style.display='none';document.getElementById('authView').style.display='flex';});
 document.getElementById('backToSplashBtn').addEventListener('click',()=>{document.getElementById('authView').style.display='none';document.getElementById('splashView').style.display='flex';});
-async function handleLogin(){let u=cleanU(document.getElementById('username').value);let p=document.getElementById('password').value.trim();let msgEl=document.getElementById('authMsg');if(u.length<3){msgEl.textContent="Username min 3";return}if(p.length<6){msgEl.textContent="Password min 6";return}document.getElementById('loginBtn').disabled=true;msgEl.textContent="Checking...";let email=emailFromU(u);try{await signInWithEmailAndPassword(auth,email,p);msgEl.style.color="#53bdeb";msgEl.textContent="Welcome "+u}catch(err){if(err.code==='auth/invalid-credential'||err.code==='auth/user-not-found'){try{let cred=await createUserWithEmailAndPassword(auth,email,p);await setDoc(doc(db,"users",cred.user.uid),{username:u,created:serverTimestamp()},{merge:true});await setDoc(doc(db,"usernames",u),{uid:cred.user.uid,username:u},{merge:true});msgEl.style.color="#53bdeb";msgEl.textContent="Created "+u}catch(cErr){msgEl.textContent=cErr.message}}else{msgEl.textContent=err.message}}document.getElementById('loginBtn').disabled=false}
-document.getElementById('loginBtn').addEventListener('click',handleLogin);
-document.getElementById('myProfileBtn').addEventListener('click',(e)=>openProfileModal(e,currentUsername));
-document.getElementById('newChatBtn').addEventListener('click',()=>newPrivateChat());
-document.getElementById('chipAll').addEventListener('click',()=>switchTab('all'));document.getElementById('chipChats').addEventListener('click',()=>switchTab('chats'));document.getElementById('chipGroups').addEventListener('click',()=>switchTab('groups'));document.getElementById('chipAddGroup').addEventListener('click',()=>createGroup());
-document.getElementById('logoutBtn').addEventListener('click',()=>{if(confirm('Logout?')) doLogout()});document.getElementById('closeChatBtn').addEventListener('click',()=>closeChat());document.getElementById('closeProfileBtn').addEventListener('click',()=>closeProfileModal());document.getElementById('imgBtn').addEventListener('click',()=>document.getElementById('imageInput').click());document.getElementById('sendBtn').addEventListener('click',()=>sendMsg());document.getElementById('searchInput').addEventListener('input',()=>filterChats());
-document.getElementById('msgInput').addEventListener('input',()=>{toggleInputButtons(); if(!currentChatId || currentChatId==='official') return; let metaCol=currentChatType==='private'?"private_chats":"group_chats";let metaDoc2=doc(db,metaCol,currentChatId); setDoc(metaDoc2,{typing:{[currentUsername]:true}},{merge:true}); if(typingTimeout) clearTimeout(typingTimeout); typingTimeout=setTimeout(()=>{setDoc(metaDoc2,{typing:{[currentUsername]:false}},{merge:true});},1500);});
-onAuthStateChanged(auth,(user)=>{if(user){let uname=cleanU(user.email.split('@')[0]);currentUsername=uname;document.getElementById('splashView').style.display='none';document.getElementById('authView').style.display='none';document.getElementById('mainView').style.display='flex';listenAllChats();listenProfiles();listenPresence();listenCalls();listenAnnouncements();loadMyProfile();setPresence(true);startPresenceHeartbeat();initPush();}else{setPresence(false);if(presenceInterval) clearInterval(presenceInterval);currentUsername=null;document.getElementById('splashView').style.display='flex';document.getElementById('authView').style.display='none';document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='none';if(unsubMsgs)unsubMsgs();if(unsubPriv)unsubPriv();if(unsubGroup)unsubGroup();if(unsubProfiles)unsubProfiles();if(unsubPresence)unsubPresence();if(unsubCalls)unsubCalls();if(unsubAnnounce)unsubAnnounce();cachePrivate=[];cacheGroups=[];cacheAnnounce=[];profilesCache={};presenceCache={};lastChatIds={};renderList()}});
-function getPrivateChatId(a,b){a=cleanU(a);b=cleanU(b);if(a===b)return null;return "private_"+[a,b].sort().join("_")}
-async function setPresence(online){if(!currentUsername) return; try{await setDoc(doc(db,"presence",currentUsername),{username:currentUsername,online:online,lastSeen:serverTimestamp()},{merge:true});}catch(e){}}
-function startPresenceHeartbeat(){if(presenceInterval) clearInterval(presenceInterval); presenceInterval=setInterval(()=>{setPresence(true);},15000); setInterval(()=>{ renderList(); if(currentChatId&&currentChatType==='private') updateChatHeaderPic(); }, 10000);}
-let lastChatIds={};
-function listenAllChats(){if(unsubPriv)unsubPriv(); if(unsubGroup)unsubGroup();let qPrivate=query(collection(db,"private_chats"),where("participants","array-contains",currentUsername));let qGroups=query(collection(db,"group_chats"),where("members","array-contains",currentUsername));unsubPriv=onSnapshot(qPrivate,(snap)=>{snap.docChanges().forEach(change=>{ if(change.type!=='modified' && change.type!=='added') return; const data=change.doc.data(); const id=change.doc.id; if(data.lastMsg && lastChatIds[id] && lastChatIds[id]!==data.lastMsg){ if(!currentChatId || currentChatId!==id){ const other=(data.participants||[]).find(p=>p!==currentUsername)||'New'; showPushToast(other, data.lastMsg.slice(0,60)); } } lastChatIds[id]=data.lastMsg; });cachePrivate=snap.docs.map(d=>({id:d.id,type:'private',...d.data()}));renderList()});unsubGroup=onSnapshot(qGroups,(snap)=>{snap.docChanges().forEach(change=>{ if(change.type!=='modified' && change.type!=='added') return; const data=change.doc.data(); const id=change.doc.id; if(data.lastMsg && lastChatIds[id] && lastChatIds[id]!==data.lastMsg){ if(!currentChatId || currentChatId!==id){ showPushToast(data.name||'Group', data.lastMsg.slice(0,60)); } } lastChatIds[id]=data.lastMsg; });cacheGroups=snap.docs.map(d=>({id:d.id,type:'group',...d.data()}));renderList()});}
-function listenProfiles(){if(unsubProfiles)unsubProfiles();let qProf=collection(db,"user_profiles");unsubProfiles=onSnapshot(qProf,(snap)=>{profilesCache={};snap.forEach(d=>{profilesCache[d.id]=d.data()});renderList();if(currentChatId&&currentChatType==='private') updateChatHeaderPic();let my=profilesCache[currentUsername];if(my&&my.photo){document.getElementById('myAvImg').src='data:image/jpeg;base64,'+my.photo;document.getElementById('myAvImg').style.display='block';document.getElementById('myAvTxt').style.display='none';}});}
-function listenPresence(){if(unsubPresence) unsubPresence(); let qPres=collection(db,"presence"); unsubPresence=onSnapshot(qPres,(snap)=>{presenceCache={}; snap.forEach(d=>{presenceCache[d.id]=d.data()}); renderList(); if(currentChatId&&currentChatType==='private') updateChatHeaderPic();});}
-async function loadMyProfile(){try{let d=await getDoc(doc(db,"user_profiles",currentUsername));if(d.exists()&&d.data().photo){document.getElementById('myAvImg').src='data:image/jpeg;base64,'+d.data().photo;document.getElementById('myAvImg').style.display='block';document.getElementById('myAvTxt').style.display='none';}}catch(e){}}
-function getUnreadCount(c){if(!c) return 0;if(c.unread && typeof c.unread === 'object' && c.unread[currentUsername]!== undefined){return c.unread[currentUsername] || 0;}return 0;}
-let announceMeta={lastMsg:'Welcome to DANKCONNECT Official 🇬🇭', lastTime:null, unreadCount:0};
-function listenAnnouncements(){
-  if(unsubAnnounce) unsubAnnounce();
-  let qAnn=query(collection(db,"announcement_messages"), orderBy("time","asc"));
-  unsubAnnounce=onSnapshot(qAnn,(snap)=>{
-    cacheAnnounce=snap.docs.map(d=>({id:d.id,...d.data()}));
-    if(cacheAnnounce.length>0){
-      let last=cacheAnnounce[cacheAnnounce.length-1];
-      announceMeta.lastMsg=last.text || (last.type==='image'?'📷 Image':'Voice');
-      announceMeta.lastTime=last.time;
-      try{
-        let raw=localStorage.getItem('dc_announce_lastSeen');
-        let lastSeenId=raw||'';
-        let idx=cacheAnnounce.findIndex(m=>m.id===lastSeenId);
-        let unreadCount= idx>=0? cacheAnnounce.length-1-idx : cacheAnnounce.length;
-        announceMeta.unreadCount = currentChatId==='official'? 0 : unreadCount;
-        if(snap.docChanges().some(c=>c.type==='added') && last.sender!==currentUsername && currentChatId!=='official'){
-           showPushToast('DANKCONNECT Official ✓', last.text?.slice(0,60)||'New announcement');
-        }
-      }catch(e){}
-      saveInstantCache('official', snap.docs);
-    }
-    renderList();
-    if(currentChatId==='official'){ listenMessages(); }
-  });
-}
-function openAnnouncement(){
-  currentChatType='announcement';
-  currentChatId='official';
-  currentChatOther=null;
-  document.getElementById('chatName').innerHTML='DANKCONNECT Official <span class="verified">✓ VERIFIED</span> <span class="pin-icon">📌</span>';
-  document.getElementById('chatAv').innerHTML='<img src="'+OFFICIAL_LOGO+'" style="width:100%;height:100%;object-fit:contain;background:white;border-radius:50%">';
-  document.getElementById('chatAv').style.background='white';
-  document.getElementById('chatAv').style.padding='2px';
-  document.getElementById('chatAv').style.color='#0d00b3';
-  let isAdmin=isAdminUser(currentUsername);
-  document.getElementById('chatStatus').innerHTML= isAdmin? 'OWNER MODE 👑 — You can post' : 'Official announcements — View only 🔒';
-  document.getElementById('chatStatus').style.color=isAdmin?'#53bdeb':'rgba(255,255,255,0.7)';
-  document.getElementById('voiceCallBtn').style.display='none';
-  document.getElementById('videoCallBtn').style.display='none';
-  showChat();
-  if(cacheAnnounce.length>0){ localStorage.setItem('dc_announce_lastSeen', cacheAnnounce[cacheAnnounce.length-1].id); }
-  announceMeta.unreadCount=0; renderList(); listenMessages();
-}
-function renderList(){
-  let list=document.getElementById('chatList');list.innerHTML='';let q=document.getElementById('searchInput').value.toLowerCase();
-  let showAnnounce =!q || 'dankconnect official'.includes(q) || 'official'.includes(q) || 'announcement'.includes(q);
-  if(showAnnounce){
-    let row=document.createElement('div');row.className='chat-row announcement';
-    let timeStr=announceMeta.lastTime?new Date(announceMeta.lastTime.seconds*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
-    let unread=announceMeta.unreadCount||0;
-    let badge=unread>0?'<span class="badge">'+(unread>9?'9+':unread)+'</span>':"";
-    row.innerHTML='<div class="av"><img src="'+OFFICIAL_LOGO+'" style="width:100%;height:100%;object-fit:contain;background:white"></div><div class="chat-info"><div class="chat-top"><span class="chat-name">DANKCONNECT Official <span class="verified">✓</span> <span class="pin-icon">📌</span></span><span class="chat-time">'+timeStr+'</span></div><div class="chat-bottom"><span class="chat-last">'+(announceMeta.lastMsg||'Tap to view announcements')+'</span>'+badge+'</div></div>';
-    row.addEventListener('click',()=>openAnnouncement());
-    list.appendChild(row);
-  }
-  let all=[...cachePrivate,...cacheGroups].sort((a,b)=>(b.lastTime?.seconds||0)-(a.lastTime?.seconds||0));
-  let filtered=all.filter(c=>{if(currentTab==='groups'&&c.type!=='group')return false;if(currentTab==='chats'){let unread=getUnreadCount(c);if(unread===0) return false;}if(!q)return true;if(c.type==='private'){let o=(c.participants||[]).find(p=>p!==currentUsername)||'';return o.includes(q)}else return (c.name||'').toLowerCase().includes(q)});
-  document.getElementById('unreadCount').textContent=cachePrivate.filter(c=>getUnreadCount(c)>0).length;document.getElementById('groupCount').textContent=cacheGroups.length;
-  filtered.forEach(c=>{
-    let row=document.createElement('div');row.className='chat-row';let timeStr=c.lastTime?new Date(c.lastTime.seconds*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';let isTyping=c.typing && Object.keys(c.typing).some(u=>u!==currentUsername && c.typing[u]);let lastText=isTyping?'<span style="color:#8ab4ff;font-weight:700">typing...</span>':(c.lastMsg||'');if(c.type==='private'){let other=(c.participants||[]).find(p=>p!==currentUsername)||'Unknown';let unread=getUnreadCount(c);let timeCls=unread>0?"chat-time green":"chat-time";let badge=unread>0?'<span class="badge">'+(unread>9?'9+':unread)+'</span>':"";let prof=profilesCache[other];let pres=presenceCache[other];let onlineDot=isUserOnline(pres)?'<div class="online-dot"></div>':"";let avInner=prof&&prof.photo?'<img src="data:image/jpeg;base64,'+prof.photo+'">':other.slice(0,2).toUpperCase();let avHtml='<div class="av-wrapper"><div class="av profile-trigger" data-user="'+other+'">'+avInner+'</div>'+onlineDot+'</div>';row.innerHTML=avHtml+'<div class="chat-info"><div class="chat-top"><span class="chat-name">'+other+'</span><span class="'+timeCls+'">'+timeStr+'</span></div><div class="chat-bottom"><span class="chat-last">'+lastText+'</span>'+badge+'</div></div>';row.addEventListener('click',()=>openPrivate(other));let avEl=row.querySelector('.profile-trigger');if(avEl){avEl.addEventListener('click',(e)=>{e.stopPropagation();openProfileModal(e,other);});}}else{let unread=getUnreadCount(c);let timeCls=unread>0?"chat-time green":"chat-time";let badge=unread>0?'<span class="badge">'+(unread>9?'9+':unread)+'</span>':"";row.innerHTML='<div class="av" style="background:#5b5bff">'+c.name.slice(0,2).toUpperCase()+'</div><div class="chat-info"><div class="chat-top"><span class="chat-name">'+c.name+'</span><span class="'+timeCls+'">'+timeStr+'</span></div><div class="chat-bottom"><span class="chat-last">'+lastText+'</span>'+badge+'</div></div>';row.addEventListener('click',()=>openGroup(c.id,c.name));}list.appendChild(row);});
-}
-function switchTab(t){currentTab=t;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));let map={all:'chipAll',chats:'chipChats',groups:'chipGroups'};if(map[t])document.getElementById(map[t]).classList.add('active');renderList()}
-function filterChats(){renderList()}
-async function newPrivateChat(){ let o=prompt("Enter username:"); if(!o) return; o=cleanU(o); if(!o || o===currentUsername){ alert("Invalid username"); return; } try{ let ref = doc(db,"usernames",o); let snap = await getDoc(ref); if(!snap.exists()){ alert("❌ User @"+o+" doesn't exist"); return; } }catch(e){} document.getElementById('searchInput').value=''; switchTab('all'); openPrivate(o); }
-async function createGroup(){let name=prompt("Group name:");if(!name)return;name=name.trim().slice(0,30);let membersRaw=prompt("Members comma separated:");let members=membersRaw?membersRaw.split(',').map(cleanU).filter(Boolean):[];members=[...new Set([currentUsername,...members])];let id="group_"+Date.now()+"_"+cleanU(name);await setDoc(doc(db,"group_chats",id),{name:name,members:members,createdBy:currentUsername,createdAt:serverTimestamp(),lastMsg:"Group created",lastTime:serverTimestamp()});openGroup(id,name)}
-function updateChatHeaderPic(){if(currentChatType!=='private') return;let other=currentChatOther;let prof=profilesCache[other];let pres=presenceCache[other];let avEl=document.getElementById('chatAv');avEl.style.cursor='pointer'; avEl.onclick=(e)=>openProfileModal(e,other); if(prof&&prof.photo){avEl.innerHTML='<img src="data:image/jpeg;base64,'+prof.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';}else{avEl.textContent=other.slice(0,2).toUpperCase();} let statusEl=document.getElementById('chatStatus'); if(isUserOnline(pres)){statusEl.textContent='online'; statusEl.style.color='#53bdeb';} else if(pres&&pres.lastSeen){statusEl.textContent=formatLastSeen(pres.lastSeen); statusEl.style.color='#8b8ba7';} else {statusEl.textContent='offline'; statusEl.style.color='#8b8ba7';}}
-let currentGroupDoc=null;
-async function openGroupInfoModal(){ if(currentChatType!=='group' ||!currentChatId) return; try{ let snap=await getDoc(doc(db,"group_chats",currentChatId)); if(!snap.exists()){alert('Group not found');return} let g=snap.data(); currentGroupDoc={id:snap.id,...g}; let members=g.members||[]; let admin=g.createdBy||members[0]; document.getElementById('groupInfoAv').textContent=g.name.slice(0,2).toUpperCase(); document.getElementById('groupInfoName').textContent=g.name; document.getElementById('groupInfoCount').textContent=members.length+' members'; let list=document.getElementById('groupInfoList'); list.innerHTML=''; let sorted=[...members].sort((a,b)=>{ if(a===admin) return -1; if(b===admin) return 1; return 0; }); sorted.forEach(m=>{ let prof=profilesCache[m]; let pres=presenceCache[m]; let isAdmin=m===admin; let isMe=m===currentUsername; let roleText=isAdmin? (isMe?'Admin (You)':'Admin') : (isMe?'You':'Member'); let roleClass=isAdmin?'role-admin':'role-member'; let avInner=prof&&prof.photo?'<img src="data:image/jpeg;base64,'+prof.photo+'">':m.slice(0,2).toUpperCase(); let onlineDot=isUserOnline(pres)?' • online':''; let row=document.createElement('div'); row.className='member-row'; row.innerHTML='<div class="member-av">'+avInner+'</div><div class="member-info"><div class="member-name">'+m+'</div><div class="member-role '+roleClass+'">'+roleText+onlineDot+'</div></div>'+ (currentUsername===admin &&!isMe? '<button class="remove-btn">Remove</button>' : '') ; row.addEventListener('click',(e)=>{ if(e.target.classList.contains('remove-btn')) return; if(isMe) return; document.getElementById('groupInfoModal').classList.remove('active'); openPrivate(m); }); let rmBtn=row.querySelector('.remove-btn'); if(rmBtn){ rmBtn.addEventListener('click',async(e)=>{ e.stopPropagation(); if(!confirm('Remove '+m+'?')) return; await removeMemberFromGroup(m); }); } list.appendChild(row); }); let addBtn=document.getElementById('addMembersBtn'); if(currentUsername===admin){ addBtn.style.display='block'; } else { addBtn.style.display='none'; } document.getElementById('groupInfoModal').classList.add('active'); }catch(e){alert('Error: '+e.message)} }
-function closeGroupInfoModal(){document.getElementById('groupInfoModal').classList.remove('active');}
-async function removeMemberFromGroup(username){ if(!currentGroupDoc) return; if(currentGroupDoc.createdBy!==currentUsername){alert('Only admin');return} let members=currentGroupDoc.members.filter(m=>m!==username); try{ await updateDoc(doc(db,"group_chats",currentGroupDoc.id),{members:members}); currentGroupDoc.members=members; openGroupInfoModal(); showPushToast('Group 🇬🇭', username+' removed'); }catch(e){alert(e.message)} }
-async function addMoreMembers(){ if(!currentGroupDoc) return; if(currentGroupDoc.createdBy!==currentUsername){alert('Only admin');return} let raw=prompt('Add members comma separated usernames:'); if(!raw) return; let newM=raw.split(',').map(cleanU).filter(Boolean); let merged=[...new Set([...currentGroupDoc.members,...newM])]; try{ await updateDoc(doc(db,"group_chats",currentGroupDoc.id),{members:merged}); currentGroupDoc.members=merged; openGroupInfoModal(); showPushToast('Group 🇬🇭', 'Members added'); }catch(e){alert(e.message)} }
-async function leaveGroup(){ if(!currentChatId) return; if(!confirm('Leave this group?')) return; try{ let snap=await getDoc(doc(db,"group_chats",currentChatId)); if(!snap.exists()){closeGroupInfoModal();closeChat();return} let members=(snap.data().members||[]).filter(m=>m!==currentUsername); await updateDoc(doc(db,"group_chats",currentChatId),{members:members}); closeGroupInfoModal(); closeChat(); }catch(e){alert(e.message)} }
-document.getElementById('chatHead').addEventListener('click',(e)=>{ if(e.target.id==='voiceCallBtn' || e.target.id==='videoCallBtn' || e.target.closest('#voiceCallBtn') || e.target.closest('#videoCallBtn')) return; if(currentChatType==='group'){ openGroupInfoModal(); } else if(currentChatType==='private' && currentChatOther){ openProfileModal(e,currentChatOther); } });
-document.getElementById('closeGroupInfoBtn').addEventListener('click',closeGroupInfoModal);
-document.getElementById('addMembersBtn').addEventListener('click',addMoreMembers);
-document.getElementById('leaveGroupBtn').addEventListener('click',leaveGroup);
-document.getElementById('groupInfoModal').addEventListener('click',(e)=>{ if(e.target.id==='groupInfoModal') closeGroupInfoModal(); });
-async function openPrivate(other){
-  other=cleanU(other);
-  if(!other || other===currentUsername) return;
-  currentChatOther=other;currentChatType='private';currentChatId=getPrivateChatId(currentUsername,other);
-  document.getElementById('chatName').textContent=other;showChat();updateChatHeaderPic();listenMessages();
-  try{ let existing=cachePrivate.find(c=>c.id===currentChatId); let otherUnread=existing?.unread?.[other]||0; await setDoc(doc(db,"private_chats",currentChatId),{participants:[currentUsername,other].sort(),lastTime:serverTimestamp(),unread:{[currentUsername]:0,[other]:otherUnread}},{merge:true}); }catch(e){}
-}
-async function openGroup(id,name){currentChatType='group';currentChatId=id;currentChatOther=null;document.getElementById('chatName').innerHTML=name;document.getElementById('chatAv').textContent=name.slice(0,2).toUpperCase();document.getElementById('chatAv').onclick=null;document.getElementById('chatAv').style.background='';document.getElementById('chatAv').style.color='';document.getElementById('chatStatus').textContent='Tap to see members 👥';document.getElementById('chatStatus').style.color='rgba(255,255,255,0.7)';document.getElementById('voiceCallBtn').style.display='flex';document.getElementById('videoCallBtn').style.display='flex';showChat();try{let existing=cacheGroups.find(c=>c.id===id);let unreadMap={};if(existing?.unread){Object.keys(existing.unread).forEach(k=>{unreadMap[k]=existing.unread[k]});}unreadMap[currentUsername]=0;await setDoc(doc(db,"group_chats",currentChatId),{unread:unreadMap},{merge:true});}catch(e){}listenMessages()}
-function showChat(){
-  document.getElementById('mainView').style.display='none';document.getElementById('chatView').style.display='flex'; if(window.visualViewport){ document.getElementById('chatView').style.height = window.visualViewport.height + 'px'; }
-  if(currentChatId==='official'){
-    let isAdmin=isAdminUser(currentUsername);
-    document.getElementById('inputBar').style.display= isAdmin?'flex':'none';
-    document.getElementById('viewOnlyBar').style.display= isAdmin?'none':'flex';
-    document.getElementById('msgInput').placeholder= isAdmin?'Type announcement to all users...':'View only';
-  } else {
-    document.getElementById('inputBar').style.display='flex';
-    document.getElementById('viewOnlyBar').style.display='none';
-    document.getElementById('msgInput').placeholder='Type message...';
-    document.getElementById('voiceCallBtn').style.display='flex';
-    document.getElementById('videoCallBtn').style.display='flex';
-  }
-}
-function closeChat(){ if(unsubMsgs)unsubMsgs(); document.getElementById('chatView').style.display='none'; document.getElementById('mainView').style.display='flex'; if(window.visualViewport){ document.getElementById('mainView').style.height = window.visualViewport.height + 'px'; } document.getElementById('searchInput').value=''; currentTab='all'; switchTab('all'); currentChatId=null;currentChatOther=null;document.getElementById('typingIndicator').style.display='none';clearReply(); }
-function toggleInputButtons(){let inp=document.getElementById('msgInput');let mic=document.getElementById('micBtn');let send=document.getElementById('sendBtn');let img=document.getElementById('imgBtn');if(!inp||!mic||!send) return;if(inp.value.trim().length>0){mic.style.display='none';img.style.display='none';send.style.display='flex';}else{mic.style.display='flex';img.style.display='flex';send.style.display='none';}}
-function listenMessages(){
-  if(unsubMsgs)unsubMsgs();
-  let box=document.getElementById('msgs');
-  let hasInstant = renderInstantCache(currentChatId);
-  if(!hasInstant){ box.innerHTML=''; }
-  let col;
-  if(currentChatId==='official'){ col=collection(db,"announcement_messages"); }
-  else if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages");
-  else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages");
-  else col=collection(db,"messages");
-  let q=query(col,orderBy("time","asc"));
-  unsubMsgs=onSnapshot(q,async(snap)=>{
-    let allDocs = snap.docs;
-    if(allDocs.length>0) saveInstantCache(currentChatId, allDocs);
-    if(currentChatId==='official' && allDocs.length>0){ localStorage.setItem('dc_announce_lastSeen', allDocs[allDocs.length-1].id); announceMeta.unreadCount=0; }
-    box.innerHTML='';
-    let toMark=[];
-    snap.forEach(d=>{
-      let data=d.data(); if(data.deletedFor && data.deletedFor.includes(currentUsername)) return;
-      let div=document.createElement('div');
-      let isMe=data.sender===currentUsername||data.uid===auth.currentUser?.uid;
-      if(currentChatId==='official'){ div.className='bubble announcement-bubble'; }
-      else div.className='bubble '+(isMe?'me':'other');
-      div.id='msg-'+d.id;
-      let timeStr=formatMsgTime(data.time);
-      let seen=data.seen||false;let ticksHtml='';
-      if(currentChatId==='official'){
-        let isOwner=isAdminUser(data.sender);
-        ticksHtml='<div class="msg-footer"><span class="msg-time">'+timeStr+'</span><span style="font-size:10px;color:#53bdeb;margin-left:6px">'+(isOwner?'👑 DankBoss':'✓ Official')+'</span></div>';
-      } else {
-        if(isMe){let cls=seen?'blue':'grey';let tickIcon='✓✓';ticksHtml='<div class="msg-footer"><span class="msg-time">'+timeStr+'</span><span class="ticks '+cls+'">'+tickIcon+'</span></div>';}else{ticksHtml='<div class="msg-footer"><span class="msg-time">'+timeStr+'</span></div>'; if(currentChatType==='private' &&!data.seen){toMark.push(d.id);}}
-      }
-      let replyHtml='';if(data.replyTo){let r=data.replyTo;let senderCls=isMe?'me-sender':'';let quoteCls=isMe?'me-quote':'';replyHtml='<div class="reply-quote '+quoteCls+'" onclick="scrollToMessage(\''+r.id+'\')"><div class="reply-sender '+senderCls+'">'+r.sender+'</div><div class="reply-text">'+(r.text||'').slice(0,80)+'</div></div>';}
-      let actionsHtml=currentChatId==='official' &&!isAdminUser(currentUsername)? '' : '<div class="bubble-actions"><div class="bubble-action" title="Reply">↩️</div></div>';
-      if(data.type==='voice' && data.audioBase64){let dur=data.duration||0;let id=d.id;div.innerHTML=replyHtml+'<div class="msg-content"><div class="voice-bubble"><div class="voice-play" id="play-'+id+'">▶️</div><div class="voice-wave">'+Array(16).fill(0).map(()=>'<div class="voice-wave-bar" style="height:'+(8+Math.random()*16)+'px"></div>').join('')+'</div><div class="voice-meta"><span class="voice-duration">'+formatTime(dur)+'</span></div></div></div>'+ticksHtml+actionsHtml;div.dataset.audio=data.audioBase64;div.dataset.mime=data.mimeType||'audio/mp4';}else if(data.type==='image' && data.imageBase64){div.classList.add('image-bubble');div.innerHTML=replyHtml+'<div class="msg-content"><img src="data:image/jpeg;base64,'+data.imageBase64+'"><div style="font-size:12px;margin-top:4px;opacity:0.8">'+(data.text||'')+'</div></div>'+ticksHtml+actionsHtml;}else{div.innerHTML=replyHtml+'<div class="msg-content">'+(data.text||'')+'</div>'+ticksHtml+actionsHtml;}
-      let replyBtn=div.querySelector('.bubble-action');if(replyBtn){replyBtn.addEventListener('click',(e)=>{e.stopPropagation();setReply({id:d.id,sender:data.sender,text:data.text||'',type:data.type});});} div.addEventListener('dblclick',()=>{if(currentChatId!=='official' || isAdminUser(currentUsername)){ setReply({id:d.id,sender:data.sender,text:data.text||'',type:data.type}); }});
-      let colPath = currentChatId==='official'? "announcement_messages" : (currentChatType==='private'? "private_chats/"+currentChatId+"/messages" : "group_chats/"+currentChatId+"/messages");
-      function attachDeleteEvents(el, msgId, isMeFlag, cPath){
-        if(currentChatId==='official' &&!isAdminUser(currentUsername)) return;
-        el.addEventListener('contextmenu',(e)=>{e.preventDefault(); openDeleteModal(msgId, isMeFlag, cPath);});
-        el.addEventListener('touchstart',(e)=>{ longPressTimer=setTimeout(()=>{ openDeleteModal(msgId, isMeFlag, cPath); }, 600); },{passive:true});
-        el.addEventListener('touchend',()=>{ clearTimeout(longPressTimer); });
-        el.addEventListener('touchmove',()=>{ clearTimeout(longPressTimer); });
-      }
-      attachDeleteEvents(div, d.id, isMe || (currentChatId==='official' && isAdminUser(currentUsername)), colPath);
-      let playBtn=div.querySelector('#play-'+d.id);if(playBtn){playBtn.addEventListener('click',()=>playVoiceBase64(d.id));} let imgEl=div.querySelector('img');if(imgEl){imgEl.addEventListener('click',()=>window.open(imgEl.src));} box.appendChild(div)});
-    box.scrollTop=box.scrollHeight;
-    if(toMark.length>0 && currentChatType==='private'){for(let id of toMark){try{await updateDoc(doc(col,id),{seen:true,seenAt:serverTimestamp()});}catch(e){}} }
-  });
-}
-window.playVoiceBase64=(id)=>{ let bubble=document.getElementById('msg-'+id); if(!bubble) return; let base64=bubble.dataset.audio; let mime=bubble.dataset.mime||'audio/mp4'; let btn=document.getElementById('play-'+id); if(!btn) return; if(currentPlayingId===id && currentAudio){ currentAudio.pause(); btn.textContent='▶️'; currentAudio=null; currentPlayingId=null; return; } if(currentAudio){ currentAudio.pause(); let old=document.getElementById('play-'+currentPlayingId); if(old) old.textContent='▶️'; } try{ let binary=atob(base64); let bytes=new Uint8Array(binary.length); for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i); let blob=new Blob([bytes],{type:mime}); let url=URL.createObjectURL(blob); let audio=new Audio(url); currentAudio=audio; currentPlayingId=id; btn.textContent='⏸️'; audio.onended=()=>{btn.textContent='▶️';URL.revokeObjectURL(url);currentAudio=null;currentPlayingId=null;}; audio.onerror=(e)=>{ btn.textContent='⚠️'; }; audio.play().catch((e)=>{ btn.textContent='⚠️'; }); }catch(e){ if(btn) btn.textContent='⚠️'; } };
-function blobToBase64(blob){return new Promise((resolve,reject)=>{let reader=new FileReader();reader.onloadend=()=>{let base64=reader.result.split(',')[1];resolve(base64);};reader.onerror=reject;reader.readAsDataURL(blob);});}
-async function startRecording(){ if(isRecording) return; if(currentChatId==='official' &&!isAdminUser(currentUsername)){ alert('View-only channel'); return; } try{ let stream=await navigator.mediaDevices.getUserMedia({audio:true}); let mimeList=['audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/aac','audio/webm;codecs=opus','audio/webm']; let mime = mimeList.find(t=>MediaRecorder.isTypeSupported(t)) || 'audio/mp4'; mediaRecorder=new MediaRecorder(stream,{mimeType:mime}); audioChunks=[]; mediaRecorder.ondataavailable=e=>{if(e.data.size>0) audioChunks.push(e.data);}; mediaRecorder.onstop=async()=>{await handleRecordingStop(mime);stream.getTracks().forEach(t=>t.stop());}; mediaRecorder.start(); isRecording=true; recStartTime=Date.now(); document.getElementById('msgInput').style.display='none'; document.getElementById('recordingBar').classList.add('active'); document.getElementById('micBtn').classList.add('recording'); document.getElementById('micBtn').textContent='⏹️'; recTimerInterval=setInterval(()=>{ let elapsed=Math.floor((Date.now()-recStartTime)/1000); document.getElementById('recTimer').textContent=formatTime(elapsed); if(elapsed>=MAX_DURATION){stopRecording();} },200); }catch(err){alert('Mic denied: '+err.message);} }
-async function stopRecording(){if(!isRecording||!mediaRecorder) return;isRecording=false;clearInterval(recTimerInterval);document.getElementById('recordingBar').classList.remove('active');document.getElementById('micBtn').classList.remove('recording');document.getElementById('micBtn').textContent='🎤';document.getElementById('msgInput').style.display='block';if(mediaRecorder.state!=='inactive') mediaRecorder.stop();}
-async function handleRecordingStop(mimeType){ if(audioChunks.length===0) return; let blob=new Blob(audioChunks,{type:mimeType}); let duration=Math.floor((Date.now()-recStartTime)/1000); if(duration<1){alert('Too short');return;} if(duration>MAX_DURATION) duration=MAX_DURATION; try{ let base64=await blobToBase64(blob); if(base64.length>900000){alert('Voice too long! Max 30sec');return;} if(!currentChatId) throw new Error('No chat'); let col; if(currentChatId==='official') col=collection(db,"announcement_messages"); else if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages"); else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages"); else col=collection(db,"messages"); let isGroup=currentChatType==='group'; let payload={type:'voice',audioBase64:base64,mimeType:mimeType,duration:duration,sender:currentUsername,uid:auth.currentUser.uid,time:serverTimestamp(),text:'',seen:isGroup}; if(replyingTo) payload.replyTo=replyingTo; await addDoc(col,payload);clearReply(); let lastTxt='Voice '+formatTime(duration); if(currentChatId==='official'){ announceMeta.lastMsg=lastTxt; announceMeta.lastTime={seconds:Math.floor(Date.now()/1000)}; renderList(); } else if(currentChatType==='private'){ let other=currentChatOther||currentChatId.replace('private_','').split('_').find(p=>p!==currentUsername); let existing=cachePrivate.find(c=>c.id===currentChatId); let unreadMap=existing?.unread?{...existing.unread}:{}; unreadMap[other]=(unreadMap[other]||0)+1;unreadMap[currentUsername]=0; await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:lastTxt,lastTime:serverTimestamp(),participants:[currentUsername,other].sort(),unread:unreadMap},{merge:true}); } if(currentChatType==='group'){ let g=cacheGroups.find(x=>x.id===currentChatId); let members=g?.members||[]; let existing=g?.unread?{...g.unread}:{}; members.forEach(m=>{if(m!==currentUsername) existing[m]=(existing[m]||0)+1;}); existing[currentUsername]=0; await setDoc(doc(db,"group_chats",currentChatId),{lastMsg:currentUsername+": "+lastTxt,lastTime:serverTimestamp(),unread:existing},{merge:true}); } }catch(e){alert('Failed: '+e.message);} }
-async function sendMsg(){
-  let txt=document.getElementById('msgInput').value.trim();if(!txt||!currentChatId)return;
-  if(currentChatId==='official' &&!isAdminUser(currentUsername)){ alert('Only DankBoss can post in Official channel'); return; }
-  document.getElementById('msgInput').value='';toggleInputButtons();
-  let col; if(currentChatId==='official') col=collection(db,"announcement_messages"); else if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages"); else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages"); else col=collection(db,"messages");
-  let isGroup=currentChatType==='group';
-  let payload={text:txt,sender:currentUsername,uid:auth.currentUser.uid,time:serverTimestamp(),type:'text',seen:isGroup};
-  if(replyingTo) payload.replyTo=replyingTo;
-  await addDoc(col,payload);clearReply();
-  if(currentChatId==='official'){ announceMeta.lastMsg=txt.slice(0,40); announceMeta.lastTime={seconds:Math.floor(Date.now()/1000)}; renderList(); showPushToast('Official Announcement ✓','Broadcasted to all users'); }
-  else if(currentChatType==='private'){let other=currentChatOther||currentChatId.replace('private_','').split('_').find(p=>p!==currentUsername);let existing=cachePrivate.find(c=>c.id===currentChatId);let unreadMap=existing?.unread?{...existing.unread}:{};unreadMap[other]=(unreadMap[other]||0)+1;unreadMap[currentUsername]=0;await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:txt,lastTime:serverTimestamp(),participants:[currentUsername,other].sort(),unread:unreadMap},{merge:true});}if(currentChatType==='group'){let g=cacheGroups.find(x=>x.id===currentChatId);let members=g?.members||[];let existing=g?.unread?{...g.unread}:{};members.forEach(m=>{if(m!==currentUsername) existing[m]=(existing[m]||0)+1;});existing[currentUsername]=0;await setDoc(doc(db,"group_chats",currentChatId),{lastMsg:currentUsername+": "+txt.slice(0,40),lastTime:serverTimestamp(),unread:existing},{merge:true});}
-}
-let micBtn=document.getElementById('micBtn');micBtn.addEventListener('click',()=>{if(isRecording) stopRecording(); else startRecording();});
-document.getElementById('profileInput').addEventListener('change',async(e)=>{let file=e.target.files[0];if(!file) return;if(file.size>5*1024*1024){alert('Image too big, max 5MB');return}try{let base64=await compressImage(file,200,0.7);await setDoc(doc(db,"user_profiles",currentUsername),{username:currentUsername,photo:base64,updated:serverTimestamp()},{merge:true});document.getElementById('myAvImg').src='data:image/jpeg;base64,'+base64;document.getElementById('myAvImg').style.display='block';document.getElementById('myAvTxt').style.display='none';closeProfileModal();}catch(err){alert('Failed: '+err.message)}e.target.value='';});
-document.getElementById('imageInput').addEventListener('change',async(e)=>{
-  let file=e.target.files[0];if(!file) return;if(!currentChatId){alert('Open a chat first');return}
-  if(currentChatId==='official' &&!isAdminUser(currentUsername)){ alert('Only DankBoss can post'); e.target.value=''; return; }
-  if(file.size>10*1024*1024){alert('Image too big max 10MB');return}
-  try{
-    let base64=await compressImage(file,800,0.65);if(base64.length>900000){base64=await compressImage(file,600,0.5);}
-    let col; if(currentChatId==='official') col=collection(db,"announcement_messages"); else if(currentChatType==='private')col=collection(db,"private_chats",currentChatId,"messages"); else if(currentChatType==='group')col=collection(db,"group_chats",currentChatId,"messages"); else col=collection(db,"messages");
-    let caption=prompt('Add caption (optional):')||'';let isGroup=currentChatType==='group';
-    let payload={type:'image',imageBase64:base64,text:caption.slice(0,200),sender:currentUsername,uid:auth.currentUser.uid,time:serverTimestamp(),seen:isGroup};
-    if(replyingTo) payload.replyTo=replyingTo; await addDoc(col,payload);clearReply();
-    let lastTxt='Image '+(caption?caption:'');
-    if(currentChatId==='official'){ announceMeta.lastMsg=lastTxt; announceMeta.lastTime={seconds:Math.floor(Date.now()/1000)}; renderList(); }
-    else if(currentChatType==='private'){let other=currentChatOther||currentChatId.replace('private_','').split('_').find(p=>p!==currentUsername);let existing=cachePrivate.find(c=>c.id===currentChatId);let unreadMap=existing?.unread?{...existing.unread}:{};unreadMap[other]=(unreadMap[other]||0)+1;unreadMap[currentUsername]=0;await setDoc(doc(db,"private_chats",currentChatId),{lastMsg:lastTxt,lastTime:serverTimestamp(),participants:[currentUsername,other].sort(),unread:unreadMap},{merge:true});}
-    if(currentChatType==='group'){let g=cacheGroups.find(x=>x.id===currentChatId);let members=g?.members||[];let existing=g?.unread?{...g.unread}:{};members.forEach(m=>{if(m!==currentUsername) existing[m]=(existing[m]||0)+1;});existing[currentUsername]=0;await setDoc(doc(db,"group_chats",currentChatId),{lastMsg:currentUsername+": "+lastTxt,lastTime:serverTimestamp(),unread:existing},{merge:true});}
-  }catch(err){alert('Image failed: '+err.message);}e.target.value='';
+document.getElementById('loginBtn').addEventListener('click',async()=>{
+  let u=document.getElementById('username').value; let p=document.getElementById('password').value;
+  let clean=cleanU(u); if(clean.length<3){document.getElementById('authMsg').textContent='Username min 3'; return;}
+  if(p.length<6){document.getElementById('authMsg').textContent='Password min 6'; return;}
+  document.getElementById('authMsg').textContent='Loading...'; let email=emailFromU(clean);
+  try{ await signInWithEmailAndPassword(auth,email,p); }catch(e){ if(e.code==='auth/user-not-found' || e.code==='auth/invalid-credential'){ try{ let cred=await createUserWithEmailAndPassword(auth,email,p); await setDoc(doc(db,"users",cred.user.uid),{username:clean,created:serverTimestamp()}); }catch(e2){document.getElementById('authMsg').textContent=e2.message; return;} } else {document.getElementById('authMsg').textContent=e.message; return;} }
+  try{ let uid=auth.currentUser.uid; let userDoc=await getDoc(doc(db,"users",uid)); if(!userDoc.exists()){ await setDoc(doc(db,"users",uid),{username:clean,created:serverTimestamp()}); } }catch(e){}
+  document.getElementById('authMsg').textContent='Success!';
 });
-function openProfileModal(e,username){if(e){e.preventDefault();e.stopPropagation();} let prof=profilesCache[username]; let pres=presenceCache[username]; let imgEl=document.getElementById('profileModalImg'); let fbEl=document.getElementById('profileModalFallback'); let nameEl=document.getElementById('profileModalName'); let actions=document.getElementById('profileModalActions'); nameEl.textContent=username; if(prof&&prof.photo){ imgEl.src='data:image/jpeg;base64,'+prof.photo; imgEl.style.display='block'; fbEl.style.display='none'; } else { imgEl.style.display='none'; fbEl.style.display='flex'; fbEl.textContent=username.slice(0,2).toUpperCase(); } if(username===currentUsername){ actions.innerHTML='<button class="profile-modal-btn primary" id="changePicBtn">Change Pic</button><button class="profile-modal-btn secondary" id="closeModalBtn2">Close</button>'; document.getElementById('changePicBtn').addEventListener('click',()=>document.getElementById('profileInput').click()); document.getElementById('closeModalBtn2').addEventListener('click',()=>closeProfileModal()); } else { actions.innerHTML='<button class="profile-modal-btn primary" id="msgBtnModal">Message</button><button class="profile-modal-btn secondary" id="closeModalBtn2">Close</button>'; document.getElementById('msgBtnModal').addEventListener('click',()=>openChatFromModal()); document.getElementById('closeModalBtn2').addEventListener('click',()=>closeProfileModal()); } document.getElementById('profileModal').classList.add('active'); document.getElementById('profileModal').dataset.username=username; let statusEl=document.getElementById('profileModalStatus'); if(isUserOnline(pres)){statusEl.textContent='online'; statusEl.style.color='#53bdeb';} else if(pres&&pres.lastSeen){statusEl.textContent=formatLastSeen(pres.lastSeen); statusEl.style.color='#9a9ab3';} else {statusEl.textContent='offline'; statusEl.style.color='#8b8ba7';}}
-function closeProfileModal(){document.getElementById('profileModal').classList.remove('active');}
-function openChatFromModal(){let u=document.getElementById('profileModal').dataset.username; if(!u) return; closeProfileModal(); if(u!==currentUsername) openPrivate(u); }
-async function doLogout(){await setPresence(false); if(presenceInterval) clearInterval(presenceInterval); try{localStorage.clear(); cachePrivate=[];cacheGroups=[];cacheAnnounce=[];lastChatIds={};}catch(e){} signOut(auth);}
-window.openProfileModal=openProfileModal; window.closeProfileModal=closeProfileModal; window.openChatFromModal=openChatFromModal; window.doLogout=doLogout;
-let pc=null, localStream=null, remoteStream=null, currentCallId=null, callTimerInt=null, callSeconds=0, isMuted=false, isSpeaker=false, incomingCallData=null, callUnsub=null, candidatesUnsub=null, isVideoCall=false;
-const rtcConfig={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
-function listenCalls(){ if(unsubCalls) unsubCalls(); let qCalls=query(collection(db,"calls"), where("participants","array-contains", currentUsername)); unsubCalls=onSnapshot(qCalls,(snap)=>{ snap.docChanges().forEach(change=>{ let data=change.doc.data(); let id=change.doc.id; if(data.status==='ringing' && data.receiver===currentUsername && data.caller!==currentUsername){ if(document.getElementById('incomingCall').classList.contains('active') || document.getElementById('activeCall').classList.contains('active')) return; incomingCallData={id:id,...data}; showIncomingCall(data.caller, data.callType||'voice'); } if(data.status==='ended' && (currentCallId===id || incomingCallData?.id===id)){ endCallUI(); } if(data.status==='accepted' && currentCallId===id){ document.getElementById('activeStatus').textContent='Connected'; } }); }); }
-function showIncomingCall(caller, type){ document.getElementById('incName').textContent=caller; document.getElementById('incType').textContent= type==='video'? 'Incoming video call... 🎥' : 'Incoming voice call... 📞'; document.getElementById('incAv').textContent=caller.slice(0,2).toUpperCase(); let prof=profilesCache[caller]; if(prof&&prof.photo){ document.getElementById('incAv').innerHTML='<img src="data:image/jpeg;base64,'+prof.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } document.getElementById('incomingCall').classList.add('active'); showPushToast((type==='video'?'Video':'Voice')+' call 📞', 'From '+caller); }
-document.getElementById('voiceCallBtn').addEventListener('click',()=>{ if(currentChatType!=='private'||!currentChatOther){alert('Open private chat');return} startCall(currentChatOther,false); });
-document.getElementById('videoCallBtn').addEventListener('click',()=>{ if(currentChatType!=='private'||!currentChatOther){alert('Open private chat');return} startCall(currentChatOther,true); });
-async function startCall(other, video){ if(pc){alert('Already in call');return} isVideoCall=video; try{ localStream=await navigator.mediaDevices.getUserMedia(video?{audio:true,video:{facingMode:'user'}}:{audio:true}); }catch(e){alert('Camera/Mic needed: '+e.message);return} currentCallId='call_'+Date.now()+'_'+cleanU(currentUsername)+'_'+cleanU(other); document.getElementById('activeName').textContent=other; document.getElementById('activeAv').textContent=other.slice(0,2).toUpperCase(); document.getElementById('activeStatus').textContent= video?'Starting video...':'Calling...'; document.getElementById('remoteVideo').style.display= video?'block':'none'; document.getElementById('localVideo').style.display= video?'block':'none'; document.getElementById('localVideo').srcObject=localStream; document.getElementById('activeCall').classList.add('active'); startCallTimer(); pc=new RTCPeerConnection(rtcConfig); remoteStream=new MediaStream(); document.getElementById('remoteAudio').srcObject=remoteStream; document.getElementById('remoteVideo').srcObject=remoteStream; localStream.getTracks().forEach(t=>pc.addTrack(t, localStream)); pc.ontrack=e=>{ e.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t)); document.getElementById('activeAv').style.display='none'; }; pc.onicecandidate=e=>{ if(e.candidate){ addDoc(collection(db,"calls",currentCallId,"callerCandidates"), e.candidate.toJSON()); } }; let offer=await pc.createOffer({offerToReceiveAudio:true,offerToReceiveVideo:video}); await pc.setLocalDescription(offer); await setDoc(doc(db,"calls",currentCallId),{caller:currentUsername,receiver:other,participants:[currentUsername,other],status:'ringing',callType:video?'video':'voice',offer:{type:offer.type,sdp:offer.sdp},created:serverTimestamp()}); callUnsub=onSnapshot(doc(db,"calls",currentCallId), async(snap)=>{ let d=snap.data(); if(!d) return; if(d.answer &&!pc.currentRemoteDescription){ await pc.setRemoteDescription(new RTCSessionDescription(d.answer)); } if(d.status==='accepted'){ document.getElementById('activeStatus').textContent='Connected'; } if(d.status==='declined'){ alert('Call declined'); endCallUI(); } if(d.status==='ended'){ endCallUI(); } }); candidatesUnsub=onSnapshot(collection(db,"calls",currentCallId,"calleeCandidates"), (snap)=>{ snap.docChanges().forEach(async c=>{ if(c.type==='added'){ try{ await pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); }catch(e){} } }); }); }
-async function acceptCall(){ if(!incomingCallData) return; currentCallId=incomingCallData.id; let caller=incomingCallData.caller; isVideoCall=incomingCallData.callType==='video'; try{ localStream=await navigator.mediaDevices.getUserMedia(isVideoCall?{audio:true,video:{facingMode:'user'}}:{audio:true}); }catch(e){alert('Mic/Camera needed');return;} document.getElementById('incomingCall').classList.remove('active'); document.getElementById('activeName').textContent=caller; document.getElementById('activeAv').textContent=caller.slice(0,2).toUpperCase(); document.getElementById('activeStatus').textContent='Connecting...'; document.getElementById('remoteVideo').style.display=isVideoCall?'block':'none'; document.getElementById('localVideo').style.display=isVideoCall?'block':'none'; document.getElementById('localVideo').srcObject=localStream; document.getElementById('activeCall').classList.add('active'); startCallTimer(); pc=new RTCPeerConnection(rtcConfig); remoteStream=new MediaStream(); document.getElementById('remoteAudio').srcObject=remoteStream; document.getElementById('remoteVideo').srcObject=remoteStream; localStream.getTracks().forEach(t=>pc.addTrack(t, localStream)); pc.ontrack=e=>{ e.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t)); document.getElementById('activeAv').style.display='none'; }; pc.onicecandidate=e=>{ if(e.candidate){ addDoc(collection(db,"calls",currentCallId,"calleeCandidates"), e.candidate.toJSON()); } }; await pc.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer)); let answer=await pc.createAnswer(); await pc.setLocalDescription(answer); await updateDoc(doc(db,"calls",currentCallId),{answer:{type:answer.type,sdp:answer.sdp},status:'accepted'}); candidatesUnsub=onSnapshot(collection(db,"calls",currentCallId,"callerCandidates"), (snap)=>{ snap.docChanges().forEach(async c=>{ if(c.type==='added'){ try{ await pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); }catch(e){} } }); }); callUnsub=onSnapshot(doc(db,"calls",currentCallId), (snap)=>{ let d=snap.data(); if(!d) return; if(d.status==='ended'){ endCallUI(); } }); incomingCallData=null; }
-async function declineCall(){ if(incomingCallData){ try{await updateDoc(doc(db,"calls",incomingCallData.id),{status:'declined'});}catch(e){} incomingCallData=null; } document.getElementById('incomingCall').classList.remove('active'); }
-async function endCall(){ if(currentCallId){ try{ await updateDoc(doc(db,"calls",currentCallId),{status:'ended',endedAt:serverTimestamp()}); }catch(e){} } endCallUI(); }
-function endCallUI(){ if(callTimerInt) clearInterval(callTimerInt); callSeconds=0; document.getElementById('incomingCall').classList.remove('active'); document.getElementById('activeCall').classList.remove('active'); document.getElementById('callTimer').textContent='00:00'; document.getElementById('activeAv').style.display='flex'; document.getElementById('remoteVideo').srcObject=null; document.getElementById('localVideo').srcObject=null; if(pc){ try{pc.close();}catch(e){} pc=null; } if(localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream=null; } if(callUnsub){callUnsub(); callUnsub=null} if(candidatesUnsub){candidatesUnsub(); candidatesUnsub=null} currentCallId=null; incomingCallData=null; isVideoCall=false; }
-function startCallTimer(){ callSeconds=0; if(callTimerInt) clearInterval(callTimerInt); callTimerInt=setInterval(()=>{ callSeconds++; let m=Math.floor(callSeconds/60).toString().padStart(2,'0'); let s=(callSeconds%60).toString().padStart(2,'0'); document.getElementById('callTimer').textContent=m+':'+s; },1000); }
-document.getElementById('acceptCallBtn').addEventListener('click', acceptCall);
-document.getElementById('declineCallBtn').addEventListener('click', declineCall);
+onAuthStateChanged(auth, async(user)=>{
+  if(user){
+    let uid=user.uid; try{ let snap=await getDoc(doc(db,"users",uid)); if(snap.exists()){ currentUsername=snap.data().username; } else { currentUsername=cleanU(user.email.split('@')[0]); } }catch(e){ currentUsername=cleanU(user.email.split('@')[0]); }
+    document.getElementById('splashView').style.display='none'; document.getElementById('authView').style.display='none'; document.getElementById('mainView').style.display='flex';
+    document.getElementById('myAvTxt').textContent=currentUsername.slice(0,2).toUpperCase();
+    initListeners(); initPush(); startPresence();
+  } else {
+    currentUsername=null; stopListeners(); document.getElementById('splashView').style.display='flex'; document.getElementById('authView').style.display='none'; document.getElementById('mainView').style.display='none'; document.getElementById('chatView').style.display='none';
+  }
+});
+function startPresence(){
+  if(presenceInterval) clearInterval(presenceInterval);
+  const updatePresence=async()=>{ if(!currentUsername) return; try{ await setDoc(doc(db,"presence",currentUsername),{username:currentUsername,online:true,lastSeen:serverTimestamp()},{merge:true}); }catch(e){} };
+  updatePresence(); presenceInterval=setInterval(updatePresence, 30000);
+  window.addEventListener('beforeunload', async()=>{ try{ await setDoc(doc(db,"presence",currentUsername),{online:false,lastSeen:serverTimestamp()},{merge:true}); }catch(e){} });
+}
+async function doLogout(){
+  if(presenceInterval) clearInterval(presenceInterval);
+  try{ if(currentUsername){ await setDoc(doc(db,"presence",currentUsername),{online:false,lastSeen:serverTimestamp()},{merge:true}); } }catch(e){}
+  // V26 FIX: KEEP instant cache for offline demo
+  try{
+    let keysToKeep=[];
+    for(let i=0;i<localStorage.length;i++){ let k=localStorage.key(i); if(k && k.startsWith('dc_instant_')) keysToKeep.push(k); }
+    let kept={}; keysToKeep.forEach(k=>{ kept[k]=localStorage.getItem(k); });
+    localStorage.clear();
+    Object.keys(kept).forEach(k=>localStorage.setItem(k, kept[k]));
+    let theme=localStorage.getItem('dc_theme');
+    if(theme) localStorage.setItem('dc_theme', theme);
+  }catch(e){ localStorage.clear(); }
+  try{ await signOut(auth); }catch(e){}
+  location.reload();
+}
+document.getElementById('logoutBtn').addEventListener('click', doLogout);function initListeners(){
+  stopListeners();
+  unsubProfiles=onSnapshot(collection(db,"profiles"), (snap)=>{ snap.forEach(d=>{ profilesCache[d.id]=d.data(); }); renderChats(); updateMyAvatar(); });
+  unsubPresence=onSnapshot(collection(db,"presence"), (snap)=>{ snap.forEach(d=>{ presenceCache[d.id]=d.data(); }); renderChats(); if(currentChatId) updateChatHeader(); });
+  unsubPriv=onSnapshot(query(collection(db,"private_chats"), where("participants","array-contains", currentUsername)), (snap)=>{ cachePrivate=[]; snap.forEach(d=>{ cachePrivate.push({id:d.id, data:d.data()}); }); renderChats(); });
+  unsubGroup=onSnapshot(query(collection(db,"group_chats"), where("members","array-contains", currentUsername)), (snap)=>{ cacheGroups=[]; snap.forEach(d=>{ cacheGroups.push({id:d.id, data:d.data()}); }); renderChats(); });
+  unsubAnnounce=onSnapshot(query(collection(db,"announcements"), orderBy("time","desc")), (snap)=>{ cacheAnnounce=[]; snap.forEach(d=>{ cacheAnnounce.push({id:d.id, data:d.data()}); }); renderChats(); });
+}
+function stopListeners(){
+  if(unsubMsgs) unsubMsgs(); if(unsubPriv) unsubPriv(); if(unsubGroup) unsubGroup(); if(unsubProfiles) unsubProfiles(); if(unsubPresence) unsubPresence(); if(unsubCalls) unsubCalls(); if(unsubAnnounce) unsubAnnounce();
+}
+function updateMyAvatar(){
+  let p=profilesCache[currentUsername];
+  if(p && p.avatarBase64){ document.getElementById('myAvImg').src='data:image/jpeg;base64,'+p.avatarBase64; document.getElementById('myAvImg').style.display='block'; document.getElementById('myAvTxt').style.display='none'; }
+  else { document.getElementById('myAvImg').style.display='none'; document.getElementById('myAvTxt').style.display='block'; }
+}
+function getOtherParticipant(chatData){
+  if(!chatData ||!chatData.participants) return null;
+  return chatData.participants.find(p=>p!==currentUsername);
+}
+function renderChats(){
+  let list=document.getElementById('chatList'); let filter=document.getElementById('searchInput').value.toLowerCase();
+  let rows=[];
+  // Official announcement always first
+  rows.push({id:'official', type:'official', name:'DANKCONNECT Official', last:'Official updates from DankBoss', time: new Date(), unread:0, isAnnouncement:true});
+  cacheAnnounce.forEach(item=>{ /* handled inside official */ });
+  cachePrivate.forEach(c=>{
+    let other=getOtherParticipant(c.data); if(!other) return; if(filter &&!other.toLowerCase().includes(filter)) return;
+    let lastMsg=c.data.lastMessage||''; let lastTime=c.data.lastTime? new Date(c.data.lastTime.seconds*1000) : new Date();
+    let unread=c.data.unread && c.data.unread[currentUsername]? c.data.unread[currentUsername] : 0;
+    if(currentTab==='chats' && unread===0) return;
+    if(currentTab==='groups') return;
+    rows.push({id:c.id, type:'private', name:other, last:lastMsg, time:lastTime, unread:unread, data:c.data});
+  });
+  cacheGroups.forEach(c=>{
+    if(filter &&!c.data.name.toLowerCase().includes(filter)) return;
+    if(currentTab==='chats') return;
+    let lastMsg=c.data.lastMessage||''; let lastTime=c.data.lastTime? new Date(c.data.lastTime.seconds*1000) : new Date();
+    let unread=c.data.unread && c.data.unread[currentUsername]? c.data.unread[currentUsername] : 0;
+    if(currentTab==='chats' && unread===0) return;
+    rows.push({id:c.id, type:'group', name:c.data.name, last:lastMsg, time:lastTime, unread:unread, data:c.data});
+  });
+  rows.sort((a,b)=> b.time - a.time);
+  list.innerHTML='';
+  rows.forEach(r=>{
+    let div=document.createElement('div'); div.className='chat-row'+(r.isAnnouncement?' announcement':'');
+    let avLetter=r.name.slice(0,2).toUpperCase();
+    let avatarHtml=''; let isOnline=false;
+    if(r.isAnnouncement){
+      avatarHtml='<div class="av"><img src="logo.png?v=26"></div>';
+    } else if(r.type==='private'){
+      let prof=profilesCache[r.name]; let pres=presenceCache[r.name]; isOnline=isUserOnline(pres);
+      if(prof && prof.avatarBase64){ avatarHtml='<div class="av-wrapper"><div class="av"><img src="data:image/jpeg;base64,'+prof.avatarBase64+'"></div>'+(isOnline?'<div class="online-dot"></div>':'')+'</div>'; }
+      else { avatarHtml='<div class="av-wrapper"><div class="av">'+avLetter+'</div>'+(isOnline?'<div class="online-dot"></div>':'')+'</div>'; }
+    } else {
+      avatarHtml='<div class="av">'+avLetter+'</div>';
+    }
+    let timeStr=r.time? r.time.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+    let pinHtml=r.type==='group'?'':'';
+    div.innerHTML=avatarHtml+'<div class="chat-info"><div class="chat-top"><div class="chat-name">'+r.name+(r.isAnnouncement?'<span class="verified">✓ Verified</span><span class="pin-icon">📌</span>':'')+'</div><div class="chat-time">'+timeStr+'</div></div><div class="chat-bottom"><div class="chat-last">'+(r.last||'Tap to chat')+'</div>'+(r.unread>0?'<div class="badge">'+r.unread+'</div>':'')+'</div></div>';
+    div.addEventListener('click',()=>{ openChat(r.id, r.type, r.name); });
+    list.appendChild(div);
+  });
+  document.getElementById('unreadCount').textContent=cachePrivate.filter(c=>c.data.unread && c.data.unread[currentUsername]>0).length + cacheGroups.filter(c=>c.data.unread && c.data.unread[currentUsername]>0).length;
+  document.getElementById('groupCount').textContent=cacheGroups.length;
+}
+document.getElementById('searchInput').addEventListener('input', renderChats);
+document.getElementById('chipAll').addEventListener('click',()=>{currentTab='all'; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); document.getElementById('chipAll').classList.add('active'); renderChats();});
+document.getElementById('chipChats').addEventListener('click',()=>{currentTab='chats'; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); document.getElementById('chipChats').classList.add('active'); renderChats();});
+document.getElementById('chipGroups').addEventListener('click',()=>{currentTab='groups'; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); document.getElementById('chipGroups').classList.add('active'); renderChats();});
+document.getElementById('chipAddGroup').addEventListener('click',()=>{ let name=prompt('Group name?'); if(!name) return; let membersStr=prompt('Add members (comma separated usernames):'); let members=membersStr? membersStr.split(',').map(m=>cleanU(m)).filter(m=>m) : []; members.push(currentUsername); members=[...new Set(members)]; addDoc(collection(db,"group_chats"),{name:name,members:members,admins:[currentUsername],created:serverTimestamp(),lastMessage:'Group created',lastTime:serverTimestamp(),unread:{}}); });
+async function openChat(chatId, chatType, chatName){
+  currentChatId=chatId; currentChatType=chatType; currentChatOther=chatType==='private'? chatName : null;
+  document.getElementById('mainView').style.display='none'; document.getElementById('chatView').style.display='flex';
+  document.getElementById('chatName').textContent=chatName;
+  let avEl=document.getElementById('chatAv');
+  if(chatId==='official'){ avEl.innerHTML='<img src="logo.png?v=26" style="width:100%;height:100%;object-fit:contain">'; avEl.style.background='white'; document.getElementById('chatStatus').textContent='Official — Verified ✓'; document.getElementById('inputBar').style.display='none'; if(isAdminUser(currentUsername)){ document.getElementById('inputBar').style.display='flex'; document.getElementById('viewOnlyBar').style.display='none'; } else { document.getElementById('viewOnlyBar').style.display='flex'; } }
+  else { document.getElementById('inputBar').style.display='flex'; document.getElementById('viewOnlyBar').style.display='none'; let prof=profilesCache[chatName]; if(chatType==='private' && prof && prof.avatarBase64){ avEl.innerHTML='<img src="data:image/jpeg;base64,'+prof.avatarBase64+'">'; } else { avEl.textContent=chatName.slice(0,2).toUpperCase(); } updateChatHeader(); }
+  let box=document.getElementById('msgs'); box.innerHTML='';
+  // V26 instant cache render first (for offline)
+  renderInstantCache(chatId);
+  if(unsubMsgs) unsubMsgs();
+  let colName = chatId==='official'? 'announcements' : (chatType==='private'? 'private_messages' : 'group_messages');
+  let q;
+  if(chatId==='official'){ q=query(collection(db,colName), orderBy("time","asc")); }
+  else { q=query(collection(db,colName), where("chatId","==", chatId), orderBy("time","asc")); }
+  unsubMsgs=onSnapshot(q, (snap)=>{
+    let docs=[]; snap.forEach(d=>docs.push(d));
+    saveInstantCache(chatId, docs);
+    renderMessages(docs, colName);
+    if(currentChatType!=='official'){
+      try{
+        let chatRef=doc(db, currentChatType==='private'?'private_chats':'group_chats', chatId);
+        updateDoc(chatRef, {['unread.'+currentUsername]:0}).catch(()=>{});
+      }catch(e){}
+    }
+  }, (err)=>{
+    console.log('msg listener err', err);
+    // If offline, keep instant cache visible
+    if(!navigator.onLine){ renderInstantCache(chatId); showPushToast('📴 Offline','Reading from phone storage'); }
+  });
+}
+function updateChatHeader(){
+  if(!currentChatOther) return;
+  let pres=presenceCache[currentChatOther];
+  if(isUserOnline(pres)){ document.getElementById('chatStatus').textContent='online'; }
+  else { document.getElementById('chatStatus').textContent=pres && pres.lastSeen? formatLastSeen(pres.lastSeen) : 'offline'; }
+}
+document.getElementById('closeChatBtn').addEventListener('click',()=>{ document.getElementById('chatView').style.display='none'; document.getElementById('mainView').style.display='flex'; if(unsubMsgs) unsubMsgs(); currentChatId=null; });
+document.getElementById('chatHead').addEventListener('click',()=>{
+  if(!currentChatId) return;
+  if(currentChatId==='official') return;
+  if(currentChatType==='group'){ openGroupInfo(currentChatId); }
+  else { openProfileModal(currentChatOther); }
+});
+function renderMessages(docs, colName){
+  let box=document.getElementById('msgs'); box.innerHTML='';
+  docs.forEach(docSnap=>{
+    let data=docSnap.data(); if(data.deletedFor && data.deletedFor.includes(currentUsername)) return;
+    let div=document.createElement('div'); let isMe=data.sender===currentUsername;
+    if(currentChatId==='official'){ div.className='bubble announcement-bubble'; }
+    else div.className='bubble '+(isMe?'me':'other')+(data.type==='image'?' image-bubble':'');
+    div.id='msg-'+docSnap.id;
+    let timeStr=formatMsgTime(data.time);
+    let ticksHtml='';
+    if(isMe){
+      let isRead = data.readBy && data.readBy.length>1;
+      ticksHtml='<div class="msg-footer"><span class="msg-time">'+timeStr+'</span><span class="ticks '+(isRead?'blue':'grey')+'">✓✓</span></div>';
+    } else {
+      ticksHtml='<div class="msg-footer"><span class="msg-time">'+timeStr+'</span></div>';
+      if(currentChatType!=='official'){
+        try{ let r=doc(db,colName,docSnap.id); updateDoc(r,{readBy: arrayUnion(currentUsername)}).catch(()=>{}); }catch(e){}
+      }
+    }
+    if(currentChatId==='official'){ ticksHtml='<div class="msg-footer"><span class="msg-time">'+timeStr+'</span><span style="font-size:10px;color:#53bdeb;margin-left:6px">✓ Official</span></div>'; }
+    let replyHtml=''; if(data.replyTo){ replyHtml='<div class="reply-quote" onclick="scrollToMessage(\''+data.replyTo.id+'\')"><div class="reply-sender">'+data.replyTo.sender+'</div><div class="reply-text">'+(data.replyTo.text||'').slice(0,50)+'</div></div>'; }
+    let content='';
+    if(data.type==='voice' && data.audioBase64){
+      let dur=data.duration||0;
+      content='<div class="voice-bubble"><div class="voice-play" data-id="'+docSnap.id+'">▶️</div><div class="voice-wave">'+Array(12).fill(0).map(()=>'<div class="voice-wave-bar" style="height:'+(8+Math.random()*16)+'px"></div>').join('')+'</div><span class="voice-duration">'+formatTime(dur)+'</span></div><audio id="audio-'+docSnap.id+'" style="display:none" src="data:audio/webm;base64,'+data.audioBase64+'"></audio>';
+    } else if(data.type==='image' && data.imageBase64){
+      content='<img src="data:image/jpeg;base64,'+data.imageBase64+'" onclick="window.open(this.src)"><div>'+(data.text||'')+'</div>';
+    } else {
+      content='<div>'+(data.text||'').replace(/</g,'&lt;')+'</div>';
+    }
+    div.innerHTML=replyHtml+'<div class="msg-content">'+content+'</div>'+ticksHtml;
+    // actions
+    let actions=document.createElement('div'); actions.className='bubble-actions';
+    let replyBtn=document.createElement('div'); replyBtn.className='bubble-action'; replyBtn.textContent='↩️'; replyBtn.onclick=(e)=>{ e.stopPropagation(); setReply({id:docSnap.id,sender:data.sender,text:data.text||data.type||'Media',type:data.type}); };
+    let delBtn=document.createElement('div'); delBtn.className='bubble-action'; delBtn.textContent='🗑️'; delBtn.onclick=(e)=>{ e.stopPropagation(); openDeleteModal(docSnap.id, isMe, colName, true); };
+    actions.appendChild(replyBtn); actions.appendChild(delBtn); div.appendChild(actions);
+    // long press
+    div.addEventListener('contextmenu',(e)=>{ e.preventDefault(); openDeleteModal(docSnap.id, isMe, colName, true); });
+    let touchTimer;
+    div.addEventListener('touchstart',()=>{ touchTimer=setTimeout(()=>openDeleteModal(docSnap.id, isMe, colName, true),600); });
+    div.addEventListener('touchend',()=>clearTimeout(touchTimer));
+    // voice play
+    if(data.type==='voice'){
+      setTimeout(()=>{ let playBtn=div.querySelector('.voice-play'); if(playBtn){ playBtn.addEventListener('click',()=>{ playVoice(docSnap.id); }); } },0);
+    }
+    box.appendChild(div);
+  });
+  box.scrollTop=box.scrollHeight;
+}
+function playVoice(id){
+  let audio=document.getElementById('audio-'+id); if(!audio) return;
+  if(currentAudio && currentPlayingId!==id){ currentAudio.pause(); currentAudio.currentTime=0; let prevBtn=document.querySelector('[data-id="'+currentPlayingId+'"]'); if(prevBtn) prevBtn.textContent='▶️'; }
+  let btn=document.querySelector('[data-id="'+id+'"]');
+  if(audio.paused){ audio.play(); btn.textContent='⏸️'; currentAudio=audio; currentPlayingId=id; audio.onended=()=>{ btn.textContent='▶️'; currentAudio=null; currentPlayingId=null; }; }
+  else { audio.pause(); btn.textContent='▶️'; currentAudio=null; currentPlayingId=null; }
+}
+async function sendMessage(){
+  if(!currentChatId) return;
+  // V26 OFFLINE CHECK
+  if(!navigator.onLine){ alert('📴 Offline — cannot send until data returns. Reading from phone storage.'); return; }
+  let text=document.getElementById('msgInput').value.trim(); if(!text) return;
+  let colName = currentChatId==='official'? 'announcements' : (currentChatType==='private'? 'private_messages' : 'group_messages');
+  let chatCol = currentChatType==='private'? 'private_chats' : 'group_chats';
+  let payload={ chatId:currentChatId, sender:currentUsername, text:text, type:'text', time:serverTimestamp(), deletedFor:[], readBy:[currentUsername] };
+  if(replyingTo){ payload.replyTo=replyingTo; }
+  document.getElementById('msgInput').value=''; clearReply();
+  try{
+    await addDoc(collection(db,colName), payload);
+    if(currentChatId!=='official'){
+      let chatRef=doc(db, chatCol, currentChatId);
+      let otherUnread={}; if(currentChatType==='private' && currentChatOther){ otherUnread[currentChatOther]=1; } else if(currentChatType==='group'){
+        let g=cacheGroups.find(g=>g.id===currentChatId); if(g){ g.data.members.forEach(m=>{ if(m!==currentUsername) otherUnread[m]=1; }); }
+      }
+      // update last message
+      try{
+        let updates={lastMessage:text.slice(0,50), lastTime:serverTimestamp()};
+        Object.keys(otherUnread).forEach(u=>{ updates['unread.'+u]=otherUnread[u]; });
+        await updateDoc(chatRef, updates);
+      }catch(e){}
+    }
+  }catch(e){ console.log('send fail', e); alert('Failed to send: '+e.message); }
+}
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
+document.getElementById('msgInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ sendMessage(); } else { handleTyping(); } });
+document.getElementById('msgInput').addEventListener('input',()=>{
+  let txt=document.getElementById('msgInput').value.trim();
+  if(txt.length>0){ document.getElementById('sendBtn').style.display='flex'; document.getElementById('micBtn').style.display='none'; }
+  else { document.getElementById('sendBtn').style.display='none'; document.getElementById('micBtn').style.display='flex'; }
+});
+function handleTyping(){
+  if(!currentChatId || currentChatType==='group' || currentChatId==='official') return;
+  if(!currentChatOther) return;
+  try{ setDoc(doc(db,"typing",currentChatId),{from:currentUsername,to:currentChatOther,time:serverTimestamp()},{merge:true}); }catch(e){}
+  clearTimeout(typingTimeout); typingTimeout=setTimeout(()=>{ try{ deleteDoc(doc(db,"typing",currentChatId)); }catch(e){} }, 3000);
+}document.getElementById('imageInput').addEventListener('change', async(e)=>{
+  let file=e.target.files[0]; if(!file) return;
+  if(!navigator.onLine){ alert('📴 Offline — cannot send images until data returns'); return; }
+  try{
+    let base64=await compressImage(file, 600, 0.7);
+    let colName = currentChatId==='official'? 'announcements' : (currentChatType==='private'? 'private_messages' : 'group_messages');
+    let payload={ chatId:currentChatId, sender:currentUsername, text:'', type:'image', imageBase64:base64, time:serverTimestamp(), deletedFor:[], readBy:[currentUsername] };
+    if(replyingTo) payload.replyTo=replyingTo;
+    await addDoc(collection(db,colName), payload);
+    clearReply();
+  }catch(err){ alert('Image fail: '+err.message); }
+  e.target.value='';
+});
+document.getElementById('imgBtn').addEventListener('click',()=>document.getElementById('imageInput').click());
+async function startRecording(){
+  if(!navigator.onLine){ alert('📴 Offline — cannot send voice until data returns'); return; }
+  try{
+    let stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder=new MediaRecorder(stream); audioChunks=[]; isRecording=true;
+    document.getElementById('micBtn').classList.add('recording');
+    document.getElementById('recordingBar').classList.add('active');
+    document.getElementById('msgInput').style.display='none';
+    recStartTime=Date.now();
+    recTimerInterval=setInterval(()=>{ let sec=Math.floor((Date.now()-recStartTime)/1000); document.getElementById('recTimer').textContent=formatTime(sec); if(sec>=MAX_DURATION) stopRecording(true); },500);
+    mediaRecorder.ondataavailable=e=>{ if(e.data.size>0) audioChunks.push(e.data); };
+    mediaRecorder.onstop=async()=>{
+      clearInterval(recTimerInterval); document.getElementById('micBtn').classList.remove('recording'); document.getElementById('recordingBar').classList.remove('active'); document.getElementById('msgInput').style.display='block';
+      let blob=new Blob(audioChunks,{type:'audio/webm'}); let duration=Math.floor((Date.now()-recStartTime)/1000);
+      if(duration<1){ isRecording=false; return; }
+      let reader=new FileReader(); reader.onloadend=async()=>{
+        let base64=reader.result.split(',')[1];
+        let colName = currentChatType==='private'? 'private_messages' : 'group_messages';
+        let payload={ chatId:currentChatId, sender:currentUsername, text:'', type:'voice', audioBase64:base64, duration:duration, time:serverTimestamp(), deletedFor:[], readBy:[currentUsername] };
+        if(replyingTo) payload.replyTo=replyingTo;
+        await addDoc(collection(db,colName), payload);
+        clearReply();
+      }; reader.readAsDataURL(blob);
+      isRecording=false; mediaRecorder.stream.getTracks().forEach(t=>t.stop());
+    };
+    mediaRecorder.start();
+  }catch(e){ alert('Mic permission needed'); }
+}
+function stopRecording(send){
+  if(mediaRecorder && isRecording){ if(send) mediaRecorder.stop(); else { mediaRecorder.stream.getTracks().forEach(t=>t.stop()); mediaRecorder=null; isRecording=false; document.getElementById('micBtn').classList.remove('recording'); document.getElementById('recordingBar').classList.remove('active'); document.getElementById('msgInput').style.display='block'; clearInterval(recTimerInterval); } }
+}
+document.getElementById('micBtn').addEventListener('mousedown',()=>{ startRecording(); });
+document.getElementById('micBtn').addEventListener('mouseup',()=>{ stopRecording(true); });
+document.getElementById('micBtn').addEventListener('touchstart',(e)=>{ e.preventDefault(); startRecording(); });
+document.getElementById('micBtn').addEventListener('touchend',(e)=>{ e.preventDefault(); stopRecording(true); });
+document.getElementById('profileInput').addEventListener('change', async(e)=>{
+  let file=e.target.files[0]; if(!file) return;
+  try{ let base64=await compressImage(file, 200, 0.6); await setDoc(doc(db,"profiles",currentUsername),{username:currentUsername,avatarBase64:base64,updated:serverTimestamp()},{merge:true}); }catch(err){ alert('Profile upload fail'); }
+});
+document.getElementById('myProfileBtn').addEventListener('click',()=>{ document.getElementById('profileInput').click(); });
+function openProfileModal(username){
+  let prof=profilesCache[username]; let pres=presenceCache[username];
+  document.getElementById('profileModalName').textContent=username;
+  let statusEl=document.getElementById('profileModalStatus');
+  if(isUserOnline(pres)){ statusEl.textContent='online'; statusEl.style.color='#53bdeb'; } else { statusEl.textContent=pres && pres.lastSeen? formatLastSeen(pres.lastSeen):'offline'; statusEl.style.color='#8b8ba7'; }
+  let img=document.getElementById('profileModalImg'); let fallback=document.getElementById('profileModalFallback');
+  if(prof && prof.avatarBase64){ img.src='data:image/jpeg;base64,'+prof.avatarBase64; img.style.display='block'; fallback.style.display='none'; } else { img.style.display='none'; fallback.style.display='flex'; fallback.textContent=username.slice(0,2).toUpperCase(); }
+  let actions=document.getElementById('profileModalActions'); actions.innerHTML='';
+  let chatBtn=document.createElement('button'); chatBtn.className='profile-modal-btn primary'; chatBtn.textContent='💬 Chat'; chatBtn.onclick=()=>{ closeProfileModal(); if(username!==currentUsername){ openOrCreatePrivateChat(username); } };
+  actions.appendChild(chatBtn);
+  document.getElementById('profileModal').classList.add('active');
+}
+function closeProfileModal(){ document.getElementById('profileModal').classList.remove('active'); }
+document.getElementById('closeProfileBtn').addEventListener('click', closeProfileModal);
+document.getElementById('profileModal').addEventListener('click',(e)=>{ if(e.target.id==='profileModal') closeProfileModal(); });
+async function openOrCreatePrivateChat(other){
+  let existing=cachePrivate.find(c=>{ let p=c.data.participants; return p.includes(other) && p.includes(currentUsername); });
+  if(existing){ openChat(existing.id,'private',other); }
+  else { let newChat=await addDoc(collection(db,"private_chats"),{participants:[currentUsername,other],created:serverTimestamp(),lastMessage:'',lastTime:serverTimestamp(),unread:{}}); openChat(newChat.id,'private',other); }
+}
+document.getElementById('newChatBtn').addEventListener('click',()=>{
+  let u=prompt('Enter username to chat:'); if(!u) return; u=cleanU(u); if(u===currentUsername){ alert('Cannot chat with yourself'); return; } openOrCreatePrivateChat(u);
+});
+function openGroupInfo(groupId){
+  let g=cacheGroups.find(g=>g.id===groupId); if(!g) return;
+  document.getElementById('groupInfoName').textContent=g.data.name; document.getElementById('groupInfoAv').textContent=g.data.name.slice(0,2).toUpperCase(); document.getElementById('groupInfoCount').textContent=g.data.members.length+' members';
+  let list=document.getElementById('groupInfoList'); list.innerHTML='';
+  g.data.members.forEach(m=>{
+    let prof=profilesCache[m]; let row=document.createElement('div'); row.className='member-row';
+    let avHtml=prof && prof.avatarBase64? '<div class="member-av"><img src="data:image/jpeg;base64,'+prof.avatarBase64+'"></div>' : '<div class="member-av">'+m.slice(0,2).toUpperCase()+'</div>';
+    let role=g.data.admins.includes(m)? 'admin' : 'member';
+    row.innerHTML=avHtml+'<div class="member-info"><div class="member-name">'+m+'</div><div class="member-role role-'+role+'">'+role+'</div></div>';
+    if(g.data.admins.includes(currentUsername) && m!==currentUsername){
+      let rm=document.createElement('button'); rm.className='remove-btn'; rm.textContent='Remove'; rm.onclick=async(e)=>{ e.stopPropagation(); try{ let ref=doc(db,"group_chats",groupId); let updated=g.data.members.filter(x=>x!==m); await updateDoc(ref,{members:updated}); }catch(e){} }; row.appendChild(rm);
+    }
+    row.onclick=()=>{ if(m!==currentUsername) { document.getElementById('groupInfoModal').classList.remove('active'); openProfileModal(m); } };
+    list.appendChild(row);
+  });
+  document.getElementById('groupInfoModal').classList.add('active');
+  document.getElementById('addMembersBtn').onclick=async()=>{
+    let mem=prompt('Add members comma separated:'); if(!mem) return; let members=mem.split(',').map(x=>cleanU(x)).filter(x=>x); let all=[...new Set([...g.data.members,...members])]; try{ await updateDoc(doc(db,"group_chats",groupId),{members:all}); }catch(e){}
+  };
+  document.getElementById('leaveGroupBtn').onclick=async()=>{
+    if(!confirm('Leave group?')) return; try{ let updated=g.data.members.filter(x=>x!==currentUsername); await updateDoc(doc(db,"group_chats",groupId),{members:updated}); document.getElementById('groupInfoModal').classList.remove('active'); document.getElementById('chatView').style.display='none'; document.getElementById('mainView').style.display='flex'; }catch(e){}
+  };
+}
+document.getElementById('closeGroupInfoBtn').addEventListener('click',()=>document.getElementById('groupInfoModal').classList.remove('active'));
+document.getElementById('groupInfoModal').addEventListener('click',(e)=>{ if(e.target.id==='groupInfoModal') e.currentTarget.classList.remove('active'); });
+// Calls placeholder (keep existing logic simple)
+let currentCall=null, localStream=null, remoteStream=null, pc=null, callTimerInt=null, callSeconds=0;
+async function startCall(type){
+  if(!currentChatOther || currentChatType!=='private'){ alert('Voice/video only for private chats'); return; }
+  if(!navigator.onLine){ alert('📴 Offline — cannot call'); return; }
+  try{
+    localStream=await navigator.mediaDevices.getUserMedia({audio:true, video: type==='video'});
+    document.getElementById('activeAv').textContent=currentChatOther.slice(0,2).toUpperCase();
+    document.getElementById('activeName').textContent=currentChatOther;
+    document.getElementById('activeStatus').textContent=type==='video'?'Video calling...':'Calling...';
+    document.getElementById('activeCall').classList.add('active');
+    document.getElementById('localVideo').srcObject=localStream;
+    let callDoc=await addDoc(collection(db,"calls"),{from:currentUsername,to:currentChatOther,type:type,status:'calling',time:serverTimestamp()});
+    currentCall=callDoc.id;
+    callSeconds=0; callTimerInt=setInterval(()=>{ callSeconds++; let m=Math.floor(callSeconds/60); let s=callSeconds%60; document.getElementById('callTimer').textContent=(m<10?'0'+m:m)+':'+(s<10?'0'+s:s); },1000);
+    unsubCalls=onSnapshot(doc(db,"calls",callDoc.id),(snap)=>{ if(!snap.exists()){ endCall(); } else { let d=snap.data(); if(d.status==='declined'){ alert('Call declined'); endCall(); } if(d.status==='ended'){ endCall(); } } });
+  }catch(e){ alert('Call failed: '+e.message); }
+}
+function endCall(){
+  if(callTimerInt) clearInterval(callTimerInt);
+  if(localStream) localStream.getTracks().forEach(t=>t.stop());
+  if(pc) pc.close();
+  document.getElementById('activeCall').classList.remove('active');
+  document.getElementById('incomingCall').classList.remove('active');
+  if(currentCall){ try{ updateDoc(doc(db,"calls",currentCall),{status:'ended'}).catch(()=>{}); deleteDoc(doc(db,"calls",currentCall)).catch(()=>{}); }catch(e){} }
+  currentCall=null; if(unsubCalls) unsubCalls();
+}
+document.getElementById('voiceCallBtn').addEventListener('click',()=>startCall('voice'));
+document.getElementById('videoCallBtn').addEventListener('click',()=>startCall('video'));
 document.getElementById('endCallBtn').addEventListener('click', endCall);
-document.getElementById('muteBtn').addEventListener('click', ()=>{ if(!localStream) return; isMuted=!isMuted; localStream.getAudioTracks().forEach(t=>t.enabled=!isMuted); document.getElementById('muteBtn').classList.toggle('active', isMuted); document.getElementById('muteBtn').textContent=isMuted?'🔇':'🎤'; });
-document.getElementById('speakerBtn').addEventListener('click', ()=>{ isSpeaker=!isSpeaker; document.getElementById('speakerBtn').classList.toggle('active', isSpeaker); });
-document.getElementById('switchCamBtn').addEventListener('click', async()=>{ if(!isVideoCall||!localStream) return; let videoTrack=localStream.getVideoTracks()[0]; if(!videoTrack) return; let currentFacing=videoTrack.getSettings().facingMode; try{ let newStream=await navigator.mediaDevices.getUserMedia({audio:true,video:{facingMode:currentFacing==='user'?'environment':'user'}}); let newVideo=newStream.getVideoTracks()[0]; let sender=pc.getSenders().find(s=>s.track&&s.track.kind==='video'); if(sender) await sender.replaceTrack(newVideo); localStream.getVideoTracks().forEach(t=>t.stop()); localStream.removeTrack(videoTrack); localStream.addTrack(newVideo); document.getElementById('localVideo').srcObject=localStream; }catch(e){alert('Switch failed: '+e.message)} });
-</script></body></html>
+document.getElementById('declineCallBtn').addEventListener('click', async()=>{
+  if(currentCall){ try{ await updateDoc(doc(db,"calls",currentCall),{status:'declined'}); }catch(e){} }
+  document.getElementById('incomingCall').classList.remove('active'); currentCall=null;
+});
+document.getElementById('acceptCallBtn').addEventListener('click', async()=>{
+  document.getElementById('incomingCall').classList.remove('active');
+  document.getElementById('activeCall').classList.add('active');
+  try{ localStream=await navigator.mediaDevices.getUserMedia({audio:true, video:true}); document.getElementById('localVideo').srcObject=localStream; }catch(e){}
+});
+onSnapshot(query(collection(db,"calls"), where("to","==", currentUsername || '___')), (snap)=>{
+  snap.forEach(d=>{
+    let data=d.data(); if(data.status!=='calling') return;
+    currentCall=d.id;
+    document.getElementById('incName').textContent=data.from;
+    document.getElementById('incAv').textContent=data.from.slice(0,2).toUpperCase();
+    document.getElementById('incType').textContent=data.type==='video'?'Incoming video call... 🎥':'Incoming voice call... 📞';
+    document.getElementById('incomingCall').classList.add('active');
+  });
+});
+// V26 Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js?v=26').then(reg => {
+      console.log('SW V26 registered', reg.scope);
+    }).catch(err => console.log('SW fail', err));
+  });
+}
+</script>
+</body></html>
