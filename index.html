@@ -2,9 +2,9 @@
 <title>DANKCONNECT - Ghana's Secure Chat</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta property="og:title" content="DANKCONNECT - Ghana's Secure Chat 🇬🇭">
-<meta property="og:image" content="logo.png?v=26">
-<meta property="og:url" content="https://danktrust15-del.github.io/DANKCONNECT/?v=26">
-<meta name="theme-color" content="#0d00b3"><link rel="icon" href="logo.png?v=26"><link rel="apple-touch-icon" href="logo.png?v=26"><link rel="manifest" href="manifest.json?v=26">
+<meta property="og:image" content="logo.png?v=27">
+<meta property="og:url" content="https://danktrust15-del.github.io/DANKCONNECT/?v=27">
+<meta name="theme-color" content="#0d00b3"><link rel="icon" href="logo.png?v=27"><link rel="apple-touch-icon" href="logo.png?v=27"><link rel="manifest" href="manifest.json?v=27">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial}:root{--blue:#0d00b3}html{height:100%;-webkit-text-size-adjust:100%}body{height:100dvh;height:100svh;width:100%;background:#0a0a14;margin:0;overscroll-behavior:none;position:relative;overflow:hidden}
 #splashView,#authView,#mainView,#chatView{position:fixed;inset:0;width:100%;height:100dvh;height:100svh;overflow:hidden}
@@ -30,9 +30,7 @@
 #mainView{display:none;flex-direction:column;background:#0a0a14;color:white}.m-top{padding:14px 16px 8px;display:flex;justify-content:space-between;align-items:center;background:var(--blue);padding-top:calc(14px + env(safe-area-inset-top))}.m-top h1{font-size:32px;font-weight:900}.icon-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}.my-av{width:38px;height:38px;border-radius:50%;object-fit:cover;background:white}.search-wrap{padding:10px 14px;background:var(--blue);padding-bottom:14px}.sbox{background:rgba(0,0,0,0.28);border-radius:12px;display:flex;align-items:center;padding:10px 14px;gap:10px}.sbox input{flex:1;background:transparent;border:none;color:white;font-size:16px!important;outline:none}.filter-chips{display:flex;gap:8px;padding:10px 14px;overflow-x:auto;background:#0a0a14}.chip{white-space:nowrap;padding:8px 14px;border-radius:20px;background:#23233a;color:#9a9ab3;font-size:13px;font-weight:600;cursor:pointer}.chip.active{background:white;color:#0a0a14;font-weight:800}.list{flex:1;overflow-y:auto;background:#0a0a14;padding-bottom:90px;-webkit-overflow-scrolling:touch}
 .chat-row{display:flex;gap:12px;padding:12px 14px;cursor:pointer;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)}
 .chat-row.announcement{background:rgba(13,0,179,0.12);border-left:4px solid #53bdeb;}
-.chat-row.announcement.av{background:white;border:2px solid #53bdeb;padding:0;overflow:hidden;}
-.chat-row.announcement.av img{width:100%;height:100%;object-fit:contain;background:white;}
-.pin-icon{font-size:12px;margin-left:4px;}.verified{background:#53bdeb;color:#0a0a14;font-size:10px;border-radius:8px;padding:2px 6px;font-weight:900;margin-left:6px;}
+.verified{background:#53bdeb;color:#0a0a14;font-size:10px;border-radius:8px;padding:2px 6px;font-weight:900;margin-left:6px;}
 .av{width:52px;height:52px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;overflow:hidden;flex-shrink:0}.av img{width:100%;height:100%;object-fit:cover}.av-wrapper{position:relative;flex-shrink:0}.online-dot{position:absolute;bottom:1px;right:1px;width:13px;height:13px;background:#53bdeb;border-radius:50%;border:2px solid #0a0a14}.chat-info{flex:1;min-width:0}.chat-top{display:flex;justify-content:space-between;align-items:center}.chat-name{font-weight:700;font-size:16px;color:white}.chat-time{font-size:12px;color:#8b8ba7}.chat-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:4px}.chat-last{font-size:14px;color:#8b8ba7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}.badge{background:var(--blue);color:white;border-radius:50%;min-width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;padding:0 6px;margin-left:8px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#14142a;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom))}.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;color:#6b6b8a;font-size:10px;cursor:pointer}.nav-item.active{color:white}
 #chatView{display:none;flex-direction:column;background:#0f0f23}.chat-head{background:var(--blue);color:white;padding:10px 12px;display:flex;align-items:center;gap:10px;padding-top:calc(10px + env(safe-area-inset-top));cursor:pointer;flex-shrink:0}.msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#0a0a14;-webkit-overflow-scrolling:touch}.bubble{max-width:78%;padding:10px 12px;border-radius:18px;font-size:14.5px;word-break:break-word;cursor:pointer;position:relative;display:flex;flex-direction:column}.bubble.me{align-self:flex-end;background:var(--blue);color:white;border-bottom-right-radius:4px}.bubble.other{align-self:flex-start;background:#1e1e35;color:white;border-bottom-left-radius:4px}
 .bubble.announcement-bubble{align-self:center;max-width:88%;background:#1e1e35;border:1px solid #53bdeb;border-left:4px solid #53bdeb;}
@@ -41,7 +39,6 @@
 #replyPreview{display:none;background:#1a1a32;border-left:4px solid #53bdeb;padding:10px 12px;align-items:center;justify-content:space-between;gap:10px;color:white;flex-shrink:0}#replyPreview.active{display:flex}#replyPreviewContent{flex:1;min-width:0}#replyPreviewSender{font-size:12px;font-weight:800;color:#53bdeb}#replyPreviewText{font-size:12px;color:#9a9ab3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#replyClose{width:28px;height:28px;border-radius:50%;background:#23233a;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .input-bar{display:flex;gap:6px;padding:10px;background:#14142a;align-items:center;padding-bottom:calc(10px + env(safe-area-inset-bottom));flex-shrink:0;position:relative;z-index:10}.input-bar input{flex:1;padding:12px 16px;border-radius:25px;border:none;background:#23233a;color:white;outline:none;font-size:16px!important}
 #viewOnlyBar{display:none;padding:12px 16px;background:#14142a;align-items:center;justify-content:center;gap:8px;color:#8b8ba7;font-size:12px;font-weight:700;padding-bottom:calc(12px + env(safe-area-inset-bottom));flex-shrink:0}
-#typingIndicator{display:none;padding:6px 18px;font-size:13px;color:#8ab4ff;font-weight:700;background:#0a0a14;flex-shrink:0}
 .voice-bubble{display:flex;align-items:center;gap:10px;min-width:180px}.voice-play{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}.voice-wave{flex:1;height:28px;display:flex;align-items:center;gap:2px}.voice-wave-bar{width:3px;background:rgba(255,255,255,0.5);border-radius:2px}.voice-duration{font-size:12px;font-weight:800}.recording-bar{display:none;flex:1;background:#23233a;border-radius:25px;padding:10px 16px;align-items:center;gap:10px;color:white}.recording-bar.active{display:flex}.rec-dot{width:10px;height:10px;border-radius:50%;background:#ff3b30;animation:blink 1s infinite}.rec-timer{font-weight:800;color:#ff3b30;font-size:14px}@keyframes blink{0%{opacity:0.2}50%{opacity:1}100%{opacity:0.2}}#micBtn,#sendBtn,#imgBtn{width:42px;height:42px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0}#micBtn{background:var(--blue);color:white}#imgBtn{background:#23233a;color:white}#sendBtn{background:var(--blue);color:white;display:none}#micBtn.recording{background:#ff3b30}
 .profile-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:20px}.profile-modal.active{display:flex}.profile-modal-img{width:280px;height:280px;border-radius:50%;object-fit:cover;border:4px solid white;max-width:80vw;max-height:50vh;background:#0d00b3;display:flex;align-items:center;justify-content:center;font-size:80px;color:white}.profile-modal-name{margin-top:18px;font-size:24px;font-weight:900;color:white}.profile-modal-status{margin-top:8px;font-size:13px;font-weight:700}.profile-modal-actions{display:flex;gap:12px;margin-top:22px}.profile-modal-btn{padding:12px 20px;border-radius:25px;border:none;font-weight:800;cursor:pointer}.profile-modal-btn.primary{background:#0d00b3;color:white}.profile-modal-btn.secondary{background:#23233a;color:white}.profile-modal-close{position:absolute;top:20px;left:20px;font-size:32px;color:white;cursor:pointer}
 .bubble-actions{position:absolute;top:-14px;right:8px;background:#23233a;border-radius:16px;padding:4px 8px;display:none;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,0.5);z-index:5}.bubble:hover.bubble-actions{display:flex}.bubble-action{width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;border-radius:50%}
@@ -63,34 +60,15 @@
 .call-timer{font-size:16px;color:#9a9ab3;margin-top:10px;font-weight:700}
 .call-controls{display:flex;gap:16px;align-items:center;justify-content:center;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
 .ctrl-btn{width:54px;height:54px;border-radius:50%;border:none;background:#23233a;color:white;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.ctrl-btn.active{background:#53bdeb;color:#0a0a14}
-#groupInfoModal.group-box{background:#1e1e35;width:100%;max-width:390px;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;max-height:85vh}
-.group-info-header{background:var(--blue);padding:16px;text-align:center;color:white;position:relative}
-.group-info-av{width:78px;height:78px;border-radius:50%;background:white;color:var(--blue);margin:0 auto;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px}
-.group-info-name{margin-top:10px;font-size:20px;font-weight:900}
-.group-info-count{margin-top:4px;font-size:12px;opacity:0.85}
-.group-info-body{overflow-y:auto;padding:0}
-.member-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer}
-.member-row:hover{background:rgba(255,255,255,0.05)}
-.member-av{width:44px;height:44px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-weight:900;overflow:hidden;flex-shrink:0}
-.member-av img{width:100%;height:100%;object-fit:cover}
-.member-info{flex:1;min-width:0}
-.member-name{font-weight:700;font-size:14px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.member-role{font-size:11px;font-weight:700;margin-top:2px}
-.role-admin{color:#53bdeb}.role-member{color:#8b8ba7}
-.remove-btn{background:#ff3b30;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:900;cursor:pointer}
-.add-members-btn{margin:14px 16px;padding:12px;background:var(--blue);color:white;border:none;border-radius:12px;font-weight:800;cursor:pointer;width:calc(100% - 32px)}
-#offlineBar{display:none!important}
-#imageLightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:10010;align-items:center;justify-content:center;flex-direction:column;padding:20px}#imageLightbox.active{display:flex}#imageLightbox img{max-width:92vw;max-height:82vh;border-radius:12px;object-fit:contain}#imageLightbox.close-light{position:absolute;top:18px;left:18px;font-size:32px;color:white;cursor:pointer;background:rgba(255,255,255,0.15);width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+#imageLightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10010;align-items:center;justify-content:center;flex-direction:column;padding:20px}#imageLightbox.active{display:flex}#imageLightbox img{max-width:92vw;max-height:82vh;border-radius:12px;object-fit:contain}#closeLightbox{position:absolute;top:18px;left:18px;font-size:32px;color:white;cursor:pointer;background:rgba(255,255,255,0.15);width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 </style></head><body>
-<div id="offlineBar" style="display:none!important"></div>
 <div id="pushToast"></div>
-<div id="splashView"><img src="logo.png?v=26" class="splash-logo"><div class="splash-title">DANKCONNECT</div><div class="splash-sub">Ghana's Secure Chat 🇬🇭<br>Username only</div><div class="splash-box"><button id="goToAuthBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button></div></div>
-<div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=26" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy" autocomplete="username"><input id="password" type="password" placeholder="Password min 6 chars" autocomplete="current-password"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
+<div id="splashView"><img src="logo.png?v=27" class="splash-logo"><div class="splash-title">DANKCONNECT</div><div class="splash-sub">Ghana's Secure Chat 🇬🇭<br>V27 DETERMINISTIC FIX</div><div class="splash-box"><button id="goToAuthBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button></div></div>
+<div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=27" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy"><input id="password" type="password" placeholder="Password min 6 chars"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
 <div id="mainView"><div class="m-top"><h1>Chats</h1><div style="display:flex;gap:8px"><div class="icon-btn" id="myProfileBtn"><img id="myAvImg" class="my-av" style="display:none"><span id="myAvTxt">ME</span></div><div class="icon-btn" id="themeBtn">🌙</div><div class="icon-btn" id="newChatBtn" style="background:white;color:#0d00b3;font-weight:900;font-size:24px">+</div></div></div>
 <div id="pushBanner"><div class="push-text">🔔 Enable notifications</div><button class="push-btn" id="enablePushBtn">Allow</button></div>
-<div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search real users only"></div></div><div class="filter-chips"><div class="chip active" id="chipAll">All</div><div class="chip" id="chipChats">Unread <span id="unreadCount">0</span></div><div class="chip" id="chipGroups">Groups <span id="groupCount">0</span></div><div class="chip" id="chipAddGroup">+</div></div><div class="list" id="chatList"></div><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="logoutBtn"><span>⚙️</span>Settings</div></div></div>
-<div id="chatView"><div class="chat-head" id="chatHead"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv" style="background:white;padding:3px"><img src="logo.png?v=26" style="width:100%;height:100%;object-fit:contain"></div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div><div id="voiceCallBtn" class="call-btn">📞</div><div id="videoCallBtn" class="call-btn">🎥</div></div><div class="msgs" id="msgs"></div><div id="typingIndicator">typing...</div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div>
+<div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search real users"></div></div><div class="filter-chips"><div class="chip active" id="chipAll">All</div><div class="chip" id="chipChats">Unread <span id="unreadCount">0</span></div><div class="chip" id="chipGroups">Groups <span id="groupCount">0</span></div><div class="chip" id="chipAddGroup">+</div></div><div class="list" id="chatList"></div><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="logoutBtn"><span>⚙️</span>Settings</div></div></div>
+<div id="chatView"><div class="chat-head" id="chatHead"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div><div id="voiceCallBtn" class="call-btn">📞</div><div id="videoCallBtn" class="call-btn">🎥</div></div><div class="msgs" id="msgs"></div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div>
 <div class="input-bar" id="inputBar"><button id="imgBtn">📎</button><input type="text" id="msgInput" placeholder="Type message..."><div class="recording-bar" id="recordingBar"><div class="rec-dot"></div><span class="rec-timer" id="recTimer">0:00</span><span>recording...</span></div><button id="micBtn">🎤</button><button id="sendBtn">➤</button></div>
 <div id="viewOnlyBar">🔒 View-only — Only DankBoss can post</div>
 </div>
@@ -99,8 +77,8 @@
 <div id="groupInfoModal" class="profile-modal"><div class="profile-modal-close" id="closeGroupInfoBtn">‹</div><div class="group-box"><div class="group-info-header"><div id="groupInfoAv" class="group-info-av">GP</div><div id="groupInfoName" class="group-info-name">Group</div><div id="groupInfoCount" class="group-info-count">0 members</div></div><div id="groupInfoList" class="group-info-body"></div><button id="addMembersBtn" class="add-members-btn">+ Add Members</button><button id="leaveGroupBtn" class="add-members-btn" style="background:#23233a;margin-top:0">Leave Group</button></div></div>
 <div id="deleteModal"><div class="delete-box"><div class="delete-title" id="deleteTitle">Delete?</div><div class="delete-text" id="deleteText">Choose</div><div class="delete-btns" id="deleteBtns"></div></div></div>
 <div id="incomingCall"><div id="incAv" class="in-call-av">DC</div><div id="incName" class="in-call-name">Incoming</div><div id="incType" class="in-call-status">Incoming voice call... 📞</div><div class="call-actions"><button class="call-action decline" id="declineCallBtn">✕</button><button class="call-action accept" id="acceptCallBtn">📞</button></div></div>
-<div id="activeCall"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay playsinline muted></video><audio id="remoteAudio" autoplay playsinline></audio><div class="call-overlay"><div style="display:flex;flex-direction:column;align-items:center;margin-top:40px"><div id="activeAv" class="in-call-av">DC</div><div id="activeName" class="in-call-name">Name</div><div id="activeStatus" class="in-call-status">Calling...</div><div id="callTimer" class="call-timer">00:00</div></div><div class="call-controls"><button class="ctrl-btn" id="muteBtn">🎤</button><button class="call-action end" id="endCallBtn">✕</button><button class="ctrl-btn" id="speakerBtn">🔊</button><button class="ctrl-btn" id="switchCamBtn">🔄</button></div></div></div>
-<div id="imageLightbox"><div class="close-light" id="closeLightbox">✕</div><img id="lightboxImg" src=""><div style="margin-top:14px;color:#9a9ab3;font-size:12px">Tap X to close • Shemen Empire style full view</div></div><script type="module">
+<div id="activeCall"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay playsinline muted></video><div class="call-overlay"><div style="display:flex;flex-direction:column;align-items:center;margin-top:40px"><div id="activeAv" class="in-call-av">DC</div><div id="activeName" class="in-call-name">Name</div><div id="activeStatus" class="in-call-status">Calling...</div><div id="callTimer" class="call-timer">00:00</div></div><div class="call-controls"><button class="ctrl-btn" id="muteBtn">🎤</button><button class="call-action end" id="endCallBtn">✕</button></div></div></div>
+<div id="imageLightbox"><div id="closeLightbox">✕</div><img id="lightboxImg" src=""><div style="margin-top:14px;color:#9a9ab3;font-size:12px">Tap X to close</div></div><script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, addDoc, query, onSnapshot, orderBy, serverTimestamp, where, deleteDoc, getDoc, updateDoc, arrayUnion, enableIndexedDbPersistence, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -110,525 +88,233 @@ const VAPID_KEY = "BN-Saty-5GQ_jpyEV4HWQcI3U6nHbkC-kGfLDoHWZRvmdKaxMBDRl0vrvhfmq
 const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
 const messaging = getMessaging(app);
 await setPersistence(auth, browserLocalPersistence);
-enableIndexedDbPersistence(db).catch(err=>{ console.log('Persistence', err.code); });
+enableIndexedDbPersistence(db).catch(()=>{});
 const ADMIN_USERNAMES = ['dankboss'];
-const OFFICIAL_LOGO = 'logo.png?v=26';
 function isAdminUser(u){ return ADMIN_USERNAMES.includes((u||'').toLowerCase()); }
 function applyTheme(t){ if(t==='light'){document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');document.getElementById('themeBtn').textContent='☀️';} else {document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');document.getElementById('themeBtn').textContent='🌙';}}
 document.getElementById('themeBtn').addEventListener('click',()=>{let cur=document.body.classList.contains('light-mode')?'light':'dark';applyTheme(cur==='light'?'dark':'light')});
 (function(){let saved=localStorage.getItem('dc_theme');if(saved) applyTheme(saved); else applyTheme('dark');})();
-function setupKeyboardFix(){ if(!window.visualViewport) return; window.visualViewport.addEventListener('resize', ()=>{ let vh = window.visualViewport.height; let chatV = document.getElementById('chatView'); let mainV = document.getElementById('mainView'); if(chatV && chatV.style.display==='flex'){ chatV.style.height = vh + 'px'; let msgs = document.getElementById('msgs'); if(msgs){ setTimeout(()=>{ msgs.scrollTop = msgs.scrollHeight; }, 120); } } if(mainV && mainV.style.display==='flex'){ mainV.style.height = vh + 'px'; } }); window.visualViewport.addEventListener('scroll', ()=>{ window.scrollTo(0,0); }); }
-setupKeyboardFix();
-function updateOfflineBar(){ return; }
-window.addEventListener('online', updateOfflineBar);
-window.addEventListener('offline', updateOfflineBar);
 const msgInputEl = document.getElementById('msgInput');
-msgInputEl.addEventListener('focus',()=>{ setTimeout(()=>{ let msgs=document.getElementById('msgs'); if(msgs) msgs.scrollTop = msgs.scrollHeight; if(window.visualViewport){ document.getElementById('chatView').style.height = window.visualViewport.height + 'px'; } },350); });
-msgInputEl.addEventListener('blur',()=>{ setTimeout(()=>{ window.scrollTo(0,0); },100); });
-function showPushToast(title,body){ const toast=document.getElementById('pushToast'); toast.innerHTML='<b>'+title+'</b><br><span style="font-size:12px;color:#9a9ab3">'+body+'</span>'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),4000); if(Notification && Notification.permission==='granted'){ try{ new Notification(title,{body:body,icon:OFFICIAL_LOGO}); }catch(e){} } }
-async function saveFCMToken(){ try{ const token = await getToken(messaging, { vapidKey: VAPID_KEY }); if(token && currentUsername){ await setDoc(doc(db,"fcm_tokens",currentUsername),{username:currentUsername,token:token,updated:serverTimestamp()},{merge:true}); localStorage.setItem('dc_fcm_token', token); } return token; }catch(e){ console.log('FCM token error', e); } }
-async function initPush(){ if(!('Notification' in window)) return; const banner=document.getElementById('pushBanner'); if(Notification.permission==='granted'){ banner.classList.remove('show'); await saveFCMToken(); } else if(Notification.permission!=='denied'){ banner.classList.add('show'); } onMessage(messaging, (payload)=>{ showPushToast(payload.notification?.title || 'DANKCONNECT', payload.notification?.body || 'New message'); }); }
-async function requestPush(){ if(!('Notification' in window)){ alert('Notifications not supported'); return; } const perm=await Notification.requestPermission(); const banner=document.getElementById('pushBanner'); if(perm==='granted'){ banner.classList.remove('show'); await saveFCMToken(); showPushToast('DANKCONNECT 🇬🇭','Notifications enabled!'); } else { banner.classList.remove('show'); } }
+function showPushToast(title,body){ const toast=document.getElementById('pushToast'); toast.innerHTML='<b>'+title+'</b><br><span style="font-size:12px;color:#9a9ab3">'+body+'</span>'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),4000); }
+async function saveFCMToken(){ try{ const token = await getToken(messaging, { vapidKey: VAPID_KEY }); if(token && currentUsername){ await setDoc(doc(db,"fcm_tokens",currentUsername),{username:currentUsername,token:token},{merge:true}); } }catch(e){} }
+async function initPush(){ if(!('Notification' in window)) return; const banner=document.getElementById('pushBanner'); if(Notification.permission==='granted'){ banner.classList.remove('show'); await saveFCMToken(); } else if(Notification.permission!=='denied'){ banner.classList.add('show'); } onMessage(messaging, (p)=>{ showPushToast(p.notification?.title||'DANKCONNECT', p.notification?.body||'New message'); }); }
+async function requestPush(){ const perm=await Notification.requestPermission(); document.getElementById('pushBanner').classList.remove('show'); if(perm==='granted'){ await saveFCMToken(); } }
 document.getElementById('enablePushBtn').addEventListener('click',requestPush);
-let currentUsername=null,currentChatId=null,currentChatType='private',currentChatOther=null,currentTab='all',unsubMsgs=null,unsubPriv=null,unsubGroup=null,unsubProfiles=null,unsubPresence=null,unsubCalls=null,unsubAnnounce=null,cachePrivate=[],cacheGroups=[],cacheAnnounce=[],typingTimeout=null,presenceInterval=null;
-let mediaRecorder=null,audioChunks=[],isRecording=false,recStartTime=0,recTimerInterval=null,currentAudio=null,currentPlayingId=null;
-let profilesCache={},presenceCache={},replyingTo=null;let longPressTimer=null,pendingDelete={id:null,isMe:false,col:null};const MAX_DURATION=30;
-function instantKey(id){ return 'dc_instant_'+id; }
-function loadInstantCache(chatId){ try{ let raw=localStorage.getItem(instantKey(chatId)); if(!raw) return null; let arr=JSON.parse(raw); return Array.isArray(arr)?arr:null; }catch(e){ return null; } }
-function saveInstantCache(chatId, docList){
-  try{
-    let plain = docList.map(d=>{
-      let data = typeof d.data==='function'? d.data() : d;
-      return { id: d.id, sender: data.sender||'', text: data.text||'', type: data.type||'text', timeSec: data.time?.seconds || Math.floor(Date.now()/1000), duration: data.duration||0, deletedFor: data.deletedFor||[], hasAudio:!!data.audioBase64, hasImage:!!data.imageBase64 };
-    });
-    localStorage.setItem(instantKey(chatId), JSON.stringify(plain.slice(-100)));
-  }catch(e){ console.log('instant save fail', e); }
-}
-function renderInstantCache(chatId){
-  let box=document.getElementById('msgs');
-  let inst=loadInstantCache(chatId);
-  if(!inst || inst.length===0) { box.innerHTML=''; return false; }
-  box.innerHTML='';
-  inst.forEach(item=>{
-    if(item.deletedFor && item.deletedFor.includes(currentUsername)) return;
-    let div=document.createElement('div');
-    let isMe=item.sender===currentUsername;
-    if(chatId==='official'){ div.className='bubble announcement-bubble'; }
-    else div.className='bubble '+(isMe?'me':'other');
-    div.id='msg-'+item.id;
-    let timeStr=new Date(item.timeSec*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    let ticksHtml=isMe?'<div class="msg-footer"><span class="msg-time">'+timeStr+'</span><span class="ticks grey">✓✓</span></div>':'<div class="msg-footer"><span class="msg-time">'+timeStr+'</span></div>';
-    if(chatId==='official'){ ticksHtml='<div class="msg-footer"><span class="msg-time">'+timeStr+'</span><span style="font-size:10px;color:#53bdeb;margin-left:6px">✓ Official</span></div>'; }
-    let content='';
-    if(item.type==='voice' || item.hasAudio){ content='<div class="voice-bubble"><div class="voice-play">▶️</div><div class="voice-wave">'+Array(12).fill(0).map(()=>'<div class="voice-wave-bar" style="height:'+(8+Math.random()*16)+'px"></div>').join('')+'</div><span class="voice-duration">'+Math.floor(item.duration/60)+':'+String(item.duration%60).padStart(2,'0')+'</span></div>'; }
-    else if(item.type==='image' || item.hasImage){ content='<div style="opacity:0.7">📷 Image</div><div>'+(item.text||'')+'</div>'; }
-    else { content='<div>'+(item.text||'')+'</div>'; }
-    div.innerHTML='<div class="msg-content">'+content+'</div>'+ticksHtml;
-    box.appendChild(div);
-  });
-  box.scrollTop=box.scrollHeight;
-  return true;
-}
+let currentUsername=null,currentChatId=null,currentChatType='private',currentChatOther=null,currentTab='all',unsubMsgs=null,unsubPriv=null,unsubGroup=null,unsubProfiles=null,unsubPresence=null,unsubCalls=null,unsubAnnounce=null,cachePrivate=[],cacheGroups=[],profilesCache={},presenceCache={},replyingTo=null,pendingDelete={};let mediaRecorder=null,audioChunks=[],isRecording=false,recStartTime=0,recTimerInterval=null,currentAudio=null,currentPlayingId=null;const MAX_DURATION=30;
 function cleanU(u){return u.trim().toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20)}function emailFromU(u){return cleanU(u)+"@dankconnect.app"}
 function formatTime(sec){let m=Math.floor(sec/60),s=Math.floor(sec%60);return m+":"+s.toString().padStart(2,'0')}
 function formatMsgTime(ts){if(!ts) return ''; let d=new Date(ts.seconds*1000); return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
-function isUserOnline(pres){if(!pres||!pres.lastSeen) return false; if(pres.online===false) return false; let now=Date.now()/1000; let diff=now-pres.lastSeen.seconds; return diff<40;}
-function formatLastSeen(ts){if(!ts) return 'offline'; let now=Date.now()/1000; let diff=now-ts.seconds; if(diff<3600) return "last seen "+Math.floor(diff/60)+"m ago"; if(diff<86400) return "last seen "+Math.floor(diff/3600)+"h ago"; let d=new Date(ts.seconds*1000); return "last seen "+d.toLocaleDateString();}
-function compressImage(file,maxSize=200,quality=0.6){return new Promise((res,rej)=>{let img=new Image();let reader=new FileReader();reader.onload=e=>{img.src=e.target.result};img.onload=()=>{let canvas=document.createElement('canvas');let w=img.width,h=img.height;if(w>h){if(w>maxSize){h*=maxSize/w;w=maxSize}}else{if(h>maxSize){w*=maxSize/h;h=maxSize}}canvas.width=w;canvas.height=h;let ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);let base64=canvas.toDataURL('image/jpeg',quality).split(',')[1];res(base64)};img.onerror=rej;reader.onerror=rej;reader.readAsDataURL(file)});}
-function setReply(msgData){replyingTo={id:msgData.id,sender:msgData.sender,text:msgData.text||'Message',type:msgData.type||'text'};document.getElementById('replyPreviewSender').textContent='Replying to '+msgData.sender;document.getElementById('replyPreviewText').textContent=replyingTo.text.slice(0,60);document.getElementById('replyPreview').classList.add('active');document.getElementById('msgInput').focus();}
+function isUserOnline(pres){if(!pres||!pres.lastSeen) return false; if(pres.online===false) return false; let now=Date.now()/1000; return (now-pres.lastSeen.seconds)<40;}
+function formatLastSeen(ts){if(!ts) return 'offline'; let now=Date.now()/1000; let diff=now-ts.seconds; if(diff<3600) return "last seen "+Math.floor(diff/60)+"m ago"; if(diff<86400) return "last seen "+Math.floor(diff/3600)+"h ago"; return "last seen "+new Date(ts.seconds*1000).toLocaleDateString();}
+function compressImage(file,maxSize=600,quality=0.7){return new Promise((res,rej)=>{let img=new Image();let reader=new FileReader();reader.onload=e=>{img.src=e.target.result};img.onload=()=>{let canvas=document.createElement('canvas');let w=img.width,h=img.height;if(w>h){if(w>maxSize){h*=maxSize/w;w=maxSize}}else{if(h>maxSize){w*=maxSize/h;h=maxSize}}canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);res(canvas.toDataURL('image/jpeg',quality).split(',')[1])};reader.readAsDataURL(file)});}
+function setReply(msgData){replyingTo={id:msgData.id,sender:msgData.sender,text:msgData.text||'Media'};document.getElementById('replyPreviewSender').textContent='Replying to '+msgData.sender;document.getElementById('replyPreviewText').textContent=replyingTo.text.slice(0,60);document.getElementById('replyPreview').classList.add('active');}
 window.clearReply=()=>{replyingTo=null;document.getElementById('replyPreview').classList.remove('active');};
 document.getElementById('replyClose').addEventListener('click',()=>clearReply());
-window.scrollToMessage=(id)=>{let el=document.getElementById('msg-'+id);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='2px solid #53bdeb';setTimeout(()=>el.style.outline='none',1000);} };
-function openDeleteModal(msgId,isMe,col,hasForEveryone){
-  pendingDelete={id:msgId,isMe:isMe,col:col};
-  let title=document.getElementById('deleteTitle'); title.textContent=isMe?'Delete message?':'Delete?';
-  let text=document.getElementById('deleteText'); text.textContent=isMe?'Choose how to delete':'Delete for you?';
-  let btns=document.getElementById('deleteBtns'); btns.innerHTML='';
-  let b1=document.createElement('button'); b1.className='d-btn neutral'; b1.textContent='🗑️ Delete for me'; b1.onclick=()=>deleteForMe();
-  btns.appendChild(b1);
-  if(isMe && hasForEveryone){
-    let b2=document.createElement('button'); b2.className='d-btn danger'; b2.textContent='🚫 Delete for everyone'; b2.onclick=()=>deleteForEveryone();
-    btns.appendChild(b2);
-  }
-  let b3=document.createElement('button'); b3.className='d-btn cancel'; b3.textContent='Cancel'; b3.onclick=()=>closeDeleteModal();
-  btns.appendChild(b3);
-  document.getElementById('deleteModal').classList.add('active');
-}
-function closeDeleteModal(){ document.getElementById('deleteModal').classList.remove('active'); pendingDelete={id:null,isMe:false,col:null}; }
-async function deleteForMe(){ if(!pendingDelete.id) return; try{ let ref=doc(db, pendingDelete.col, pendingDelete.id); await updateDoc(ref, { deletedFor: arrayUnion(currentUsername) }); }catch(e){ console.log('deleteForMe fail',e);} closeDeleteModal(); }
-async function deleteForEveryone(){ if(!pendingDelete.id ||!pendingDelete.isMe) return; try{ let ref=doc(db, pendingDelete.col, pendingDelete.id); await deleteDoc(ref); }catch(e){ console.log('deleteForEveryone fail',e);} closeDeleteModal(); }
+window.scrollToMessage=(id)=>{let el=document.getElementById('msg-'+id);if(el){el.scrollIntoView({behavior:'smooth'});}};
+function openDeleteModal(msgId,isMe,col){ pendingDelete={id:msgId,isMe:isMe,col:col}; let btns=document.getElementById('deleteBtns'); btns.innerHTML=''; let b1=document.createElement('button'); b1.className='d-btn neutral'; b1.textContent='🗑️ Delete for me'; b1.onclick=async()=>{ try{ await updateDoc(doc(db,col,pendingDelete.id),{deletedFor:arrayUnion(currentUsername)});}catch(e){} closeDeleteModal(); }; btns.appendChild(b1); if(isMe){ let b2=document.createElement('button'); b2.className='d-btn danger'; b2.textContent='🚫 Delete for everyone'; b2.onclick=async()=>{ try{ await deleteDoc(doc(db,col,pendingDelete.id));}catch(e){} closeDeleteModal(); }; btns.appendChild(b2);} let b3=document.createElement('button'); b3.className='d-btn cancel'; b3.textContent='Cancel'; b3.onclick=()=>closeDeleteModal(); btns.appendChild(b3); document.getElementById('deleteModal').classList.add('active'); }
+function closeDeleteModal(){ document.getElementById('deleteModal').classList.remove('active'); }
 document.getElementById('deleteModal').addEventListener('click', (e)=>{ if(e.target.id==='deleteModal') closeDeleteModal(); });
 document.getElementById('goToAuthBtn').addEventListener('click',()=>{document.getElementById('splashView').style.display='none';document.getElementById('authView').style.display='flex';});
-document.getElementById('backToSplashBtn').addEventListener('click',()=>{document.getElementById('authView').style.display='none';document.getElementById('splashView').style.display='flex';});document.getElementById('loginBtn').addEventListener('click',async()=>{
+document.getElementById('backToSplashBtn').addEventListener('click',()=>{document.getElementById('authView').style.display='none';document.getElementById('splashView').style.display='flex';});
+document.getElementById('loginBtn').addEventListener('click',async()=>{
   let u=document.getElementById('username').value; let p=document.getElementById('password').value;
   let clean=cleanU(u); if(clean.length<3){document.getElementById('authMsg').textContent='Username min 3'; return;}
   if(p.length<6){document.getElementById('authMsg').textContent='Password min 6'; return;}
   document.getElementById('authMsg').textContent='Loading...'; let email=emailFromU(clean);
   try{ await signInWithEmailAndPassword(auth,email,p); }catch(e){ if(e.code==='auth/user-not-found' || e.code==='auth/invalid-credential'){ try{ let cred=await createUserWithEmailAndPassword(auth,email,p); await setDoc(doc(db,"users",cred.user.uid),{username:clean,created:serverTimestamp()}); }catch(e2){document.getElementById('authMsg').textContent=e2.message; return;} } else {document.getElementById('authMsg').textContent=e.message; return;} }
-  try{ let uid=auth.currentUser.uid; let userDoc=await getDoc(doc(db,"users",uid)); if(!userDoc.exists()){ await setDoc(doc(db,"users",uid),{username:clean,created:serverTimestamp()}); } }catch(e){}
   document.getElementById('authMsg').textContent='Success!';
 });
 onAuthStateChanged(auth, async(user)=>{
   if(user){
-    let uid=user.uid; try{ let snap=await getDoc(doc(db,"users",uid)); if(snap.exists()){ currentUsername=snap.data().username; } else { currentUsername=cleanU(user.email.split('@')[0]); } }catch(e){ currentUsername=cleanU(user.email.split('@')[0]); }
+    let snap=await getDoc(doc(db,"users",user.uid)); currentUsername=snap.exists()?snap.data().username:cleanU(user.email.split('@')[0]);
     document.getElementById('splashView').style.display='none'; document.getElementById('authView').style.display='none'; document.getElementById('mainView').style.display='flex';
     document.getElementById('myAvTxt').textContent=currentUsername.slice(0,2).toUpperCase();
     initListeners(); initPush(); startPresence();
-  } else {
-    currentUsername=null; stopListeners(); document.getElementById('splashView').style.display='flex'; document.getElementById('authView').style.display='none'; document.getElementById('mainView').style.display='none'; document.getElementById('chatView').style.display='none';
-  }
+  } else { currentUsername=null; stopListeners(); document.getElementById('splashView').style.display='flex'; document.getElementById('authView').style.display='none'; document.getElementById('mainView').style.display='none'; document.getElementById('chatView').style.display='none'; }
 });
-function startPresence(){
-  if(presenceInterval) clearInterval(presenceInterval);
-  const updatePresence=async()=>{ if(!currentUsername) return; try{ await setDoc(doc(db,"presence",currentUsername),{username:currentUsername,online:true,lastSeen:serverTimestamp()},{merge:true}); }catch(e){} };
-  updatePresence(); presenceInterval=setInterval(updatePresence, 30000);
-  window.addEventListener('beforeunload', async()=>{ try{ await setDoc(doc(db,"presence",currentUsername),{online:false,lastSeen:serverTimestamp()},{merge:true}); }catch(e){} });
-}
-async function doLogout(){
-  if(presenceInterval) clearInterval(presenceInterval);
-  try{ if(currentUsername){ await setDoc(doc(db,"presence",currentUsername),{online:false,lastSeen:serverTimestamp()},{merge:true}); } }catch(e){}
-  try{
-    let keysToKeep=[];
-    for(let i=0;i<localStorage.length;i++){ let k=localStorage.key(i); if(k && k.startsWith('dc_instant_')) keysToKeep.push(k); }
-    let kept={}; keysToKeep.forEach(k=>{ kept[k]=localStorage.getItem(k); });
-    localStorage.clear();
-    Object.keys(kept).forEach(k=>localStorage.setItem(k, kept[k]));
-    let theme=localStorage.getItem('dc_theme');
-    if(theme) localStorage.setItem('dc_theme', theme);
-  }catch(e){ localStorage.clear(); }
-  try{ await signOut(auth); }catch(e){}
-  location.reload();
-}
+function startPresence(){ const upd=async()=>{ if(!currentUsername) return; try{ await setDoc(doc(db,"presence",currentUsername),{username:currentUsername,online:true,lastSeen:serverTimestamp()},{merge:true}); }catch(e){} }; upd(); setInterval(upd,30000); }
+async function doLogout(){ try{ if(currentUsername) await setDoc(doc(db,"presence",currentUsername),{online:false,lastSeen:serverTimestamp()},{merge:true}); }catch(e){} try{ await signOut(auth);}catch(e){} location.reload(); }
 document.getElementById('logoutBtn').addEventListener('click', doLogout);
 function initListeners(){
   stopListeners();
-  unsubProfiles=onSnapshot(collection(db,"profiles"), (snap)=>{ snap.forEach(d=>{ profilesCache[d.id]=d.data(); }); renderChats(); updateMyAvatar(); });
-  unsubPresence=onSnapshot(collection(db,"presence"), (snap)=>{ snap.forEach(d=>{ presenceCache[d.id]=d.data(); }); renderChats(); if(currentChatId) updateChatHeader(); });
-  unsubPriv=onSnapshot(query(collection(db,"private_chats"), where("participants","array-contains", currentUsername)), (snap)=>{ cachePrivate=[]; snap.forEach(d=>{ cachePrivate.push({id:d.id, data:d.data()}); }); renderChats(); });
-  unsubGroup=onSnapshot(query(collection(db,"group_chats"), where("members","array-contains", currentUsername)), (snap)=>{ cacheGroups=[]; snap.forEach(d=>{ cacheGroups.push({id:d.id, data:d.data()}); }); renderChats(); });
-  unsubAnnounce=onSnapshot(query(collection(db,"announcements"), orderBy("time","desc")), (snap)=>{ cacheAnnounce=[]; snap.forEach(d=>{ cacheAnnounce.push({id:d.id, data:d.data()}); }); renderChats(); });
+  unsubProfiles=onSnapshot(collection(db,"profiles"), (s)=>{ s.forEach(d=>profilesCache[d.id]=d.data()); renderChats(); });
+  unsubPresence=onSnapshot(collection(db,"presence"), (s)=>{ s.forEach(d=>presenceCache[d.id]=d.data()); renderChats(); if(currentChatId) updateChatHeader(); });
+  unsubPriv=onSnapshot(query(collection(db,"private_chats"), where("participants","array-contains", currentUsername)), (s)=>{ cachePrivate=[]; s.forEach(d=>cachePrivate.push({id:d.id,data:d.data()})); renderChats(); });
+  unsubGroup=onSnapshot(query(collection(db,"group_chats"), where("members","array-contains", currentUsername)), (s)=>{ cacheGroups=[]; s.forEach(d=>cacheGroups.push({id:d.id,data:d.data()})); renderChats(); });
+  unsubAnnounce=onSnapshot(query(collection(db,"announcements"), orderBy("time","desc")), (s)=>{ renderChats(); });
 }
-function stopListeners(){
-  if(unsubMsgs) unsubMsgs(); if(unsubPriv) unsubPriv(); if(unsubGroup) unsubGroup(); if(unsubProfiles) unsubProfiles(); if(unsubPresence) unsubPresence(); if(unsubCalls) unsubCalls(); if(unsubAnnounce) unsubAnnounce();
-}
-function updateMyAvatar(){
-  let p=profilesCache[currentUsername];
-  if(p && p.avatarBase64){ document.getElementById('myAvImg').src='data:image/jpeg;base64,'+p.avatarBase64; document.getElementById('myAvImg').style.display='block'; document.getElementById('myAvTxt').style.display='none'; }
-  else { document.getElementById('myAvImg').style.display='none'; document.getElementById('myAvTxt').style.display='block'; }
-}
-function getOtherParticipant(chatData){
-  if(!chatData ||!chatData.participants) return null;
-  return chatData.participants.find(p=>p!==currentUsername);
-}
-// FIXED RENDER + DELETE FAKE CHATS
+function stopListeners(){ if(unsubMsgs) unsubMsgs(); if(unsubPriv) unsubPriv(); if(unsubGroup) unsubGroup(); if(unsubProfiles) unsubProfiles(); if(unsubPresence) unsubPresence(); }function getOtherParticipant(chatData){ if(!chatData||!chatData.participants) return null; return chatData.participants.find(p=>p!==currentUsername); }
 function renderChats(){
   let list=document.getElementById('chatList'); let filter=document.getElementById('searchInput').value.toLowerCase();
-  let rows=[];
-  rows.push({id:'official', type:'official', name:'DANKCONNECT Official', last:'Official updates from DankBoss', time: new Date(), unread:0, isAnnouncement:true});
-  cachePrivate.forEach(c=>{
-    let other=getOtherParticipant(c.data); if(!other) return; if(filter &&!other.toLowerCase().includes(filter)) return;
-    let lastMsg=c.data.lastMessage||''; let lastTime=c.data.lastTime? new Date(c.data.lastTime.seconds*1000) : new Date();
-    let unread=c.data.unread && c.data.unread[currentUsername]? c.data.unread[currentUsername] : 0;
-    if(currentTab==='chats' && unread===0) return;
-    if(currentTab==='groups') return;
-    rows.push({id:c.id, type:'private', name:other, last:lastMsg, time:lastTime, unread:unread, data:c.data});
-  });
-  cacheGroups.forEach(c=>{
-    if(filter &&!c.data.name.toLowerCase().includes(filter)) return;
-    if(currentTab==='chats') return;
-    let lastMsg=c.data.lastMessage||''; let lastTime=c.data.lastTime? new Date(c.data.lastTime.seconds*1000) : new Date();
-    let unread=c.data.unread && c.data.unread[currentUsername]? c.data.unread[currentUsername] : 0;
-    if(currentTab==='chats' && unread===0) return;
-    rows.push({id:c.id, type:'group', name:c.data.name, last:lastMsg, time:lastTime, unread:unread, data:c.data});
-  });
-  rows.sort((a,b)=> b.time - a.time);
-  list.innerHTML='';
-  if(filter && rows.length===1 && rows[0].isAnnouncement){ list.innerHTML='<div style="padding:30px;text-align:center;color:#8b8ba7">❌ No user found for "'+filter+'"</div>'; return; }
+  let rows=[]; rows.push({id:'official', type:'official', name:'DANKCONNECT Official', last:'Official updates', time:new Date(), unread:0, isAnnouncement:true});
+  cachePrivate.forEach(c=>{ let other=getOtherParticipant(c.data); if(!other) return; if(filter &&!other.toLowerCase().includes(filter)) return; let last=c.data.lastMessage||''; let t=c.data.lastTime?new Date(c.data.lastTime.seconds*1000):new Date(); let unread=c.data.unread&&c.data.unread[currentUsername]?c.data.unread[currentUsername]:0; if(currentTab==='chats'&&unread===0) return; if(currentTab==='groups') return; rows.push({id:c.id,type:'private',name:other,last:last,time:t,unread:unread,data:c.data}); });
+  cacheGroups.forEach(c=>{ if(filter &&!c.data.name.toLowerCase().includes(filter)) return; if(currentTab==='chats') return; let last=c.data.lastMessage||''; let t=c.data.lastTime?new Date(c.data.lastTime.seconds*1000):new Date(); let unread=c.data.unread&&c.data.unread[currentUsername]?c.data.unread[currentUsername]:0; rows.push({id:c.id,type:'group',name:c.data.name,last:last,time:t,unread:unread}); });
+  rows.sort((a,b)=>b.time-a.time); list.innerHTML='';
+  if(filter && rows.length===1 && rows[0].isAnnouncement){ list.innerHTML='<div style="padding:30px;text-align:center;color:#8b8ba7">❌ No user "'+filter+'" found</div>'; return; }
   rows.forEach(r=>{
     let div=document.createElement('div'); div.className='chat-row'+(r.isAnnouncement?' announcement':'');
-    let avLetter=r.name.slice(0,2).toUpperCase();
-    let avatarHtml=''; let isOnline=false;
-    if(r.isAnnouncement){
-      avatarHtml='<div class="av"><img src="logo.png?v=26"></div>';
-    } else if(r.type==='private'){
-      let prof=profilesCache[r.name]; let pres=presenceCache[r.name]; isOnline=isUserOnline(pres);
-      if(prof && prof.avatarBase64){ avatarHtml='<div class="av-wrapper"><div class="av"><img src="data:image/jpeg;base64,'+prof.avatarBase64+'"></div>'+(isOnline?'<div class="online-dot"></div>':'')+'</div>'; }
-      else { avatarHtml='<div class="av-wrapper"><div class="av">'+avLetter+'</div>'+(isOnline?'<div class="online-dot"></div>':'')+'</div>'; }
-    } else {
-      avatarHtml='<div class="av">'+avLetter+'</div>';
-    }
-    let timeStr=r.time? r.time.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
-    div.innerHTML=avatarHtml+'<div class="chat-info"><div class="chat-top"><div class="chat-name">'+r.name+(r.isAnnouncement?'<span class="verified">✓ Verified</span><span class="pin-icon">📌</span>':'')+'</div><div class="chat-time">'+timeStr+'</div></div><div class="chat-bottom"><div class="chat-last">'+(r.last||'Tap to chat — hold to delete fake')+'</div>'+(r.unread>0?'<div class="badge">'+r.unread+'</div>':'')+'</div></div>';
-    div.addEventListener('click',()=>{ openChat(r.id, r.type, r.name); });
-    // LONG PRESS TO DELETE FAKE JAMES/THOMAS
-    let pressTimer=null;
-    div.addEventListener('touchstart',()=>{ pressTimer=setTimeout(()=>{ if(r.type!=='official'){ if(confirm('Delete chat with '+r.name+'? This removes fake '+r.name+' permanently')){ deleteDoc(doc(db, r.type==='private'?'private_chats':'group_chats', r.id)); } } },800); });
-    div.addEventListener('touchend',()=>clearTimeout(pressTimer));
-    div.addEventListener('mousedown',()=>{ pressTimer=setTimeout(()=>{ if(r.type!=='official'){ if(confirm('Delete chat with '+r.name+'?')){ deleteDoc(doc(db, r.type==='private'?'private_chats':'group_chats', r.id)); } } },800); });
-    div.addEventListener('mouseup',()=>clearTimeout(pressTimer));
+    let av=r.name.slice(0,2).toUpperCase(); let pres=presenceCache[r.name]; let online=pres && (Date.now()/1000 - (pres.lastSeen?.seconds||0))<40 && pres.online!==false;
+    let avatar=r.isAnnouncement?'<div class="av"><img src="logo.png?v=27"></div>':'<div class="av-wrapper"><div class="av">'+av+'</div>'+(online?'<div class="online-dot"></div>':'')+'</div>';
+    div.innerHTML=avatar+'<div class="chat-info"><div class="chat-top"><div class="chat-name">'+r.name+(r.isAnnouncement?'<span class="verified">✓</span>':'')+'</div><div class="chat-time">'+(r.time?r.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'')+'</div></div><div class="chat-bottom"><div class="chat-last">'+(r.last||'Tap to chat — hold to delete')+'</div>'+(r.unread>0?'<div class="badge">'+r.unread+'</div>':'')+'</div></div>';
+    div.addEventListener('click',()=>openChat(r.id,r.type,r.name));
+    let timer=null; const del=()=>{ if(r.type!=='official' && confirm('Delete chat with '+r.name+'?')){ deleteDoc(doc(db, r.type==='private'?'private_chats':'group_chats', r.id)); } }; div.addEventListener('touchstart',()=>{ timer=setTimeout(del,800); }); div.addEventListener('touchend',()=>clearTimeout(timer)); div.addEventListener('mousedown',()=>{ timer=setTimeout(del,800); }); div.addEventListener('mouseup',()=>clearTimeout(timer));
     list.appendChild(div);
   });
-  document.getElementById('unreadCount').textContent=cachePrivate.filter(c=>c.data.unread && c.data.unread[currentUsername]>0).length + cacheGroups.filter(c=>c.data.unread && c.data.unread[currentUsername]>0).length;
-  document.getElementById('groupCount').textContent=cacheGroups.length;
 }
 document.getElementById('searchInput').addEventListener('input', renderChats);
 document.getElementById('chipAll').addEventListener('click',()=>{currentTab='all'; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); document.getElementById('chipAll').classList.add('active'); renderChats();});
 document.getElementById('chipChats').addEventListener('click',()=>{currentTab='chats'; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); document.getElementById('chipChats').classList.add('active'); renderChats();});
 document.getElementById('chipGroups').addEventListener('click',()=>{currentTab='groups'; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); document.getElementById('chipGroups').classList.add('active'); renderChats();});
-document.getElementById('chipAddGroup').addEventListener('click',()=>{ let name=prompt('Group name?'); if(!name) return; let membersStr=prompt('Add members (comma separated usernames):'); let members=membersStr? membersStr.split(',').map(m=>cleanU(m)).filter(m=>m) : []; members.push(currentUsername); members=[...new Set(members)]; addDoc(collection(db,"group_chats"),{name:name,members:members,admins:[currentUsername],created:serverTimestamp(),lastMessage:'Group created',lastTime:serverTimestamp(),unread:{}}); });
+document.getElementById('chipAddGroup').addEventListener('click',()=>{ let name=prompt('Group name?'); if(!name) return; let membersStr=prompt('Add members comma separated:'); let members=membersStr? membersStr.split(',').map(m=>cleanU(m)).filter(m=>m):[]; members.push(currentUsername); members=[...new Set(members)]; addDoc(collection(db,"group_chats"),{name:name,members:members,admins:[currentUsername],created:serverTimestamp(),lastMessage:'Group created',lastTime:serverTimestamp(),unread:{}}); });
 async function openChat(chatId, chatType, chatName){
-  currentChatId=chatId; currentChatType=chatType; currentChatOther=chatType==='private'? chatName : null;
+  currentChatId=chatId; currentChatType=chatType; currentChatOther=chatType==='private'?chatName:null;
   document.getElementById('mainView').style.display='none'; document.getElementById('chatView').style.display='flex';
   document.getElementById('chatName').textContent=chatName;
-  let avEl=document.getElementById('chatAv');
-  if(chatId==='official'){ avEl.innerHTML='<img src="logo.png?v=26" style="width:100%;height:100%;object-fit:contain">'; avEl.style.background='white'; document.getElementById('chatStatus').textContent='Official — Verified ✓'; document.getElementById('inputBar').style.display='none'; if(isAdminUser(currentUsername)){ document.getElementById('inputBar').style.display='flex'; document.getElementById('viewOnlyBar').style.display='none'; } else { document.getElementById('viewOnlyBar').style.display='flex'; } }
-  else { document.getElementById('inputBar').style.display='flex'; document.getElementById('viewOnlyBar').style.display='none'; let prof=profilesCache[chatName]; if(chatType==='private' && prof && prof.avatarBase64){ avEl.innerHTML='<img src="data:image/jpeg;base64,'+prof.avatarBase64+'">'; } else { avEl.textContent=chatName.slice(0,2).toUpperCase(); } updateChatHeader(); }
-  let box=document.getElementById('msgs'); box.innerHTML='';
-  renderInstantCache(chatId);
+  let avEl=document.getElementById('chatAv'); avEl.textContent=chatName.slice(0,2).toUpperCase();
+  if(chatId==='official'){ document.getElementById('chatStatus').textContent='Official ✓'; document.getElementById('inputBar').style.display='none'; if(isAdminUser(currentUsername)){ document.getElementById('inputBar').style.display='flex'; document.getElementById('viewOnlyBar').style.display='none'; } else { document.getElementById('viewOnlyBar').style.display='flex'; } }
+  else { document.getElementById('inputBar').style.display='flex'; document.getElementById('viewOnlyBar').style.display='none'; updateChatHeader(); }
+  document.getElementById('msgs').innerHTML='';
   if(unsubMsgs) unsubMsgs();
-  let colName = chatId==='official'? 'announcements' : (chatType==='private'? 'private_messages' : 'group_messages');
-  let q;
-  if(chatId==='official'){ q=query(collection(db,colName), orderBy("time","asc")); }
-  else { q=query(collection(db,colName), where("chatId","==", chatId), orderBy("time","asc")); }
+  let colName = chatId==='official'?'announcements':(chatType==='private'?'private_messages':'group_messages');
+  let q = chatId==='official'?query(collection(db,colName), orderBy("time","asc")):query(collection(db,colName), where("chatId","==", chatId), orderBy("time","asc"));
   unsubMsgs=onSnapshot(q, (snap)=>{
     let docs=[]; snap.forEach(d=>docs.push(d));
-    saveInstantCache(chatId, docs);
     renderMessages(docs, colName);
-    if(currentChatType!=='official'){
-      try{
-        let chatRef=doc(db, currentChatType==='private'?'private_chats':'group_chats', chatId);
-        updateDoc(chatRef, {['unread.'+currentUsername]:0}).catch(()=>{});
-      }catch(e){}
-    }
-  }, (err)=>{
-    console.log('msg listener err', err);
-    if(!navigator.onLine){ renderInstantCache(chatId); }
+    try{ let ref=doc(db, chatType==='private'?'private_chats':'group_chats', chatId); updateDoc(ref, {['unread.'+currentUsername]:0}).catch(()=>{}); }catch(e){}
   });
 }
-function updateChatHeader(){
-  if(!currentChatOther) return;
-  let pres=presenceCache[currentChatOther];
-  if(isUserOnline(pres)){ document.getElementById('chatStatus').textContent='online'; }
-  else { document.getElementById('chatStatus').textContent=pres && pres.lastSeen? formatLastSeen(pres.lastSeen) : 'offline'; }
-}
+function updateChatHeader(){ if(!currentChatOther) return; let pres=presenceCache[currentChatOther]; document.getElementById('chatStatus').textContent=isUserOnline(pres)?'online':(pres?.lastSeen?formatLastSeen(pres.lastSeen):'offline'); }
 document.getElementById('closeChatBtn').addEventListener('click',()=>{ document.getElementById('chatView').style.display='none'; document.getElementById('mainView').style.display='flex'; if(unsubMsgs) unsubMsgs(); currentChatId=null; });
-document.getElementById('chatHead').addEventListener('click',()=>{
-  if(!currentChatId) return;
-  if(currentChatId==='official') return;
-  if(currentChatType==='group'){ openGroupInfo(currentChatId); }
-  else { openProfileModal(currentChatOther); }
-});
 function renderMessages(docs, colName){
   let box=document.getElementById('msgs'); box.innerHTML='';
   docs.forEach(docSnap=>{
-    let data=docSnap.data(); if(data.deletedFor && data.deletedFor.includes(currentUsername)) return;
-    let div=document.createElement('div'); let isMe=data.sender===currentUsername;
-    if(currentChatId==='official'){ div.className='bubble announcement-bubble'; }
-    else div.className='bubble '+(isMe?'me':'other')+(data.type==='image'?' image-bubble':'');
-    div.id='msg-'+docSnap.id;
-    let timeStr=formatMsgTime(data.time);
-    let ticksHtml='';
-    if(isMe){
-      let isRead = data.readBy && data.readBy.length>1;
-      ticksHtml='<div class="msg-footer"><span class="msg-time">'+timeStr+'</span><span class="ticks '+(isRead?'blue':'grey')+'">✓✓</span></div>';
-    } else {
-      ticksHtml='<div class="msg-footer"><span class="msg-time">'+timeStr+'</span></div>';
-      if(currentChatType!=='official'){
-        try{ let r=doc(db,colName,docSnap.id); updateDoc(r,{readBy: arrayUnion(currentUsername)}).catch(()=>{}); }catch(e){}
-      }
-    }
-    if(currentChatId==='official'){ ticksHtml='<div class="msg-footer"><span class="msg-time">'+timeStr+'</span><span style="font-size:10px;color:#53bdeb;margin-left:6px">✓ Official</span></div>'; }
-    let replyHtml=''; if(data.replyTo){ replyHtml='<div class="reply-quote" onclick="scrollToMessage(\''+data.replyTo.id+'\')"><div class="reply-sender">'+data.replyTo.sender+'</div><div class="reply-text">'+(data.replyTo.text||'').slice(0,50)+'</div></div>'; }
-    let content='';
-    if(data.type==='voice' && data.audioBase64){
-      let dur=data.duration||0;
-      content='<div class="voice-bubble"><div class="voice-play" data-id="'+docSnap.id+'">▶️</div><div class="voice-wave">'+Array(12).fill(0).map(()=>'<div class="voice-wave-bar" style="height:'+(8+Math.random()*16)+'px"></div>').join('')+'</div><span class="voice-duration">'+formatTime(dur)+'</span></div><audio id="audio-'+docSnap.id+'" style="display:none" src="data:audio/webm;base64,'+data.audioBase64+'"></audio>';
-    } else if(data.type==='image' && data.imageBase64){
-      content='<img src="data:image/jpeg;base64,'+data.imageBase64+'" onclick="openImageLightbox(this.src)"><div>'+(data.text||'')+'</div>';
-    } else {
-      content='<div>'+(data.text||'').replace(/</g,'&lt;')+'</div>';
-    }
-    div.innerHTML=replyHtml+'<div class="msg-content">'+content+'</div>'+ticksHtml;
-    let actions=document.createElement('div'); actions.className='bubble-actions';
-    let replyBtn=document.createElement('div'); replyBtn.className='bubble-action'; replyBtn.textContent='↩️'; replyBtn.onclick=(e)=>{ e.stopPropagation(); setReply({id:docSnap.id,sender:data.sender,text:data.text||data.type||'Media',type:data.type}); };
-    let delBtn=document.createElement('div'); delBtn.className='bubble-action'; delBtn.textContent='🗑️'; delBtn.onclick=(e)=>{ e.stopPropagation(); openDeleteModal(docSnap.id, isMe, colName, true); };
-    actions.appendChild(replyBtn); actions.appendChild(delBtn); div.appendChild(actions);
-    div.addEventListener('contextmenu',(e)=>{ e.preventDefault(); openDeleteModal(docSnap.id, isMe, colName, true); });
-    let touchTimer;
-    div.addEventListener('touchstart',()=>{ touchTimer=setTimeout(()=>openDeleteModal(docSnap.id, isMe, colName, true),600); });
-    div.addEventListener('touchend',()=>clearTimeout(touchTimer));
-    if(data.type==='voice'){
-      setTimeout(()=>{ let playBtn=div.querySelector('.voice-play'); if(playBtn){ playBtn.addEventListener('click',()=>{ playVoice(docSnap.id); }); } },0);
-    }
+    let data=docSnap.data(); if(data.deletedFor&&data.deletedFor.includes(currentUsername)) return;
+    let isMe=data.sender===currentUsername; let div=document.createElement('div'); div.className='bubble '+(currentChatId==='official'?'announcement-bubble':(isMe?'me':'other'))+(data.type==='image'?' image-bubble':''); div.id='msg-'+docSnap.id;
+    let timeStr=formatMsgTime(data.time); let ticks=isMe?'<div class="msg-footer"><span class="msg-time">'+timeStr+'</span><span class="ticks '+(data.readBy&&data.readBy.length>1?'blue':'grey')+'">✓✓</span></div>':'<div class="msg-footer"><span class="msg-time">'+timeStr+'</span></div>';
+    let reply=''; if(data.replyTo){ reply='<div class="reply-quote"><div class="reply-sender">'+data.replyTo.sender+'</div><div class="reply-text">'+(data.replyTo.text||'').slice(0,50)+'</div></div>'; }
+    let content=''; if(data.type==='voice'&&data.audioBase64){ content='<div class="voice-bubble"><div class="voice-play" data-id="'+docSnap.id+'">▶️</div><div class="voice-wave">'+Array(12).fill(0).map(()=>'<div class="voice-wave-bar" style="height:'+(8+Math.random()*16)+'px"></div>').join('')+'</div></div><audio id="audio-'+docSnap.id+'" style="display:none" src="data:audio/webm;base64,'+data.audioBase64+'"></audio>'; }
+    else if(data.type==='image'&&data.imageBase64){ content='<img src="data:image/jpeg;base64,'+data.imageBase64+'" onclick="openImageLightbox(this.src)"><div>'+(data.text||'')+'</div>'; }
+    else { content='<div>'+(data.text||'').replace(/</g,'&lt;')+'</div>'; }
+    div.innerHTML=reply+'<div class="msg-content">'+content+'</div>'+ticks;
+    div.addEventListener('contextmenu',(e)=>{ e.preventDefault(); openDeleteModal(docSnap.id,isMe,colName); });
     box.appendChild(div);
   });
   box.scrollTop=box.scrollHeight;
 }
-function playVoice(id){
-  let audio=document.getElementById('audio-'+id); if(!audio) return;
-  if(currentAudio && currentPlayingId!==id){ currentAudio.pause(); currentAudio.currentTime=0; let prevBtn=document.querySelector('[data-id="'+currentPlayingId+'"]'); if(prevBtn) prevBtn.textContent='▶️'; }
-  let btn=document.querySelector('[data-id="'+id+'"]');
-  if(audio.paused){ audio.play(); btn.textContent='⏸️'; currentAudio=audio; currentPlayingId=id; audio.onended=()=>{ btn.textContent='▶️'; currentAudio=null; currentPlayingId=null; }; }
-  else { audio.pause(); btn.textContent='▶️'; currentAudio=null; currentPlayingId=null; }
-}
-// FIXED: Optimistic UI for nimat bug + lightbox
 window.openImageLightbox=(src)=>{ document.getElementById('lightboxImg').src=src; document.getElementById('imageLightbox').classList.add('active'); };
-function closeLightbox(){ document.getElementById('imageLightbox').classList.remove('active'); }
-document.getElementById('closeLightbox').addEventListener('click', closeLightbox);
-document.getElementById('imageLightbox').addEventListener('click',(e)=>{ if(e.target.id==='imageLightbox') closeLightbox(); });
-
+document.getElementById('closeLightbox').addEventListener('click',()=>document.getElementById('imageLightbox').classList.remove('active'));
+document.getElementById('imageLightbox').addEventListener('click',(e)=>{ if(e.target.id==='imageLightbox') document.getElementById('imageLightbox').classList.remove('active'); });
 async function sendMessage(){
-  if(!currentChatId) return;
-  if(!navigator.onLine){ alert('📴 Offline — cannot send until data returns.'); return; }
-  let text=document.getElementById('msgInput').value.trim(); if(!text) return;
-  let colName = currentChatId==='official'? 'announcements' : (currentChatType==='private'? 'private_messages' : 'group_messages');
-  let chatCol = currentChatType==='private'? 'private_chats' : 'group_chats';
-  // OPTIMISTIC UI FIX FOR NIMAT
-  let tempDiv=document.createElement('div'); tempDiv.className='bubble me'; let timeNow=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); tempDiv.innerHTML='<div>'+text.replace(/</g,'&lt;')+'</div><div class="msg-footer"><span class="msg-time">'+timeNow+'</span><span class="ticks grey">✓</span></div>'; document.getElementById('msgs').appendChild(tempDiv); document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;
+  if(!currentChatId) return; let text=document.getElementById('msgInput').value.trim(); if(!text) return;
+  let colName = currentChatId==='official'?'announcements':(currentChatType==='private'?'private_messages':'group_messages');
+  // OPTIMISTIC
+  let temp=document.createElement('div'); temp.className='bubble me'; temp.innerHTML='<div>'+text.replace(/</g,'&lt;')+'</div><div class="msg-footer"><span class="msg-time">'+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span><span class="ticks grey">✓</span></div>'; document.getElementById('msgs').appendChild(temp); document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;
   let payload={ chatId:currentChatId, sender:currentUsername, text:text, type:'text', time:serverTimestamp(), deletedFor:[], readBy:[currentUsername] };
-  if(replyingTo){ payload.replyTo=replyingTo; }
-  document.getElementById('msgInput').value=''; clearReply();
-  document.getElementById('sendBtn').style.display='none'; document.getElementById('micBtn').style.display='flex';
-  try{
-    await addDoc(collection(db,colName), payload);
-    if(currentChatId!=='official'){
-      let chatRef=doc(db, chatCol, currentChatId);
-      try{
-        let updates={lastMessage:text.slice(0,50), lastTime:serverTimestamp()};
-        if(currentChatOther){ updates['unread.'+currentChatOther]=1; }
-        await updateDoc(chatRef, updates);
-      }catch(e){}
-    }
-  }catch(e){ console.log('send fail', e); alert('Failed to send: '+e.message); }
+  if(replyingTo) payload.replyTo=replyingTo;
+  document.getElementById('msgInput').value=''; clearReply(); document.getElementById('sendBtn').style.display='none'; document.getElementById('micBtn').style.display='flex';
+  try{ await addDoc(collection(db,colName), payload); if(currentChatId!=='official'){ let ref=doc(db, currentChatType==='private'?'private_chats':'group_chats', currentChatId); await updateDoc(ref, {lastMessage:text.slice(0,50), lastTime:serverTimestamp(), ['unread.'+currentChatOther]:1}); } }catch(e){ alert('Send failed: '+e.message); }
 }
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
-document.getElementById('msgInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ sendMessage(); } else { handleTyping(); } });
-document.getElementById('msgInput').addEventListener('input',()=>{
-  let txt=document.getElementById('msgInput').value.trim();
-  if(txt.length>0){ document.getElementById('sendBtn').style.display='flex'; document.getElementById('micBtn').style.display='none'; }
-  else { document.getElementById('sendBtn').style.display='none'; document.getElementById('micBtn').style.display='flex'; }
+document.getElementById('msgInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMessage(); });
+document.getElementById('msgInput').addEventListener('input',()=>{ let t=document.getElementById('msgInput').value.trim(); document.getElementById('sendBtn').style.display=t?'flex':'none'; document.getElementById('micBtn').style.display=t?'none':'flex'; });// DETERMINISTIC FIX - NO MORE DUPLICATE CHATS - NIMAT BUG FIXED!
+async function openOrCreatePrivateChat(other){
+  other=cleanU(other);
+  if(other===currentUsername){ alert('Cannot chat with yourself'); return; }
+  // REAL USER CHECK
+  try{
+    let qUser=query(collection(db,"users"), where("username","==", other));
+    let snap=await getDocs(qUser);
+    if(snap.empty){ alert('❌ User "'+other+'" not found in DANKCONNECT'); return; }
+  }catch(e){}
+  // DETERMINISTIC ID: dankboss_nimat = SAME FOR BOTH SIDES
+  let deterministicId = [currentUsername, other].sort().join('_').toLowerCase();
+  // Check cache first
+  let existing = cachePrivate.find(c=>c.id===deterministicId);
+  if(existing){ openChat(existing.id,'private',other); return; }
+  // Check if doc exists in firestore
+  try{
+    let ref=doc(db,"private_chats", deterministicId);
+    let snap=await getDoc(ref);
+    if(snap.exists()){
+      openChat(deterministicId,'private',other);
+    } else {
+      // Create ONE deterministic doc - both users will share it!
+      await setDoc(ref, {participants:[currentUsername, other], created:serverTimestamp(), lastMessage:'', lastTime:serverTimestamp(), unread:{}});
+      openChat(deterministicId,'private',other);
+    }
+  }catch(e){ alert('Chat error: '+e.message); }
+}
+document.getElementById('newChatBtn').addEventListener('click',async()=>{
+  let u=prompt('Enter real username:'); if(!u) return; await openOrCreatePrivateChat(u);
 });
-function handleTyping(){
-  if(!currentChatId || currentChatType==='group' || currentChatId==='official') return;
-  if(!currentChatOther) return;
-  try{ setDoc(doc(db,"typing",currentChatId),{from:currentUsername,to:currentChatOther,time:serverTimestamp()},{merge:true}); }catch(e){}
-  clearTimeout(typingTimeout); typingTimeout=setTimeout(()=>{ try{ deleteDoc(doc(db,"typing",currentChatId)); }catch(e){} }, 3000);
-}document.getElementById('imageInput').addEventListener('change', async(e)=>{
+document.getElementById('imageInput').addEventListener('change', async(e)=>{
   let file=e.target.files[0]; if(!file) return;
-  if(!navigator.onLine){ alert('📴 Offline — cannot send images until data returns'); return; }
   try{
     let base64=await compressImage(file, 600, 0.7);
-    let colName = currentChatId==='official'? 'announcements' : (currentChatType==='private'? 'private_messages' : 'group_messages');
+    let colName = currentChatId==='official'?'announcements':(currentChatType==='private'?'private_messages':'group_messages');
     let payload={ chatId:currentChatId, sender:currentUsername, text:'', type:'image', imageBase64:base64, time:serverTimestamp(), deletedFor:[], readBy:[currentUsername] };
-    if(replyingTo) payload.replyTo=replyingTo;
-    // optimistic image
-    let tempDiv=document.createElement('div'); tempDiv.className='bubble me image-bubble'; tempDiv.innerHTML='<img src="data:image/jpeg;base64,'+base64+'" style="max-width:220px;border-radius:10px">'; document.getElementById('msgs').appendChild(tempDiv); document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;
+    let temp=document.createElement('div'); temp.className='bubble me image-bubble'; temp.innerHTML='<img src="data:image/jpeg;base64,'+base64+'" style="max-width:220px;border-radius:10px">'; document.getElementById('msgs').appendChild(temp); document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;
     await addDoc(collection(db,colName), payload);
-    clearReply();
-  }catch(err){ alert('Image fail: '+err.message); }
-  e.target.value='';
+  }catch(err){ alert('Image fail: '+err.message); } e.target.value='';
 });
 document.getElementById('imgBtn').addEventListener('click',()=>document.getElementById('imageInput').click());
 async function startRecording(){
-  if(!navigator.onLine){ alert('📴 Offline — cannot send voice until data returns'); return; }
   try{
     let stream=await navigator.mediaDevices.getUserMedia({audio:true});
     mediaRecorder=new MediaRecorder(stream); audioChunks=[]; isRecording=true;
-    document.getElementById('micBtn').classList.add('recording');
-    document.getElementById('recordingBar').classList.add('active');
-    document.getElementById('msgInput').style.display='none';
+    document.getElementById('micBtn').classList.add('recording'); document.getElementById('recordingBar').classList.add('active'); document.getElementById('msgInput').style.display='none';
     recStartTime=Date.now();
-    recTimerInterval=setInterval(()=>{ let sec=Math.floor((Date.now()-recStartTime)/1000); document.getElementById('recTimer').textContent=formatTime(sec); if(sec>=MAX_DURATION) stopRecording(true); },500);
+    recTimerInterval=setInterval(()=>{ let sec=Math.floor((Date.now()-recStartTime)/1000); document.getElementById('recTimer').textContent=formatTime(sec); if(sec>=30) stopRecording(true); },500);
     mediaRecorder.ondataavailable=e=>{ if(e.data.size>0) audioChunks.push(e.data); };
     mediaRecorder.onstop=async()=>{
       clearInterval(recTimerInterval); document.getElementById('micBtn').classList.remove('recording'); document.getElementById('recordingBar').classList.remove('active'); document.getElementById('msgInput').style.display='block';
-      let blob=new Blob(audioChunks,{type:'audio/webm'}); let duration=Math.floor((Date.now()-recStartTime)/1000);
-      if(duration<1){ isRecording=false; return; }
-      let reader=new FileReader(); reader.onloadend=async()=>{
-        let base64=reader.result.split(',')[1];
-        let colName = currentChatType==='private'? 'private_messages' : 'group_messages';
-        let payload={ chatId:currentChatId, sender:currentUsername, text:'', type:'voice', audioBase64:base64, duration:duration, time:serverTimestamp(), deletedFor:[], readBy:[currentUsername] };
-        if(replyingTo) payload.replyTo=replyingTo;
-        await addDoc(collection(db,colName), payload);
-        clearReply();
-      }; reader.readAsDataURL(blob);
+      let blob=new Blob(audioChunks,{type:'audio/webm'}); let dur=Math.floor((Date.now()-recStartTime)/1000); if(dur<1){ isRecording=false; return; }
+      let reader=new FileReader(); reader.onloadend=async()=>{ let base64=reader.result.split(',')[1]; let colName = currentChatType==='private'?'private_messages':'group_messages'; let payload={ chatId:currentChatId, sender:currentUsername, text:'', type:'voice', audioBase64:base64, duration:dur, time:serverTimestamp(), deletedFor:[], readBy:[currentUsername] }; await addDoc(collection(db,colName), payload); }; reader.readAsDataURL(blob);
       isRecording=false; mediaRecorder.stream.getTracks().forEach(t=>t.stop());
     };
     mediaRecorder.start();
-  }catch(e){ alert('Mic permission needed'); }
+  }catch(e){ alert('Mic needed'); }
 }
-function stopRecording(send){
-  if(mediaRecorder && isRecording){ if(send) mediaRecorder.stop(); else { mediaRecorder.stream.getTracks().forEach(t=>t.stop()); mediaRecorder=null; isRecording=false; document.getElementById('micBtn').classList.remove('recording'); document.getElementById('recordingBar').classList.remove('active'); document.getElementById('msgInput').style.display='block'; clearInterval(recTimerInterval); } }
-}
-document.getElementById('micBtn').addEventListener('mousedown',()=>{ startRecording(); });
-document.getElementById('micBtn').addEventListener('mouseup',()=>{ stopRecording(true); });
-document.getElementById('micBtn').addEventListener('touchstart',(e)=>{ e.preventDefault(); startRecording(); });
-document.getElementById('micBtn').addEventListener('touchend',(e)=>{ e.preventDefault(); stopRecording(true); });
-document.getElementById('profileInput').addEventListener('change', async(e)=>{
-  let file=e.target.files[0]; if(!file) return;
-  try{ let base64=await compressImage(file, 200, 0.6); await setDoc(doc(db,"profiles",currentUsername),{username:currentUsername,avatarBase64:base64,updated:serverTimestamp()},{merge:true}); }catch(err){ alert('Profile upload fail'); }
-});
-document.getElementById('myProfileBtn').addEventListener('click',()=>{ document.getElementById('profileInput').click(); });
+function stopRecording(send){ if(mediaRecorder && isRecording){ if(send) mediaRecorder.stop(); else { mediaRecorder.stream.getTracks().forEach(t=>t.stop()); mediaRecorder=null; isRecording=false; document.getElementById('micBtn').classList.remove('recording'); document.getElementById('recordingBar').classList.remove('active'); document.getElementById('msgInput').style.display='block'; clearInterval(recTimerInterval); } } }
+document.getElementById('micBtn').addEventListener('mousedown',()=>startRecording()); document.getElementById('micBtn').addEventListener('mouseup',()=>stopRecording(true));
+document.getElementById('micBtn').addEventListener('touchstart',(e)=>{ e.preventDefault(); startRecording(); }); document.getElementById('micBtn').addEventListener('touchend',(e)=>{ e.preventDefault(); stopRecording(true); });
+document.getElementById('profileInput').addEventListener('change', async(e)=>{ let file=e.target.files[0]; if(!file) return; try{ let b64=await compressImage(file,200,0.6); await setDoc(doc(db,"profiles",currentUsername),{username:currentUsername,avatarBase64:b64,updated:serverTimestamp()},{merge:true}); }catch(err){} });
+document.getElementById('myProfileBtn').addEventListener('click',()=>document.getElementById('profileInput').click());
 function openProfileModal(username){
   let prof=profilesCache[username]; let pres=presenceCache[username];
   document.getElementById('profileModalName').textContent=username;
-  let statusEl=document.getElementById('profileModalStatus');
-  if(isUserOnline(pres)){ statusEl.textContent='online'; statusEl.style.color='#53bdeb'; } else { statusEl.textContent=pres && pres.lastSeen? formatLastSeen(pres.lastSeen):'offline'; statusEl.style.color='#8b8ba7'; }
-  let img=document.getElementById('profileModalImg'); let fallback=document.getElementById('profileModalFallback');
-  if(prof && prof.avatarBase64){ img.src='data:image/jpeg;base64,'+prof.avatarBase64; img.style.display='block'; fallback.style.display='none'; } else { img.style.display='none'; fallback.style.display='flex'; fallback.textContent=username.slice(0,2).toUpperCase(); }
+  document.getElementById('profileModalStatus').textContent=isUserOnline(pres)?'online':(pres?.lastSeen?formatLastSeen(pres.lastSeen):'offline');
+  let img=document.getElementById('profileModalImg'); let fb=document.getElementById('profileModalFallback');
+  if(prof && prof.avatarBase64){ img.src='data:image/jpeg;base64,'+prof.avatarBase64; img.style.display='block'; fb.style.display='none'; } else { img.style.display='none'; fb.style.display='flex'; fb.textContent=username.slice(0,2).toUpperCase(); }
   let actions=document.getElementById('profileModalActions'); actions.innerHTML='';
-  let chatBtn=document.createElement('button'); chatBtn.className='profile-modal-btn primary'; chatBtn.textContent='💬 Chat'; chatBtn.onclick=()=>{ closeProfileModal(); if(username!==currentUsername){ openOrCreatePrivateChat(username); } };
-  actions.appendChild(chatBtn);
+  let btn=document.createElement('button'); btn.className='profile-modal-btn primary'; btn.textContent='💬 Chat'; btn.onclick=()=>{ closeProfileModal(); openOrCreatePrivateChat(username); }; actions.appendChild(btn);
   document.getElementById('profileModal').classList.add('active');
 }
 function closeProfileModal(){ document.getElementById('profileModal').classList.remove('active'); }
 document.getElementById('closeProfileBtn').addEventListener('click', closeProfileModal);
-document.getElementById('profileModal').addEventListener('click',(e)=>{ if(e.target.id==='profileModal') closeProfileModal(); });
-// FIXED: REAL USER CHECK - NO MORE FAKE JAMES/THOMAS
-async function openOrCreatePrivateChat(other){
-  other=cleanU(other);
-  if(other===currentUsername){ alert('Cannot chat with yourself'); return; }
-  // CHECK IF REAL USER EXISTS
-  try{
-    let qUser=query(collection(db,"users"), where("username","==", other));
-    let snap=await getDocs(qUser);
-    if(snap.empty){
-      alert('❌ No user found: "'+other+'" — User does not exist in DANKCONNECT. Please check spelling.');
-      return;
-    }
-  }catch(e){ console.log('user check fail', e); }
-  let existing=cachePrivate.find(c=>{ let p=c.data.participants; return p.includes(other) && p.includes(currentUsername); });
-  if(existing){ openChat(existing.id,'private',other); }
-  else {
-    try{
-      let newChat=await addDoc(collection(db,"private_chats"),{participants:[currentUsername,other],created:serverTimestamp(),lastMessage:'',lastTime:serverTimestamp(),unread:{}});
-      openChat(newChat.id,'private',other);
-    }catch(e){ alert('Chat create failed: '+e.message); }
-  }
-}
-document.getElementById('newChatBtn').addEventListener('click',async()=>{
-  let u=prompt('Enter username to chat (real user only):'); if(!u) return; u=cleanU(u); if(!u){ alert('Invalid username'); return; }
-  await openOrCreatePrivateChat(u);
-});
 function openGroupInfo(groupId){
   let g=cacheGroups.find(g=>g.id===groupId); if(!g) return;
   document.getElementById('groupInfoName').textContent=g.data.name; document.getElementById('groupInfoAv').textContent=g.data.name.slice(0,2).toUpperCase(); document.getElementById('groupInfoCount').textContent=g.data.members.length+' members';
   let list=document.getElementById('groupInfoList'); list.innerHTML='';
-  g.data.members.forEach(m=>{
-    let prof=profilesCache[m]; let row=document.createElement('div'); row.className='member-row';
-    let avHtml=prof && prof.avatarBase64? '<div class="member-av"><img src="data:image/jpeg;base64,'+prof.avatarBase64+'"></div>' : '<div class="member-av">'+m.slice(0,2).toUpperCase()+'</div>';
-    let role=g.data.admins.includes(m)? 'admin' : 'member';
-    row.innerHTML=avHtml+'<div class="member-info"><div class="member-name">'+m+'</div><div class="member-role role-'+role+'">'+role+'</div></div>';
-    if(g.data.admins.includes(currentUsername) && m!==currentUsername){
-      let rm=document.createElement('button'); rm.className='remove-btn'; rm.textContent='Remove'; rm.onclick=async(e)=>{ e.stopPropagation(); try{ let ref=doc(db,"group_chats",groupId); let updated=g.data.members.filter(x=>x!==m); await updateDoc(ref,{members:updated}); }catch(e){} }; row.appendChild(rm);
-    }
-    row.onclick=()=>{ if(m!==currentUsername) { document.getElementById('groupInfoModal').classList.remove('active'); openProfileModal(m); } };
-    list.appendChild(row);
-  });
+  g.data.members.forEach(m=>{ let row=document.createElement('div'); row.className='member-row'; row.innerHTML='<div class="member-av">'+m.slice(0,2).toUpperCase()+'</div><div class="member-info"><div class="member-name">'+m+'</div></div>'; row.onclick=()=>{ document.getElementById('groupInfoModal').classList.remove('active'); openProfileModal(m); }; list.appendChild(row); });
   document.getElementById('groupInfoModal').classList.add('active');
-  document.getElementById('addMembersBtn').onclick=async()=>{
-    let mem=prompt('Add members comma separated:'); if(!mem) return; let members=mem.split(',').map(x=>cleanU(x)).filter(x=>x); let all=[...new Set([...g.data.members,...members])]; try{ await updateDoc(doc(db,"group_chats",groupId),{members:all}); }catch(e){}
-  };
-  document.getElementById('leaveGroupBtn').onclick=async()=>{
-    if(!confirm('Leave group?')) return; try{ let updated=g.data.members.filter(x=>x!==currentUsername); await updateDoc(doc(db,"group_chats",groupId),{members:updated}); document.getElementById('groupInfoModal').classList.remove('active'); document.getElementById('chatView').style.display='none'; document.getElementById('mainView').style.display='flex'; }catch(e){}
-  };
 }
 document.getElementById('closeGroupInfoBtn').addEventListener('click',()=>document.getElementById('groupInfoModal').classList.remove('active'));
-document.getElementById('groupInfoModal').addEventListener('click',(e)=>{ if(e.target.id==='groupInfoModal') e.currentTarget.classList.remove('active'); });
-let currentCall=null, localStream=null, remoteStream=null, pc=null, callTimerInt=null, callSeconds=0;
+let currentCall=null, localStream=null, callTimerInt=null, callSeconds=0;
 async function startCall(type){
-  if(!currentChatOther || currentChatType!=='private'){ alert('Voice/video only for private chats'); return; }
-  if(!navigator.onLine){ alert('📴 Offline — cannot call'); return; }
+  if(!currentChatOther){ alert('Private chats only'); return; }
   try{
-    localStream=await navigator.mediaDevices.getUserMedia({audio:true, video: type==='video'});
-    document.getElementById('activeAv').textContent=currentChatOther.slice(0,2).toUpperCase();
-    document.getElementById('activeName').textContent=currentChatOther;
-    document.getElementById('activeStatus').textContent=type==='video'?'Video calling...':'Calling...';
-    document.getElementById('activeCall').classList.add('active');
-    document.getElementById('localVideo').srcObject=localStream;
-    let callDoc=await addDoc(collection(db,"calls"),{from:currentUsername,to:currentChatOther,type:type,status:'calling',time:serverTimestamp()});
-    currentCall=callDoc.id;
-    callSeconds=0; callTimerInt=setInterval(()=>{ callSeconds++; let m=Math.floor(callSeconds/60); let s=callSeconds%60; document.getElementById('callTimer').textContent=(m<10?'0'+m:m)+':'+(s<10?'0'+s:s); },1000);
-    unsubCalls=onSnapshot(doc(db,"calls",callDoc.id),(snap)=>{ if(!snap.exists()){ endCall(); } else { let d=snap.data(); if(d.status==='declined'){ alert('Call declined'); endCall(); } if(d.status==='ended'){ endCall(); } } });
-  }catch(e){ alert('Call failed: '+e.message); }
+    localStream=await navigator.mediaDevices.getUserMedia({audio:true, video:type==='video'});
+    document.getElementById('activeAv').textContent=currentChatOther.slice(0,2).toUpperCase(); document.getElementById('activeName').textContent=currentChatOther; document.getElementById('activeCall').classList.add('active'); document.getElementById('localVideo').srcObject=localStream;
+    let callDoc=await addDoc(collection(db,"calls"),{from:currentUsername,to:currentChatOther,type:type,status:'calling',time:serverTimestamp()}); currentCall=callDoc.id;
+    callSeconds=0; callTimerInt=setInterval(()=>{ callSeconds++; document.getElementById('callTimer').textContent=formatTime(callSeconds); },1000);
+  }catch(e){ alert('Call fail: '+e.message); }
 }
-function endCall(){
-  if(callTimerInt) clearInterval(callTimerInt);
-  if(localStream) localStream.getTracks().forEach(t=>t.stop());
-  if(pc) pc.close();
-  document.getElementById('activeCall').classList.remove('active');
-  document.getElementById('incomingCall').classList.remove('active');
-  if(currentCall){ try{ updateDoc(doc(db,"calls",currentCall),{status:'ended'}).catch(()=>{}); deleteDoc(doc(db,"calls",currentCall)).catch(()=>{}); }catch(e){} }
-  currentCall=null; if(unsubCalls) unsubCalls();
-}
-document.getElementById('voiceCallBtn').addEventListener('click',()=>startCall('voice'));
-document.getElementById('videoCallBtn').addEventListener('click',()=>startCall('video'));
-document.getElementById('endCallBtn').addEventListener('click', endCall);
-document.getElementById('declineCallBtn').addEventListener('click', async()=>{
-  if(currentCall){ try{ await updateDoc(doc(db,"calls",currentCall),{status:'declined'}); }catch(e){} }
-  document.getElementById('incomingCall').classList.remove('active'); currentCall=null;
-});
-document.getElementById('acceptCallBtn').addEventListener('click', async()=>{
-  document.getElementById('incomingCall').classList.remove('active');
-  document.getElementById('activeCall').classList.add('active');
-  try{ localStream=await navigator.mediaDevices.getUserMedia({audio:true, video:true}); document.getElementById('localVideo').srcObject=localStream; }catch(e){}
-});
-onSnapshot(query(collection(db,"calls"), where("to","==", currentUsername || '___')), (snap)=>{
-  snap.forEach(d=>{
-    let data=d.data(); if(data.status!=='calling') return;
-    currentCall=d.id;
-    document.getElementById('incName').textContent=data.from;
-    document.getElementById('incAv').textContent=data.from.slice(0,2).toUpperCase();
-    document.getElementById('incType').textContent=data.type==='video'?'Incoming video call... 🎥':'Incoming voice call... 📞';
-    document.getElementById('incomingCall').classList.add('active');
-  });
-});
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=26').then(reg => {
-      console.log('SW V26 registered', reg.scope);
-    }).catch(err => console.log('SW fail', err));
-  });
-}
+function endCall(){ if(callTimerInt) clearInterval(callTimerInt); if(localStream) localStream.getTracks().forEach(t=>t.stop()); document.getElementById('activeCall').classList.remove('active'); document.getElementById('incomingCall').classList.remove('active'); if(currentCall){ try{ deleteDoc(doc(db,"calls",currentCall)); }catch(e){} } currentCall=null; }
+document.getElementById('voiceCallBtn').addEventListener('click',()=>startCall('voice')); document.getElementById('videoCallBtn').addEventListener('click',()=>startCall('video')); document.getElementById('endCallBtn').addEventListener('click', endCall);
+document.getElementById('declineCallBtn').addEventListener('click', async()=>{ if(currentCall){ try{ await updateDoc(doc(db,"calls",currentCall),{status:'declined'}); }catch(e){} } document.getElementById('incomingCall').classList.remove('active'); currentCall=null; });
+document.getElementById('acceptCallBtn').addEventListener('click', async()=>{ document.getElementById('incomingCall').classList.remove('active'); document.getElementById('activeCall').classList.add('active'); try{ localStream=await navigator.mediaDevices.getUserMedia({audio:true, video:true}); document.getElementById('localVideo').srcObject=localStream; }catch(e){} });
+onSnapshot(query(collection(db,"calls"), where("to","==", currentUsername||'___')), (snap)=>{ snap.forEach(d=>{ let data=d.data(); if(data.status!=='calling') return; currentCall=d.id; document.getElementById('incName').textContent=data.from; document.getElementById('incAv').textContent=data.from.slice(0,2).toUpperCase(); document.getElementById('incomingCall').classList.add('active'); }); });
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js?v=27').then(r=>console.log('SW V27')).catch(()=>{}); }); }
 </script>
 </body></html>
