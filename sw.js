@@ -1,22 +1,22 @@
-const CACHE_NAME = 'dankconnect-v29';
+const CACHE_NAME = 'dankconnect-v30';
 const ASSETS = [
   './',
-  './index.html?v=29',
+  './index.html?v=30',
   './index.html',
-  './manifest.json?v=29',
+  './manifest.json?v=30',
   './manifest.json',
-  './logo.png?v=29',
+  './logo.png?v=30',
   './logo.png'
 ];
 
 self.addEventListener('install', (e) => {
-  console.log('[SW V29] Install');
+  console.log('[SW V30] Install');
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS).catch(err=>console.log('cache fail',err))));
 });
 
 self.addEventListener('activate', (e) => {
-  console.log('[SW V29] Activate');
+  console.log('[SW V30] Activate');
   e.waitUntil(
     caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())
   );
@@ -36,7 +36,7 @@ self.addEventListener('fetch', (e) => {
         const copy = res.clone();
         caches.open(CACHE_NAME).then(c=>c.put(req, copy));
         return res;
-      }).catch(() => caches.match('./index.html') || caches.match('./index.html?v=29') || caches.match(req))
+      }).catch(() => caches.match('./index.html') || caches.match('./index.html?v=30') || caches.match(req))
     );
     return;
   }
