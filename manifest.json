@@ -1,31 +1,24 @@
 {
-  "name": "DANKCONNECT - Ghana's Secure Chat",
+  "name": "DANKCONNECT - V26 True Offline",
   "short_name": "DANKCONNECT",
-  "description": "Ghana's Secure Chat 🇬🇭 - Username only - V21 Locked",
-  "start_url": "./index.html?v=21",
+  "description": "V26 True Offline - Ghana's Secure Chat",
+  "start_url": "./index.html?v=26",
   "display": "standalone",
   "background_color": "#0d00b3",
   "theme_color": "#0d00b3",
-  "scope": "./",
-  "gcm_sender_id": "103953800507",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "logo.png?v=21",
+      "src": "logo.png?v=26",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png?v=21",
+      "src": "logo.png?v=26",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "apple-touch-icon.png?v=21",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any"
     }
   ]
 }
