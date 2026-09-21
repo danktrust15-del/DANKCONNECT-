@@ -1,4 +1,56 @@
-const CACHE_NAME='dankconnect-v2';
-const urlsToCache=['./','./index.html','./manifest.json','./logo.png','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(urlsToCache)))});
-self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});
+const CACHE_NAME = 'dankconnect-v26';
+const ASSETS = [
+  './',
+  './index.html?v=26',
+  './index.html',
+  './manifest.json?v=26',
+  './manifest.json',
+  './logo.png?v=26',
+  './logo.png'
+];
+
+self.addEventListener('install', (e) => {
+  console.log('[SW V26] Install');
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS).catch(err=>console.log('cache fail',err))));
+});
+
+self.addEventListener('activate', (e) => {
+  console.log('[SW V26] Activate');
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+  const url = new URL(req.url);
+
+  if (url.hostname.includes('firestore') || url.hostname.includes('firebase') || url.hostname.includes('googleapis') || url.pathname.includes('fcm') || req.method !== 'GET') {
+    return;
+  }
+
+  if (req.mode === 'navigate') {
+    e.respondWith(
+      fetch(req).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then(c=>c.put(req, copy));
+        return res;
+      }).catch(() => caches.match('./index.html') || caches.match('./index.html?v=26') || caches.match(req))
+    );
+    return;
+  }
+
+  e.respondWith(
+    caches.match(req).then(cached => {
+      if (cached) return cached;
+      return fetch(req).then(res => {
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(c=>c.put(req, copy));
+        }
+        return res;
+      }).catch(()=>cached);
+    })
+  );
+});
