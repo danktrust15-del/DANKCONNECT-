@@ -300,7 +300,9 @@ window.handleDankTypedMessage = async function(userText){
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({contents:[{parts:[{text:`You are DANK? Assistant inside DankConnect chat app. Be friendly, short (under 70 words), Ghanaian vibe. Question: ${text}`}]}]})
       });
+    const tt=document.getElementById('dankTyping'); if(tt) tt.remove();
       const data = await res.json();
+     console.log("Gemini says:", data);
       reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I no get answer now, try again.";
     }catch(e){ reply = "Network slow, check internet and try again."; }
   }
