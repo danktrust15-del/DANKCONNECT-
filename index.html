@@ -274,24 +274,49 @@ window.dankBrainReply = function(userText){
   return "<b>🤔 I'm not sure I understand.</b><br><br>Please try rephrasing your question, or tap the button below to talk directly to DankBoss for human support.";
 };
 
-window.handleDankTypedMessage = function(userText){
+// ========= V49 ULTIMATE BRAIN - GEMINI FREE =========
+const GEMINI_API_KEY = "AQ.Ab8RN6Jak4dry_M7cEe86ZxSx4IMZd46cszCY24_HsXTLTOTUg";
+
+window.handleDankTypedMessage = async function(userText){
   const chatArea=document.getElementById('msgs'); if(!chatArea) return;
-  // typing effect
+  const text = userText;
+  const q = text.toLowerCase();
+
   const typing=document.createElement('div'); typing.className='bubble other'; typing.id='dankTyping';
   typing.style.cssText='background:#eef0ff;padding:10px 12px;border-radius:12px;margin:8px;max-width:80%;color:#000!important';
-  typing.innerHTML="<span style='color:#555'>Dank Assistant is typing...</span>"; chatArea.appendChild(typing); chatArea.scrollTop=chatArea.scrollHeight;
+  typing.innerHTML="<span style='color:#555'>Dank Assistant is typing...</span>"; chatArea.appendChild(typing);
+  chatArea.scrollTop=chatArea.scrollHeight;
+
+  let reply = "";
+  const t = q.trim();
+
+  if(t.includes('password')||t.includes('forgot')) reply = "<b>🔑 Password Reset:</b><br><br>Go to Login > Forgot Password. Enter your email.";
+  else if(t.includes('private')||t.includes('safe')||t.includes('secret')||t.includes('secure')) reply = "<b>🔒 Yes, your chats are private.</b><br><br>Private chats are visible only to you and the recipient.";
+  else if(t.includes('dankboss')||t.includes('admin')||t.includes('owner')||t.includes('human')||t.includes('support')) reply = "CONNECT_TO_DANKBOSS";
+  else {
+    try{
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({contents:[{parts:[{text:`You are DANK? Assistant inside DankConnect chat app. Be friendly, short (under 70 words), Ghanaian vibe. Question: ${text}`}]}]})
+      });
+      const data = await res.json();
+      reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I no get answer now, try again.";
+    }catch(e){ reply = "Network slow, check internet and try again."; }
+  }
+
   setTimeout(()=>{
-    const t=document.getElementById('dankTyping'); if(t) t.remove();
-    const answer = window.dankBrainReply(userText);
-    if(answer==="CONNECT_TO_DANKBOSS"){
-      const d=document.createElement('div'); d.className='bubble other'; d.style.cssText='background:#eef0ff;padding:10px 12px;border-radius:12px;margin:8px;max-width:80%;color:#000!important'; d.innerHTML="<span style='color:#000'>Connecting you to DankBoss now...</span>"; chatArea.appendChild(d); chatArea.scrollTop=chatArea.scrollHeight; setTimeout(()=>{ openOrCreatePrivateChat('dankboss'); },700); return;
+    const tt=document.getElementById('dankTyping'); if(tt) tt.remove();
+    if(reply==="CONNECT_TO_DANKBOSS"){
+      const d=document.createElement('div'); d.className='bubble other'; d.style.cssText='background:#eef0ff;padding:10px 12px;border-radius:12px;margin:8px;max-width:80%;color:#000!important'; d.innerHTML="<span style='color:#000'>Connecting you to DankBoss now...</span>";
+      chatArea.appendChild(d); chatArea.scrollTop=chatArea.scrollHeight; setTimeout(()=>{ openOrCreatePrivateChat('dankboss'); },700); return;
     }
     const div=document.createElement('div'); div.className='bubble other'; div.style.cssText='background:#eef0ff;padding:10px 12px;border-radius:12px;margin:8px;max-width:80%;color:#000!important';
-    div.innerHTML = answer + `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"><button onclick="handleDankReply('how')" style="padding:6px 10px;border-radius:16px;border:1px solid #0000CD;background:#fff;color:#0000CD;font-size:11px">How it works?</button><button onclick="handleDankReply('connect')" style="padding:6px 10px;border-radius:16px;background:#0000CD;color:#fff;font-size:11px">Talk to DankBoss</button></div>`;
+    div.innerHTML = reply;
     chatArea.appendChild(div); chatArea.scrollTop=chatArea.scrollHeight;
   },800);
 };
-// === END V48 BRAIN ===
+// ========= END V49 =========
 document.getElementById('newChatBtn').addEventListener('click',async()=>{let u=prompt('Enter REAL username:'); if(!u) return; await openOrCreatePrivateChat(u);});document.getElementById('imageInput').addEventListener('change', async(e)=>{let file=e.target.files[0]; if(!file) return;if(freeMode){ showPushToast('Free Mode ON','Image blocked'); e.target.value=''; return; }try{let base64=await compressImage(file, 700, 0.7);let colName = currentChatId==='official'?'announcements':(currentChatType==='private'?'private_messages':'group_messages');let payload={ chatId:currentChatId, sender:currentUsername, text:'', type:'image', imageBase64:base64, time:serverTimestamp(), deletedFor:[], readBy:[currentUsername] };let temp=document.createElement('div'); temp.className='bubble me image-bubble'; temp.innerHTML='<img src="data:image/jpeg;base64,'+base64+'" style="max-width:220px;border-radius:10px">'; document.getElementById('msgs').appendChild(temp); document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;await addDoc(collection(db,colName), payload);if(currentChatId!=='official' && currentChatType==='private'){let curUnread=0; let cached=cachePrivate.find(c=>c.id===currentChatId); if(cached && cached.data.unread && cached.data.unread[currentChatOther]) curUnread=cached.data.unread[currentChatOther];let ref=doc(db,"private_chats", currentChatId); await updateDoc(ref, {lastMessage:'📷 Image', lastTime:serverTimestamp(), ['unread.'+currentChatOther]:curUnread+1});}}catch(err){ alert('Image fail: '+err.message); } e.target.value='';});
 document.getElementById('imgBtn').addEventListener('click',()=>{if(freeMode){ showPushToast('Free Mode ON','Photo blocked'); return; }document.getElementById('imageInput').click()});
 function getSupportedMime(){ if(typeof MediaRecorder==='undefined') return ''; if(MediaRecorder.isTypeSupported('audio/mp4')) return 'audio/mp4'; if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) return 'audio/webm;codecs=opus'; if(MediaRecorder.isTypeSupported('audio/webm')) return 'audio/webm'; if(MediaRecorder.isTypeSupported('audio/aac')) return 'audio/aac'; return ''; }
