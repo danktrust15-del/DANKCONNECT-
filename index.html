@@ -674,17 +674,17 @@ function openShopProducts(market,shopId,shopName){
 }
 window.addToCart=function(name,price){ cart.push({name,price}); document.getElementById('cartBar').style.display='flex'; document.getElementById('cartCount').innerText=cart.length; let total=cart.reduce((s,i)=>s+i.price,0); document.getElementById('cartTotal').innerText=total; };
 window.checkout=function(){ alert('Checkout $'+document.getElementById('cartTotal').innerText+' for '+currentShop); cart=[]; document.getElementById('cartBar').style.display='none'; };
-window.handleShopClick = async function(market, id){
+window.handleShopClick = function(market, id){
   let rented = rentedShops[market] && rentedShops[market][id];
   if(rented){ openShopProducts(market,id,rented); return; }
-  if(!confirm('Rent Shop #'+id+' in '+market+' Market for $100? This will contact DankBoss for payment.')) return;
+  if(!confirm('Rent Shop #'+id+' in '+market+' Market for $100?')) return;
 
-  // GET USERNAME CORRECTLY - from your app variable, not localStorage
-  let currentUser = (typeof currentUsername!== 'undefined'? currentUsername : window.currentUsername) || localStorage.getItem('username') || localStorage.getItem('userName') || 'buyer';
-  console.log('Current user is:', currentUser);
+  // Get username from your app
+  let currentUser = (typeof currentUsername!== 'undefined' && currentUsername)? currentUsername : (window.currentUsername || 'buyer');
+  console.log('Buyer:', currentUser);
 
   if(currentUser.toLowerCase() === 'dankboss'){
-    alert("You are DankBoss 😅");
+    alert("You are DankBoss");
     return;
   }
 
@@ -695,43 +695,34 @@ window.handleShopClick = async function(market, id){
   pending.push({market, shopId:id, date:new Date().toISOString(), status:'pending_payment'});
   localStorage.setItem('pendingShops',JSON.stringify(pending));
 
+  // Close shops
   try{
     document.getElementById('marketShopsView').style.display='none';
     document.getElementById('generalMarketView').style.display='none';
   }catch(e){}
 
-  // DIRECT OPEN - NO SEARCH, NO QUERY, JUST OPEN
-  try{
-    let targetUser = 'dankboss'; // lower case - how it is in your DB
-    let chatId=[currentUser.toLowerCase(), targetUser].sort().join('_');
-    console.log('Opening chat:', chatId);
+  // DIRECT OPEN - NO doc, NO Firebase query - just openChat
+  let targetUser = 'dankboss';
+  let chatId=[currentUser.toLowerCase(), targetUser].sort().join('_');
 
-    // Create chat doc if not exists
-    let ref=doc(db,"private_chats",chatId);
-    let snap=await getDoc(ref);
-    if(!snap.exists()){
-      await setDoc(ref,{participants:[currentUser.toLowerCase(), targetUser], lastMessage:'', lastTime:serverTimestamp(), unread:{}});
+  // This function already exists in your code and works!
+  openChat(chatId,'private',targetUser);
+
+  // Fill message box after 0.8 sec
+  setTimeout(()=>{
+    let input = document.getElementById('messageInput') || document.querySelector('#chatInput') || document.querySelector('input[placeholder*="Type"]') || document.querySelector('textarea');
+    if(input){
+      input.value = msg;
+      input.focus();
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      input.dispatchEvent(new Event('change',{bubbles:true}));
+      console.log('Message filled!');
+    } else {
+      console.log('Input not found, copying');
+      try{ navigator.clipboard.writeText(msg); }catch(e){}
+      alert('Chat opened! Message copied:\n\n'+msg+'\n\nPaste and SEND');
     }
-
-    // OPEN IT
-    openChat(chatId,'private',targetUser);
-
-    setTimeout(()=>{
-      let input=document.getElementById('messageInput') || document.querySelector('input[placeholder*="Type a message"]') || document.getElementById('chatInput') || document.querySelector('textarea');
-      if(input){
-        input.value=msg;
-        input.focus();
-        input.dispatchEvent(new Event('input',{bubbles:true}));
-        input.style.border='2px solid #00ff00';
-      }
-    }, 900);
-
-  }catch(err){
-    console.error('Chat open failed:', err);
-    // FALLBACK - at least copy message
-    try{ navigator.clipboard.writeText(msg); }catch(e){}
-    alert('Error: '+err.message+'\n\nMessage copied:\n'+msg);
-  }
+  }, 800);
 }
 document.getElementById('backToMarketShops').onclick=function(){ document.getElementById('shopProductsView').style.display='none'; document.getElementById('marketShopsView').style.display='flex'; };
 window.openContactSeller=function(){ document.getElementById('contactModal').style.display='flex'; document.getElementById('contactShopName').innerText=currentShop; };
