@@ -706,7 +706,10 @@ window.sellerAddProduct = function(){
   let products = JSON.parse(localStorage.getItem('sellerProducts_'+currentShop)||'[]');
   products.push({name:name, price:price, img:img});
   localStorage.setItem('sellerProducts_'+currentShop, JSON.stringify(products));
-  document.getElementById('sProdName').value=''; document.getElementById('sProdPrice').value=''; document.getElementById('sProdImg').value='';
+  document.getElementById('sProdName').value='';
+document.getElementById('sProdPrice').value=''; document.getElementById('sProdImg').value='';
+document.getElementById('sProdPreview').style.display='none';
+document.getElementById('sProdFile').value='';
   loadSellerMyProducts();
   alert('Product added to '+currentShop+'!');
 }
