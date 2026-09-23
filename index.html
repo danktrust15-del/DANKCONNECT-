@@ -328,18 +328,17 @@ window.handleDankTypedMessage = async function(userText){
    }
  }
 
- // SHOW REPLY
- const box = document.getElementById('dankMessages') || document.getElementById('chatMessages') || document.getElementById('messages') || document.getElementById('chat-box') || document.querySelector('.chat-messages');
+ // SHOW REPLY - BLUE BUBBLE
+ const box = document.getElementById('msgs');
+ const replyHTML = `<div class="bubble other" style="background:#0084FF; color:white; padding:12px 14px; border-radius:18px 18px 18px 4px; margin:10px; max-width:80%; box-shadow:0 2px 8px rgba(0,132,255,0.4); font-family:system-ui; line-height:1.4;"><b style="color:#fff;">🤖 Dank Assistant:</b><br><br>${reply}</div>`;
+ if(box){
+   box.insertAdjacentHTML('beforeend', replyHTML);
+   box.scrollTop = box.scrollHeight;
+ }
  const typing = document.getElementById('dankTyping');
  if(typing) typing.remove();
- if(box){
-   box.innerHTML += `<div style="margin:10px 0; padding:10px; background:#1a1a1a; border-radius:10px; color:white; border-left:3px solid #a855f7;"><b style="color:#a855f7;">Dank Assistant:</b><br>${reply}</div>`;
-   box.scrollTop = box.scrollHeight;
- } else {
-   alert(reply);
-   console.log("DANK REPLY (box not found):", reply);
- }
-};// ========= END V49 =========
+};
+// ========= END V49 =========
 document.getElementById('newChatBtn').addEventListener('aclick',async()=>{let u=prompt('Enter REAL username:'); if(!u) return; await openOrCreatePrivateChat(u);});document.getElementById('imageInput').addEventListener('change', async(e)=>{let file=e.target.files[0]; if(!file) return;if(freeMode){ showPushToast('Free Mode ON','Image blocked'); e.target.value=''; return; }try{let base64=await compressImage(file, 700, 0.7);let colName = currentChatId==='official'?'announcements':(currentChatType==='private'?'private_messages':'group_messages');let payload={ chatId:currentChatId, sender:currentUsername, text:'', type:'image', imageBase64:base64, time:serverTimestamp(), deletedFor:[], readBy:[currentUsername] };let temp=document.createElement('div'); temp.className='bubble me image-bubble'; temp.innerHTML='<img src="data:image/jpeg;base64,'+base64+'" style="max-width:220px;border-radius:10px">'; document.getElementById('msgs').appendChild(temp); document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;await addDoc(collection(db,colName), payload);if(currentChatId!=='official' && currentChatType==='private'){let curUnread=0; let cached=cachePrivate.find(c=>c.id===currentChatId); if(cached && cached.data.unread && cached.data.unread[currentChatOther]) curUnread=cached.data.unread[currentChatOther];let ref=doc(db,"private_chats", currentChatId); await updateDoc(ref, {lastMessage:'📷 Image', lastTime:serverTimestamp(), ['unread.'+currentChatOther]:curUnread+1});}}catch(err){ alert('Image fail: '+err.message); } e.target.value='';});
 document.getElementById('imgBtn').addEventListener('click',()=>{if(freeMode){ showPushToast('Free Mode ON','Photo blocked'); return; }document.getElementById('imageInput').click()});
 function getSupportedMime(){ if(typeof MediaRecorder==='undefined') return ''; if(MediaRecorder.isTypeSupported('audio/mp4')) return 'audio/mp4'; if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) return 'audio/webm;codecs=opus'; if(MediaRecorder.isTypeSupported('audio/webm')) return 'audio/webm'; if(MediaRecorder.isTypeSupported('audio/aac')) return 'audio/aac'; return ''; }
