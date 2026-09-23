@@ -658,83 +658,44 @@ function openMarketShops(market){
     grid.innerHTML+=`<div onclick="handleShopClick('${market}',${i})" style="background:#252538; border-radius:14px; padding:12px; cursor:pointer;"><div style="color:white; font-weight:700;">Shop #${i}<br>${rented? rented : 'Available $100'}</div><div style="background:${rented? '#3d5afe':'#1e90ff'}; color:white; padding:6px; border-radius:20px; text-align:center; font-size:12px; margin-top:6px;">${rented? 'Visit':'Rent $100'}</div></div>`;
   }
 }
-window.handleShopClick = async function(market, id){
+window.handleShopClick = function(market, id){
   let rented = rentedShops[market] && rentedShops[market][id];
   if(rented){ openShopProducts(market,id,rented); return; }
   if(!confirm('Rent Shop #'+id+' in '+market+' Market for $100?')) return;
 
-  // Get real username - your app stores it here
   let currentUser = window.currentUsername || (typeof currentUsername!=='undefined'?currentUsername:'') || localStorage.getItem('username') || '';
-  if(!currentUser){
+  if(!currentUser || currentUser.toLowerCase()==='buyer'){
     currentUser = prompt('Enter your username:') || 'buyer';
   }
-
-  if(currentUser.toLowerCase() === 'dankboss'){
+  if(currentUser.toLowerCase()==='dankboss'){
     alert("You are DankBoss");
     return;
   }
 
-  let msg = `Hello DankBoss 👋 I want to rent Shop #${id} in ${market} Market for $100. My username is ${currentUser}. Please send payment details.`;
+  let msg = "Hello DankBoss I want to rent Shop #"+id+" in "+market+" Market for $100. My username is "+currentUser+". Please send payment details.";
 
-  // Close shop view
   try{
     document.getElementById('marketShopsView').style.display='none';
     document.getElementById('generalMarketView').style.display='none';
   }catch(e){}
 
-  try{
-    let target = 'dankboss';
-    let chatId = [currentUser.toLowerCase(), target].sort().join('_');
+  let target = 'dankboss';
+  let chatId = [currentUser.toLowerCase(), target].sort().join('_');
 
-    // Use exposed Firebase
-    let db = window._db;
-    let docFn = window._doc;
-    let getDocFn = window._getDoc;
-    let setDocFn = window._setDoc;
-    let ts = window._serverTimestamp;
-
-    if(db && docFn && getDocFn && setDocFn){
-      // 1. Create private chat with you
-      let chatRef = docFn(db, "private_chats", chatId);
-      let snap = await getDocFn(chatRef);
-      if(!snap.exists()){
-        await setDocFn(chatRef, {
-          participants: [currentUser.toLowerCase(), target],
-          lastMessage: msg,
-          lastTime: ts(),
-          unread: {}
-        });
-      }
-      // 2. Also save to rent_requests so YOU have a list in Firebase
-      let reqRef = docFn(db, "rent_requests", chatId+'_'+id+'_'+market);
-      await setDocFn(reqRef, {
-        buyer: currentUser.toLowerCase(),
-        market: market,
-        shopId: id,
-        amount: 100,
-        message: msg,
-        status: 'pending_payment',
-        createdAt: ts()
-      });
-    }
-
-    // 3. OPEN YOUR DM DIRECTLY - not ASK DANK
+  // Open YOUR DM - this is the function that already works in your app
+  if(typeof openChat === 'function'){
     openChat(chatId, 'private', target);
-
-    // 4. Auto-fill the message box after chat opens
-    setTimeout(()=>{
+    setTimeout(function(){
       let input = document.getElementById('messageInput') || document.getElementById('chatInput') || document.querySelector('input[placeholder*="Type"]') || document.querySelector('textarea');
       if(input){
         input.value = msg;
         input.focus();
-        input.dispatchEvent(new Event('input',{bubbles:true}));
+        let ev = new Event('input',{bubbles:true});
+        input.dispatchEvent(ev);
       }
     }, 800);
-
-  }catch(err){
-    console.error(err);
-    alert('Failed: '+err.message);
-    try{ navigator.clipboard.writeText(msg); }catch(e){}
+  }else{
+    alert('openChat not found! Message:\n\n'+msg);
   }
 }
 document.getElementById('backToMarketShops').onclick=function(){ document.getElementById('shopProductsView').style.display='none'; document.getElementById('marketShopsView').style.display='flex'; };
