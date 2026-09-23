@@ -684,12 +684,44 @@ window.handleShopClick=function(market,id){
     let pending=JSON.parse(localStorage.getItem('pendingShops')||'[]');
     pending.push({market:market, shopId:id, date:new Date().toISOString(), status:'pending_payment'});
     localStorage.setItem('pendingShops',JSON.stringify(pending));
-    let msg=`Hello DankBoss 👋 I want to rent Shop #${id} in ${market} Market for $100. Please send payment details. My username: ${localStorage.getItem('username')||'buyer'}`;
+    let username = localStorage.getItem('username')||localStorage.getItem('userName')||'buyer';
+    let msg=`Hello DankBoss 👋 I want to rent Shop #${id} in ${market} Market for $100. My username is ${username}. Please send payment details.`;
+
+    // Hide shop view
     document.getElementById('marketShopsView').style.display='none';
-    document.getElementById('contactModal').style.display='flex';
-    document.getElementById('contactShopName').innerText='DankBoss - Rent Payment';
-    document.getElementById('contactMsg').value=msg;
-    alert('✅ Request saved! Tap Send Message to contact DankBoss for payment. After payment it will appear in Settings > My Shops');
+    document.getElementById('generalMarketView').style.display='none';
+    document.getElementById('mainView').style.display='flex';
+
+    // 1. Auto search DankBoss
+    let searchBox=document.querySelector('input[placeholder*="Search real users"]');
+    if(searchBox){
+      searchBox.value='DankBoss';
+      searchBox.dispatchEvent(new Event('input',{bubbles:true}));
+      searchBox.dispatchEvent(new Event('keyup',{bubbles:true}));
+    }
+
+    // 2. After 800ms, try to auto-click DankBoss and fill message
+    setTimeout(()=>{
+      // Try to find and click DankBoss user row
+      let users = document.querySelectorAll('[onclick*="DankBoss"], [data-username*="DankBoss"], div, li');
+      for(let el of document.querySelectorAll('*')){
+        if(el.innerText && el.innerText.trim()==='DankBoss' && el.closest('[onclick]')){
+          el.closest('[onclick]').click();
+          break;
+        }
+      }
+      // Fill message input - try all possible ids
+      let msgInput = document.getElementById('messageInput') || document.getElementById('chatInput') || document.querySelector('textarea') || document.querySelector('input[placeholder*="Type a message"]') || document.querySelector('input[placeholder*="Message"]');
+      if(msgInput){
+        msgInput.value=msg;
+        msgInput.focus();
+        msgInput.dispatchEvent(new Event('input',{bubbles:true}));
+      }
+      // Also copy to clipboard as backup
+      try{ navigator.clipboard.writeText(msg); }catch(e){}
+    }, 900);
+
+    alert('✅ Opening DankBoss chat with message ready! Just tap SEND after.');
   }
 }
 document.getElementById('backToMarketShops').onclick=function(){ document.getElementById('shopProductsView').style.display='none'; document.getElementById('marketShopsView').style.display='flex'; };
