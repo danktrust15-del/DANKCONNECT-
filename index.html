@@ -74,19 +74,28 @@
 <div id="authView"><div class="auth-top"><div class="auth-back" id="backToSplashBtn">‹</div><img src="logo.png?v=31" class="auth-logo"></div><div class="auth-box"><h2>Create Account</h2><input id="username" placeholder="Username e.g. dankboy"><input id="password" type="password" placeholder="Password min 6 chars"><button id="loginBtn" class="btn-primary">LOGIN / CREATE ACCOUNT</button><div id="authMsg"></div></div></div>
 <div id="mainView"><div class="m-top"><h1>Chats</h1><div style="display:flex;gap:8px;align-items:center"><div class="icon-btn" id="myProfileBtn"><img id="myAvImg" class="my-av" style="display:none"><span id="myAvTxt">ME</span></div><button id="shopTopBtn">🛒 Shop</button><div class="icon-btn" id="newChatBtn" style="background:white;color:#0d00b3;font-weight:900;font-size:24px">+</div></div></div><div id="pushBanner"><div class="push-text">🔔 Enable notifications</div><button class="push-btn" id="enablePushBtn">Allow</button></div>
 <div class="search-wrap"><div class="sbox"><span>🔍</span><input id="searchInput" placeholder="Search real users"></div></div><div class="filter-chips"><div class="chip active" id="chipAll">All</div><div class="chip" id="chipChats">Unread <span id="unreadCount">0</span></div><div class="chip" id="chipGroups">Groups <span id="groupCount">0</span></div><div class="chip" id="chipAddGroup">+</div></div><div class="list" id="chatList"></div>
-<div id="shopView" style="display:none; flex-direction:column; height:100%; background:#0f0f12;">
-  <div style="background:#2a2af0; padding:14px;">
-    <h2 style="color:white; margin:0;">Market Area</h2>
+<div id="shopView" style="display:none; flex-direction:column; height:100%; background:#0f0f12; overflow-y:auto;">
+  <div style="background:#2a2af0; padding:14px; display:flex; align-items:center; gap:10px; position:sticky; top:0;">
+    <span id="backToFace2" style="cursor:pointer; color:white; font-size:20px;">←</span>
+    <h2 id="shopHeaderTitle" style="color:white; margin:0; font-size:18px;">Market Area</h2>
   </div>
-  <div style="padding:16px;">
+  <div id="face2Content" style="padding:16px;">
     <div id="generalMarketCard" style="background:#1f1f2e; border-radius:24px; padding:40px 20px; text-align:center; border:1px solid #333; cursor:pointer;">
       <div style="width:80px; height:80px; background:#2a2af0; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:36px;">🛒</div>
       <h2 style="color:white; margin:0;">General Market</h2>
-      <p style="color:#aaa; font-size:13px;">All markets • Fashion • Craft • Tech • Food</p>
+      <p style="color:#aaa; font-size:13px;">Tap to enter →</p>
     </div>
   </div>
-</div>
-<div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="settingsBtn"><span>⚙️</span>Settings</div></div></div>
+  <div id="face3Content" style="display:none; padding:16px; flex-direction:column; gap:16px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="marketBtn" data-market="fashion" style="background:#1f1f2e; border-radius:20px; padding:20px; text-align:center; border:1px solid #333;"><div style="font-size:30px;">👗</div><div style="color:white;">Fashion</div></div>
+      <div class="marketBtn" data-market="craft" style="background:#1f1f2e; border-radius:20px; padding:20px; text-align:center; border:1px solid #333;"><div style="font-size:30px;">🎨</div><div style="color:white;">Craft</div></div>
+      <div class="marketBtn" data-market="tech" style="background:#1f1f2e; border-radius:20px; padding:20px; text-align:center; border:1px solid #333;"><div style="font-size:30px;">💻</div><div style="color:white;">Tech</div></div>
+      <div class="marketBtn" data-market="food" style="background:#1f1f2e; border-radius:20px; padding:20px; text-align:center; border:1px solid #333;"><div style="font-size:30px;">🍔</div><div style="color:white;">Food</div></div>
+    </div>
+    <div id="sellerList" style="color:#888; font-size:12px;">Select a market above</div>
+  </div>
+</div><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="settingsBtn"><span>⚙️</span>Settings</div></div></div>
 <div id="chatView"><div class="chat-head" id="chatHead"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div><div id="voiceCallBtn" class="call-btn">📞</div><div id="videoCallBtn" class="call-btn">🎥</div></div><div class="msgs" id="msgs"></div><div id="typingIndicator"><div class="typing-dots"><span></span><span></span><span></span></div><span id="typingText">typing...</span></div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div>
 <div class="input-bar" id="inputBar"><button id="imgBtn">📎</button><input type="text" id="msgInput" placeholder="Type message..."><div class="recording-bar" id="recordingBar"><div class="rec-dot"></div><span class="rec-timer" id="recTimer">0:00</span><span>recording...</span></div><button id="micBtn">🎤</button><button id="sendBtn">➤</button></div>
 <div id="viewOnlyBar">🔒 View-only — Only DankBoss can post</div>
@@ -447,28 +456,84 @@ up();
 (function(){
   const shopView = document.getElementById('shopView');
   const chatList = document.getElementById('chatList');
-  function openShop(){ 
-    if(chatList) chatList.style.display='none'; 
-    if(shopView){ shopView.style.display='flex'; shopView.style.flex='1'; shopView.style.height='100%'; } 
+  function openShop(){
+    if(chatList) chatList.style.display='none';
+    if(shopView){ shopView.style.display='flex'; shopView.style.flex='1'; shopView.style.height='100%'; }
+    var f2=document.getElementById('face2Content');
+    var f3=document.getElementById('face3Content');
+    var ht=document.getElementById('shopHeaderTitle');
+    if(f2) f2.style.display='block';
+    if(f3) f3.style.display='none';
+    if(ht) ht.innerText='Market Area';
   }
-  function closeShop(){ 
-    if(shopView) shopView.style.display='none'; 
-    if(chatList) chatList.style.display='block'; 
+  function closeShop(){
+    if(shopView) shopView.style.display='none';
+    if(chatList) chatList.style.display='block';
+    var f2=document.getElementById('face2Content');
+    var f3=document.getElementById('face3Content');
+    var ht=document.getElementById('shopHeaderTitle');
+    if(f2) f2.style.display='block';
+    if(f3) f3.style.display='none';
+    if(ht) ht.innerText='Market Area';
   }
+  window.closeShop=closeShop; window.openShop=openShop;
   document.addEventListener('click', function(e){
     var t = e.target.innerText || '';
-    if(t.includes('Shop') || (e.target.closest('button') && e.target.closest('button').innerText.includes('Shop'))){ 
-      openShop(); 
+    if(t.includes('Shop') || (e.target.closest('button') && e.target.closest('button').innerText.includes('Shop'))){
+      openShop();
     }
   });
   document.addEventListener('click', function(e){
     var t = e.target.innerText || '';
-    if(t.includes('Chats')){ 
-      closeShop(); 
+    if(t.includes('Chats')){
+      closeShop();
     }
   });
+  // Face2 -> Face3
   var gmCard = document.getElementById('generalMarketCard');
-  if(gmCard){ gmCard.addEventListener('click', function(){ alert('Face 2 works! Ready for Face 3'); }); }
+  var face2 = document.getElementById('face2Content');
+  var face3 = document.getElementById('face3Content');
+  var headerTitle = document.getElementById('shopHeaderTitle');
+  var backBtn = document.getElementById('backToFace2');
+  if(gmCard){
+    gmCard.onclick = function(){
+      if(face2) face2.style.display='none';
+      if(face3){ face3.style.display='flex'; face3.style.flexDirection='column'; }
+      if(headerTitle) headerTitle.innerText='General Market';
+    };
+  }
+  if(backBtn){
+    backBtn.onclick = function(){
+      if(face3 && face3.style.display==='flex'){
+        face3.style.display='none';
+        if(face2) face2.style.display='block';
+        if(headerTitle) headerTitle.innerText='Market Area';
+      } else { closeShop(); }
+    };
+  }
 })();
+var gmCard = document.getElementById('generalMarketCard');
+var face2 = document.getElementById('face2Content');
+var face3 = document.getElementById('face3Content');
+var headerTitle = document.getElementById('shopHeaderTitle');
+var backBtn = document.getElementById('backToFace2');
+if(gmCard){
+  gmCard.onclick = function(){
+    if(face2) face2.style.display='none';
+    if(face3){ face3.style.display='flex'; face3.style.flexDirection='column'; }
+    if(headerTitle) headerTitle.innerText='General Market';
+  };
+}
+if(backBtn){
+  backBtn.onclick = function(){
+    if(face3 && face3.style.display==='flex'){
+      face3.style.display='none';
+      if(face2) face2.style.display='block';
+      if(headerTitle) headerTitle.innerText='Market Area';
+    } else {
+      closeShop();
+    }
+  };
+}
 })();
 </script></body></html>
