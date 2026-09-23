@@ -674,7 +674,24 @@ function openShopProducts(market,shopId,shopName){
 }
 window.addToCart=function(name,price){ cart.push({name,price}); document.getElementById('cartBar').style.display='flex'; document.getElementById('cartCount').innerText=cart.length; let total=cart.reduce((s,i)=>s+i.price,0); document.getElementById('cartTotal').innerText=total; };
 window.checkout=function(){ alert('Checkout $'+document.getElementById('cartTotal').innerText+' for '+currentShop); cart=[]; document.getElementById('cartBar').style.display='none'; };
-window.handleShopClick=function(market,id){ let rented=rentedShops[market]&&rentedShops[market][id]; if(rented){ openShopProducts(market,id,rented); } else { if(confirm('Rent '+market+' Shop #'+id+' for $100?')){ let n=prompt('Shop name:')||'My Shop'; rentedShops[market][id]=n; openMarketShops(market); } } };
+window.handleShopClick=function(market,id){
+  let rented=rentedShops[market]&&rentedShops[market][id];
+  if(rented){
+    openShopProducts(market,id,rented);
+    return;
+  }
+  if(confirm('Rent Shop #'+id+' in '+market+' Market for $100? This will contact DankBoss for payment.')){
+    let pending=JSON.parse(localStorage.getItem('pendingShops')||'[]');
+    pending.push({market:market, shopId:id, date:new Date().toISOString(), status:'pending_payment'});
+    localStorage.setItem('pendingShops',JSON.stringify(pending));
+    let msg=`Hello DankBoss 👋 I want to rent Shop #${id} in ${market} Market for $100. Please send payment details. My username: ${localStorage.getItem('username')||'buyer'}`;
+    document.getElementById('marketShopsView').style.display='none';
+    document.getElementById('contactModal').style.display='flex';
+    document.getElementById('contactShopName').innerText='DankBoss - Rent Payment';
+    document.getElementById('contactMsg').value=msg;
+    alert('✅ Request saved! Tap Send Message to contact DankBoss for payment. After payment it will appear in Settings > My Shops');
+  }
+}
 document.getElementById('backToMarketShops').onclick=function(){ document.getElementById('shopProductsView').style.display='none'; document.getElementById('marketShopsView').style.display='flex'; };
 window.openContactSeller=function(){ document.getElementById('contactModal').style.display='flex'; document.getElementById('contactShopName').innerText=currentShop; };
 window.closeContact=function(){ document.getElementById('contactModal').style.display='none'; };
