@@ -700,6 +700,18 @@ document.getElementById('backToFace2').onclick = function(){
   document.getElementById('face2Content').style.display='block';
   document.getElementById('shopHeaderTitle').innerText='Market Area';
 };
+// FIX SHOP PILL - from screenshot line 75 id=shopTopBtn
+document.getElementById('shopTopBtn').onclick = function(){
+  document.getElementById('chatList').style.display='none';
+  document.getElementById('shopView').style.display='flex';
+  document.getElementById('face2Content').style.display='block';
+  document.getElementById('face3Content').style.display='none';
+  document.getElementById('shopHeaderTitle').innerText='Market Area';
+};
+document.querySelector('#mainView h1').onclick = function(){
+  document.getElementById('shopView').style.display='none';
+  document.getElementById('chatList').style.display='block';
+};
 document.getElementById('backToMarketShops').onclick=function(){ document.getElementById('shopProductsView').style.display='none'; document.getElementById('marketShopsView').style.display='flex'; };
 window.openContactSeller=function(){ document.getElementById('contactModal').style.display='flex'; document.getElementById('contactShopName').innerText=currentShop; };
 window.closeContact=function(){ document.getElementById('contactModal').style.display='none'; };
