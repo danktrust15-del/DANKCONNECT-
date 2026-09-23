@@ -576,19 +576,21 @@ up();
     if(f3) f3.style.display='none';
     if(ht) ht.innerText='Market Area';
   }
-  window.closeShop=closeShop; window.openShop=openShop;
-  document.addEventListener('click', function(e){
-    var t = e.target.innerText || '';
-    if(t.includes('Shop') || (e.target.closest('button') && e.target.closest('button').innerText.includes('Shop'))){
-      openShop();
-    }
-  });
-  document.addEventListener('click', function(e){
-    var t = e.target.innerText || '';
-    if(t.includes('Chats')){
-      closeShop();
-    }
-  });
+window.closeShop=closeShop; window.openShop=openShop;
+document.getElementById('marketPill')?.addEventListener('click', openShop);
+document.getElementById('shopHeaderPill')?.addEventListener('click', openShop);
+document.getElementById('chatsPill')?.addEventListener('click', closeShop);
+
+// OPEN INNER SHOPS
+document.addEventListener('click', function(e){
+  const card = e.target.closest('[data-shop]');
+  if(!card) return;
+  const shopId = card.dataset.shop;
+  // open specific shop
+  document.querySelectorAll('.shopPage').forEach(p=>p.style.display='none');
+  const page = document.getElementById(shopId);
+  if(page){ page.style.display='block'; }
+});
   // Face2 -> Face3
   var gmCard = document.getElementById('generalMarketCard');
   var face2 = document.getElementById('face2Content');
@@ -688,6 +690,16 @@ window.handleShopClick = function(market, id){
     alert('openChat not found! Message:\n\n'+msg);
   }
 }
+document.getElementById('generalMarketCard').onclick = function(){
+  document.getElementById('face2Content').style.display='none';
+  document.getElementById('face3Content').style.display='flex';
+  document.getElementById('shopHeaderTitle').innerText='Sub-Markets';
+};
+document.getElementById('backToFace2').onclick = function(){
+  document.getElementById('face3Content').style.display='none';
+  document.getElementById('face2Content').style.display='block';
+  document.getElementById('shopHeaderTitle').innerText='Market Area';
+};
 document.getElementById('backToMarketShops').onclick=function(){ document.getElementById('shopProductsView').style.display='none'; document.getElementById('marketShopsView').style.display='flex'; };
 window.openContactSeller=function(){ document.getElementById('contactModal').style.display='flex'; document.getElementById('contactShopName').innerText=currentShop; };
 window.closeContact=function(){ document.getElementById('contactModal').style.display='none'; };
