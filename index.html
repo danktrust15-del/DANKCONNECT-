@@ -712,6 +712,26 @@ document.querySelector('#mainView h1').onclick = function(){
   document.getElementById('shopView').style.display='none';
   document.getElementById('chatList').style.display='block';
 };
+// FIX SUB-MARKET CARDS - Fashion, Craft, Tech, Food
+function openSubMarket(name){
+  document.getElementById('shopHeaderTitle').innerText = name + ' Market';
+  // scroll to Rented Stores or show message
+  const rented = document.getElementById('rentedStoresList') || document.querySelector('[id*="Rented"]');
+  if(rented) rented.scrollIntoView({behavior:'smooth'});
+  // Optional: filter stores by market (if you have function)
+  if(window.filterMarketShops) window.filterMarketShops(name);
+}
+
+document.querySelector('[data-market="Fashion"]')?.addEventListener('click', ()=>openSubMarket('Fashion'));
+document.querySelector('[data-market="Craft"]')?.addEventListener('click', ()=>openSubMarket('Craft'));
+document.querySelector('[data-market="Tech"]')?.addEventListener('click', ()=>openSubMarket('Tech'));
+document.querySelector('[data-market="Food"]')?.addEventListener('click', ()=>openSubMarket('Food'));
+
+// Also by IDs if you used them
+document.getElementById('fashionCard')?.addEventListener('click', ()=>openSubMarket('Fashion'));
+document.getElementById('craftCard')?.addEventListener('click', ()=>openSubMarket('Craft'));
+document.getElementById('techCard')?.addEventListener('click', ()=>openSubMarket('Tech'));
+document.getElementById('foodCard')?.addEventListener('click', ()=>openSubMarket('Food'));
 document.getElementById('backToMarketShops').onclick=function(){ document.getElementById('shopProductsView').style.display='none'; document.getElementById('marketShopsView').style.display='flex'; };
 window.openContactSeller=function(){ document.getElementById('contactModal').style.display='flex'; document.getElementById('contactShopName').innerText=currentShop; };
 window.closeContact=function(){ document.getElementById('contactModal').style.display='none'; };
