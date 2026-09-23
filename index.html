@@ -648,16 +648,23 @@ document.getElementById('foodCard').onclick=function(){ openMarketShops('Food');
 // --- FACE 4 + CONTACT ---
 let cart=[]; let currentShop='';
 function openShopProducts(market,shopId,shopName){
-  currentShop=shopName;
-  document.getElementById('marketShopsView').style.display='none';
-  document.getElementById('shopProductsView').style.display='flex';
-  document.getElementById('shopProductsTitle').innerText=shopName;
-  document.getElementById('shopNameDisplay').innerText=shopName;
-  let grid=document.getElementById('productsGrid'); grid.innerHTML='';
-  for(let i=1;i<=20;i++){
-    let price=Math.floor(Math.random()*50)+10;
-    grid.innerHTML+=`<div style="background:#252538; border-radius:14px; padding:10px;"><div style="background:#1a1a2e; height:80px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#6d7cff; font-size:24px;">👕</div><div style="color:white; font-size:13px; margin-top:6px;">Product ${i}</div><div style="color:#1e90ff; font-weight:700;">$${price}</div><div onclick="addToCart('Product ${i}',${price})" style="background:#2a2a4a; color:white; padding:6px; border-radius:20px; text-align:center; font-size:12px; margin-top:6px; cursor:pointer;">Add to Cart</div></div>`;
-  }
+ currentShop=shopName;
+ document.getElementById('marketShopsView').style.display='none';
+ document.getElementById('shopProductsView').style.display='flex';
+ document.getElementById('shopProductsTitle').innerText=shopName;
+ document.getElementById('shopNameDisplay').innerText=shopName;
+ let grid=document.getElementById('productsGrid'); grid.innerHTML='';
+ // SHOW REAL SELLER PRODUCTS FIRST
+ let saved = JSON.parse(localStorage.getItem('sellerProducts_'+shopName) || localStorage.getItem('myProducts') || localStorage.getItem('products_'+shopName) || '[]');
+ saved.forEach((p)=>{
+   let img = p.img||'';
+   let imgHtml = (img.startsWith('data:')||img.startsWith('http')) ? `<img src="${img}" style="width:100%;height:80px;object-fit:cover;border-radius:10px;">` : `<div style="background:#1a1a2e;height:80px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#6d7cff;font-size:24px;">${img||'📦'}</div>`;
+   grid.innerHTML+=`<div style="background:#252538;border-radius:14px;padding:10px;">${imgHtml}<div style="color:white;font-size:13px;margin-top:6px;">${p.name}</div><div style="color:#1e90ff;font-weight:700;">$${p.price}</div><div onclick="addToCart('${p.name}',${p.price})" style="background:#2a2a4a;color:white;padding:6px;border-radius:20px;text-align:center;font-size:12px;margin-top:5px;cursor:pointer;">Add to Cart</div></div>`;
+ });
+ for(let i=1;i<=20;i++){
+  let price=Math.floor(Math.random()*50)+10;
+  grid.innerHTML+=`<div style="background:#252538;border-radius:14px;padding:10px;"><div style="background:#1a1a2e;height:80px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#6d7cff;font-size:24px;">👕</div><div style="color:white;font-size:13px;margin-top:6px;">Product ${i}</div><div style="color:#1e90ff;font-weight:700;">$${price}</div><div onclick="addToCart('Product ${i}',${price})" style="background:#2a2a4a;color:white;padding:6px;border-radius:20px;text-align:center;font-size:12px;margin-top:5px;cursor:pointer;">Add to Cart</div></div>`;
+ }
 }
 window.addToCart=function(name,price){ cart.push({name,price}); document.getElementById('cartBar').style.display='flex'; document.getElementById('cartCount').innerText=cart.length; let total=cart.reduce((s,i)=>s+i.price,0); document.getElementById('cartTotal').innerText=total; };
 window.checkout=function(){ alert('Checkout $'+document.getElementById('cartTotal').innerText+' for '+currentShop); cart=[]; document.getElementById('cartBar').style.display='none'; };
@@ -689,8 +696,10 @@ function loadSellerMyProducts(){
   if(products.length==0){ list.innerHTML='<p style="color:#888;">No products yet. Add one above!</p>'; return; }
   list.innerHTML='';
   products.forEach((p,i)=>{
-    list.innerHTML+=`<div style="background:#2a2a40; padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
-      <div><b style="color:white;">${p.name}</b><br><span style="color:#6d7cff;">$${p.price}</span> ${p.img||''}</div>
+  let img = p.img||'';
+  let imgHtml = (img.startsWith('data:')||img.startsWith('http')) ? `<img src="${img}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">` : `<span style="font-size:30px;">${img}</span>`;
+  list.innerHTML+=`<div style="background:#2a2a40; padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+  <div style="display:flex; align-items:center; gap:10px;">${imgHtml}<div><b style="color:white;">${p.name}</b><br><span style="color:#6d7cff;">$${p.price}</span></div></div>
       <div style="display:flex; gap:5px;">
         <button onclick="sellerEditPrice(${i})" style="padding:6px 10px; background:#6d7cff; color:white; border:none; border-radius:6px;">Edit</button>
         <button onclick="sellerDelProduct(${i})" style="padding:6px 10px; background:#ff4757; color:white; border:none; border-radius:6px;">X</button>
