@@ -148,6 +148,39 @@ id="marketShopsView" style="display:none; flex-direction:column; background:#121
   </div>
   <div id="shopsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px; padding-bottom:80px;"></div>
 </div>
+    <!-- FACE 4: SHOP WITH CONTACT -->
+<div id="shopProductsView" style="display:none; flex-direction:column; background:#12121f; height:100%; overflow-y:auto;">
+  <div style="display:flex; align-items:center; gap:12px; padding:14px; background:#1a1a2e; position:sticky; top:0;">
+    <span id="backToMarketShops" style="font-size:24px; color:#6d7cff; cursor:pointer;">←</span>
+    <h3 id="shopProductsTitle" style="color:white; margin:0; font-size:16px;">Shop</h3>
+    <div onclick="openContactSeller()" style="margin-left:auto; background:#25D366; color:white; padding:6px 14px; border-radius:20px; font-size:12px; cursor:pointer;">💬 Contact</div>
+  </div>
+  <div style="background:#252538; margin:12px; border-radius:14px; padding:14px;">
+    <div style="display:flex; justify-content:space-between;">
+      <div><div id="shopNameDisplay" style="color:white; font-weight:700;">StyleHub</div><div style="color:#8a8aa0; font-size:12px;">★★★★★ 4.9 • 1.2k followers</div></div>
+      <div style="background:#1e90ff; color:white; padding:6px 12px; border-radius:20px; font-size:12px; height:fit-content;">Open</div>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <div onclick="contactWhatsApp()" style="flex:1; background:#25D366; color:white; padding:10px; border-radius:10px; text-align:center; font-size:12px; font-weight:700; cursor:pointer;">WhatsApp</div>
+      <div onclick="contactCall()" style="flex:1; background:#1a1a2e; color:white; padding:10px; border-radius:10px; text-align:center; font-size:12px; border:1px solid #333; cursor:pointer;">📞 Call</div>
+      <div onclick="openContactSeller()" style="flex:1; background:#6d7cff; color:white; padding:10px; border-radius:10px; text-align:center; font-size:12px; font-weight:700; cursor:pointer;">💬 Chat</div>
+    </div>
+  </div>
+  <div id="productsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 12px; padding-bottom:100px;"></div>
+  <div id="cartBar" style="display:none; position:fixed; bottom:70px; left:0; right:0; background:#1a1a2e; padding:12px 16px; border-top:1px solid #333; flex-direction:row; justify-content:space-between; align-items:center;">
+    <div style="color:white;"><span id="cartCount">0</span> items - $<span id="cartTotal">0</span></div>
+    <div onclick="checkout()" style="background:#1e90ff; color:white; padding:10px 20px; border-radius:20px; cursor:pointer;">Checkout</div>
+  </div>
+  <div id="contactModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:99; align-items:center; justify-content:center;">
+    <div style="background:#1a1a2e; width:85%; border-radius:16px; padding:20px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:14px;"><div style="color:white; font-weight:700;">Contact <span id="contactShopName">Seller</span></div><span onclick="closeContact()" style="color:#8a8aa0; font-size:20px; cursor:pointer;">✕</span></div>
+      <div onclick="contactWhatsApp()" style="background:#25D366; color:white; padding:12px; border-radius:10px; margin-bottom:8px; text-align:center; cursor:pointer;">💬 WhatsApp</div>
+      <div onclick="contactCall()" style="background:#252538; color:white; padding:12px; border-radius:10px; margin-bottom:12px; text-align:center; cursor:pointer;">📞 Call Seller</div>
+      <textarea id="contactMsg" placeholder="Hello, I'm interested..." style="width:100%; background:#252538; border:1px solid #333; color:white; border-radius:10px; padding:10px; height:80px; box-sizing:border-box;"></textarea>
+      <div onclick="sendMessage()" style="background:#6d7cff; color:white; padding:12px; border-radius:10px; margin-top:10px; text-align:center; font-weight:700; cursor:pointer;">Send Message</div>
+    </div>
+  </div>
+</div>
 </div><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="settingsBtn"><span>⚙️</span>Settings</div></div></div>
 <div id="chatView"><div class="chat-head" id="chatHead"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div><div id="voiceCallBtn" class="call-btn">📞</div><div id="videoCallBtn" class="call-btn">🎥</div></div><div class="msgs" id="msgs"></div><div id="typingIndicator"><div class="typing-dots"><span></span><span></span><span></span></div><span id="typingText">typing...</span></div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div>
 <div class="input-bar" id="inputBar"><button id="imgBtn">📎</button><input type="text" id="msgInput" placeholder="Type message..."><div class="recording-bar" id="recordingBar"><div class="rec-dot"></div><span class="rec-timer" id="recTimer">0:00</span><span>recording...</span></div><button id="micBtn">🎤</button><button id="sendBtn">➤</button></div>
@@ -611,4 +644,27 @@ document.getElementById('fashionCard').onclick=function(){ openMarketShops('Fash
 document.getElementById('craftCard').onclick=function(){ openMarketShops('Craft'); };
 document.getElementById('techCard').onclick=function(){ openMarketShops('Tech'); };
 document.getElementById('foodCard').onclick=function(){ openMarketShops('Food'); };
+// --- FACE 4 + CONTACT ---
+let cart=[]; let currentShop='';
+function openShopProducts(market,shopId,shopName){
+  currentShop=shopName;
+  document.getElementById('marketShopsView').style.display='none';
+  document.getElementById('shopProductsView').style.display='flex';
+  document.getElementById('shopProductsTitle').innerText=shopName;
+  document.getElementById('shopNameDisplay').innerText=shopName;
+  let grid=document.getElementById('productsGrid'); grid.innerHTML='';
+  for(let i=1;i<=20;i++){
+    let price=Math.floor(Math.random()*50)+10;
+    grid.innerHTML+=`<div style="background:#252538; border-radius:14px; padding:10px;"><div style="background:#1a1a2e; height:80px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#6d7cff; font-size:24px;">👕</div><div style="color:white; font-size:13px; margin-top:6px;">Product ${i}</div><div style="color:#1e90ff; font-weight:700;">$${price}</div><div onclick="addToCart('Product ${i}',${price})" style="background:#2a2a4a; color:white; padding:6px; border-radius:20px; text-align:center; font-size:12px; margin-top:6px; cursor:pointer;">Add to Cart</div></div>`;
+  }
+}
+window.addToCart=function(name,price){ cart.push({name,price}); document.getElementById('cartBar').style.display='flex'; document.getElementById('cartCount').innerText=cart.length; let total=cart.reduce((s,i)=>s+i.price,0); document.getElementById('cartTotal').innerText=total; };
+window.checkout=function(){ alert('Checkout $'+document.getElementById('cartTotal').innerText+' for '+currentShop); cart=[]; document.getElementById('cartBar').style.display='none'; };
+window.handleShopClick=function(market,id){ let rented=rentedShops[market]&&rentedShops[market][id]; if(rented){ openShopProducts(market,id,rented); } else { if(confirm('Rent '+market+' Shop #'+id+' for $100?')){ let n=prompt('Shop name:')||'My Shop'; rentedShops[market][id]=n; openMarketShops(market); } } };
+document.getElementById('backToMarketShops').onclick=function(){ document.getElementById('shopProductsView').style.display='none'; document.getElementById('marketShopsView').style.display='flex'; };
+window.openContactSeller=function(){ document.getElementById('contactModal').style.display='flex'; document.getElementById('contactShopName').innerText=currentShop; };
+window.closeContact=function(){ document.getElementById('contactModal').style.display='none'; };
+window.contactWhatsApp=function(){ let msg=encodeURIComponent('Hi '+currentShop+', I am interested in your products.'); window.open('https://wa.me/233000000000?text='+msg,'_blank'); };
+window.contactCall=function(){ alert('Calling '+currentShop); };
+window.sendMessage=function(){ let m=document.getElementById('contactMsg').value; if(!m) return alert('Type message'); alert('Message sent to '+currentShop+': '+m); closeContact(); document.getElementById('contactMsg').value=''; };
 </script></body></html>
