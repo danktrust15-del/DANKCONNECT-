@@ -154,7 +154,6 @@ id="marketShopsView" style="display:none; flex-direction:column; background:#121
     <span id="backToMarketShops" style="font-size:24px; color:#6d7cff; cursor:pointer;">←</span>
     <h3 id="shopProductsTitle" style="color:white; margin:0; font-size:16px;">Shop</h3>
     <div onclick="openContactSeller()" style="margin-left:auto; background:#25D366; color:white; padding:6px 14px; border-radius:20px; font-size:12px; cursor:pointer;">💬 Contact</div>
-      <div onclick="openSellerDash()" style="margin-left:8px; background:#00c851; color:white; padding:6px 14px; border-radius:20px; font-size:12px; cursor:pointer; font-weight:700;">👨‍💼 Seller</div>
   </div>
   <div style="background:#252538; margin:12px; border-radius:14px; padding:14px;">
     <div style="display:flex; justify-content:space-between;">
@@ -268,6 +267,20 @@ document.getElementById('settingsModal').addEventListener('click',(e)=>{ if(e.ta
 document.getElementById('freeModeToggle').addEventListener('click', toggleFreeMode);
 document.getElementById('setThemeRow').addEventListener('click',()=>{let cur=document.body.classList.contains('light-mode')?'light':'dark';applyTheme(cur==='light'?'dark':'light')});
 document.getElementById('setLogoutRow').addEventListener('click', doLogout);
+// --- MY SHOPS BUTTON IN SETTINGS (Option A) ---
+(function(){
+ let box = document.querySelector('#settingsModal .settings-box') || document.getElementById('settingsModal');
+ if(!box) return;
+ let row = document.createElement('div');
+ row.className = 'set-row';
+ row.id = 'setMyShopsRow';
+ row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:14px;background:#1a1a2e;border-radius:10px;margin:8px 0;border:1px solid #1e90ff;cursor:pointer;';
+ row.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:20px;">🏪</span><div><b style="color:white;">My Shops</b><div style="color:#888;font-size:11px;">Manage your rented shops</div></div></div><span style="color:#1e90ff;">→</span>';
+ row.onclick = ()=>{ document.getElementById('settingsModal').classList.remove('active'); openMyShops(); };
+ let logoutRow = document.getElementById('setLogoutRow');
+ if(logoutRow) logoutRow.parentNode.insertBefore(row, logoutRow);
+ else box.appendChild(row);
+})();
 // SHOP BUTTON - WHITE PILL
 document.getElementById('shopTopBtn')?.addEventListener('click',()=>{ showPushToast('DANK-TRUST Shop','🛒 Shop coming soon — Ghana products loading!'); });function initListeners(){stopListeners();unsubProfiles=onSnapshot(collection(db,"profiles"), (s)=>{ s.forEach(d=>profilesCache[d.id]=d.data()); renderChats(); if(currentChatId) updateChatHeader(); if(profilesCache[currentUsername]?.avatarBase64){ document.getElementById('myAvImg').src='data:image/jpeg;base64,'+profilesCache[currentUsername].avatarBase64; document.getElementById('myAvImg').style.display='block'; document.getElementById('myAvTxt').style.display='none'; } });unsubPresence=onSnapshot(collection(db,"presence"), (s)=>{ s.forEach(d=>presenceCache[d.id]=d.data()); renderChats(); if(currentChatId) updateChatHeader(); });unsubPriv=onSnapshot(query(collection(db,"private_chats"), where("participants","array-contains", currentUsername)), (s)=>{ cachePrivate=[]; s.forEach(d=>cachePrivate.push({id:d.id,data:d.data()})); renderChats(); });unsubGroup=onSnapshot(query(collection(db,"group_chats"), where("members","array-contains", currentUsername)), (s)=>{ cacheGroups=[]; s.forEach(d=>cacheGroups.push({id:d.id,data:d.data()})); renderChats(); });}
 function stopListeners(){ if(unsubMsgs) unsubMsgs(); if(unsubPriv) unsubPriv(); if(unsubGroup) unsubGroup(); if(unsubProfiles) unsubProfiles(); if(unsubPresence) unsubPresence(); if(unsubTyping) unsubTyping(); if(unsubRec) unsubRec(); }
@@ -648,23 +661,16 @@ document.getElementById('foodCard').onclick=function(){ openMarketShops('Food');
 // --- FACE 4 + CONTACT ---
 let cart=[]; let currentShop='';
 function openShopProducts(market,shopId,shopName){
- currentShop=shopName;
- document.getElementById('marketShopsView').style.display='none';
- document.getElementById('shopProductsView').style.display='flex';
- document.getElementById('shopProductsTitle').innerText=shopName;
- document.getElementById('shopNameDisplay').innerText=shopName;
- let grid=document.getElementById('productsGrid'); grid.innerHTML='';
- // SHOW REAL SELLER PRODUCTS FIRST
- let saved = JSON.parse(localStorage.getItem('sellerProducts_'+shopName) || localStorage.getItem('myProducts') || localStorage.getItem('products_'+shopName) || '[]');
- saved.forEach((p)=>{
-   let img = p.img||'';
-   let imgHtml = (img.startsWith('data:')||img.startsWith('http')) ? `<img src="${img}" style="width:100%;height:80px;object-fit:cover;border-radius:10px;">` : `<div style="background:#1a1a2e;height:80px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#6d7cff;font-size:24px;">${img||'📦'}</div>`;
-   grid.innerHTML+=`<div style="background:#252538;border-radius:14px;padding:10px;">${imgHtml}<div style="color:white;font-size:13px;margin-top:6px;">${p.name}</div><div style="color:#1e90ff;font-weight:700;">$${p.price}</div><div onclick="addToCart('${p.name}',${p.price})" style="background:#2a2a4a;color:white;padding:6px;border-radius:20px;text-align:center;font-size:12px;margin-top:5px;cursor:pointer;">Add to Cart</div></div>`;
- });
- for(let i=1;i<=20;i++){
-  let price=Math.floor(Math.random()*50)+10;
-  grid.innerHTML+=`<div style="background:#252538;border-radius:14px;padding:10px;"><div style="background:#1a1a2e;height:80px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#6d7cff;font-size:24px;">👕</div><div style="color:white;font-size:13px;margin-top:6px;">Product ${i}</div><div style="color:#1e90ff;font-weight:700;">$${price}</div><div onclick="addToCart('Product ${i}',${price})" style="background:#2a2a4a;color:white;padding:6px;border-radius:20px;text-align:center;font-size:12px;margin-top:5px;cursor:pointer;">Add to Cart</div></div>`;
- }
+  currentShop=shopName;
+  document.getElementById('marketShopsView').style.display='none';
+  document.getElementById('shopProductsView').style.display='flex';
+  document.getElementById('shopProductsTitle').innerText=shopName;
+  document.getElementById('shopNameDisplay').innerText=shopName;
+  let grid=document.getElementById('productsGrid'); grid.innerHTML='';
+  for(let i=1;i<=20;i++){
+    let price=Math.floor(Math.random()*50)+10;
+    grid.innerHTML+=`<div style="background:#252538; border-radius:14px; padding:10px;"><div style="background:#1a1a2e; height:80px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#6d7cff; font-size:24px;">👕</div><div style="color:white; font-size:13px; margin-top:6px;">Product ${i}</div><div style="color:#1e90ff; font-weight:700;">$${price}</div><div onclick="addToCart('Product ${i}',${price})" style="background:#2a2a4a; color:white; padding:6px; border-radius:20px; text-align:center; font-size:12px; margin-top:6px; cursor:pointer;">Add to Cart</div></div>`;
+  }
 }
 window.addToCart=function(name,price){ cart.push({name,price}); document.getElementById('cartBar').style.display='flex'; document.getElementById('cartCount').innerText=cart.length; let total=cart.reduce((s,i)=>s+i.price,0); document.getElementById('cartTotal').innerText=total; };
 window.checkout=function(){ alert('Checkout $'+document.getElementById('cartTotal').innerText+' for '+currentShop); cart=[]; document.getElementById('cartBar').style.display='none'; };
@@ -675,112 +681,4 @@ window.closeContact=function(){ document.getElementById('contactModal').style.di
 window.contactWhatsApp=function(){ let msg=encodeURIComponent('Hi '+currentShop+', I am interested in your products.'); window.open('https://wa.me/233000000000?text='+msg,'_blank'); };
 window.contactCall=function(){ alert('Calling '+currentShop); };
 window.sendMessage=function(){ let m=document.getElementById('contactMsg').value; if(!m) return alert('Type message'); alert('Message sent to '+currentShop+': '+m); closeContact(); document.getElementById('contactMsg').value=''; };
-    // === SELLER DASHBOARD JS - SAFE ===
-window.closeSellerDash = function(){
-  document.getElementById('sellerDash').style.display='none';
-}
-window.openSellerDash = function(shopName){
-  if(shopName) currentShop = shopName;
-  if(!currentShop) return alert('Open a shop first!');
-  document.getElementById('sellerDash').style.display='flex';
-  // load saved contact
-  let saved = localStorage.getItem('sellerContact_'+currentShop);
-  if(saved){
-    try{ let c=JSON.parse(saved); document.getElementById('sWhatsApp').value=c.wa||''; document.getElementById('sPhone').value=c.ph||''; }catch(e){}
-  }
-  loadSellerMyProducts();
-}
-function loadSellerMyProducts(){
-  let list = document.getElementById('sellerMyProductsList');
-  let products = JSON.parse(localStorage.getItem('sellerProducts_'+currentShop)||'[]');
-  if(products.length==0){ list.innerHTML='<p style="color:#888;">No products yet. Add one above!</p>'; return; }
-  list.innerHTML='';
-  products.forEach((p,i)=>{
-  let img = p.img||'';
-  let imgHtml = (img.startsWith('data:')||img.startsWith('http')) ? `<img src="${img}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">` : `<span style="font-size:30px;">${img}</span>`;
-  list.innerHTML+=`<div style="background:#2a2a40; padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
-  <div style="display:flex; align-items:center; gap:10px;">${imgHtml}<div><b style="color:white;">${p.name}</b><br><span style="color:#6d7cff;">$${p.price}</span></div></div>
-      <div style="display:flex; gap:5px;">
-        <button onclick="sellerEditPrice(${i})" style="padding:6px 10px; background:#6d7cff; color:white; border:none; border-radius:6px;">Edit</button>
-        <button onclick="sellerDelProduct(${i})" style="padding:6px 10px; background:#ff4757; color:white; border:none; border-radius:6px;">X</button>
-      </div>
-    </div>`;
-  });
-}
-window.sellerAddProduct = function(){
-  let name=document.getElementById('sProdName').value.trim();
-  let price=document.getElementById('sProdPrice').value.trim();
-  let img=document.getElementById('sProdImg').value.trim();
-  if(!name||!price) return alert('Enter name and price!');
-  let products = JSON.parse(localStorage.getItem('sellerProducts_'+currentShop)||'[]');
-  products.push({name:name, price:price, img:img});
-  localStorage.setItem('sellerProducts_'+currentShop, JSON.stringify(products));
-  document.getElementById('sProdName').value='';
-document.getElementById('sProdPrice').value=''; document.getElementById('sProdImg').value='';
-document.getElementById('sProdPreview').style.display='none';
-document.getElementById('sProdFile').value='';
-  loadSellerMyProducts();
-  alert('Product added to '+currentShop+'!');
-}
-window.sellerEditPrice = function(i){
-  let products = JSON.parse(localStorage.getItem('sellerProducts_'+currentShop)||'[]');
-  let newPrice = prompt('New price for '+products[i].name, products[i].price);
-  if(newPrice===null) return;
-  products[i].price=newPrice;
-  localStorage.setItem('sellerProducts_'+currentShop, JSON.stringify(products));
-  loadSellerMyProducts();
-}
-window.sellerDelProduct = function(i){
-  if(!confirm('Delete this product?')) return;
-  let products = JSON.parse(localStorage.getItem('sellerProducts_'+currentShop)||'[]');
-  products.splice(i,1);
-  localStorage.setItem('sellerProducts_'+currentShop, JSON.stringify(products));
-  loadSellerMyProducts();
-}
-window.sellerSaveContact = function(){
-  let wa=document.getElementById('sWhatsApp').value.trim();
-  let ph=document.getElementById('sPhone').value.trim();
-  if(!wa &&!ph) return alert('Enter WhatsApp or Phone');
-  localStorage.setItem('sellerContact_'+currentShop, JSON.stringify({wa:wa, ph:ph}));
-  // also save for buyer buttons to use
-  localStorage.setItem('contact_'+currentShop, JSON.stringify({wa:wa, ph:ph}));
-  alert('Contact saved for buyers! WhatsApp: '+wa);
-}
-    // Photo preview + save as base64
-document.addEventListener('change', function(e){
-  if(e.target && e.target.id==='sProdFile'){
-    let file = e.target.files[0];
-    if(!file) return;
-    let reader = new FileReader();
-    reader.onload = function(ev){
-      document.getElementById('sProdPreview').src = ev.target.result;
-      document.getElementById('sProdPreview').style.display='block';
-      document.getElementById('sProdImg').value = ev.target.result;
-    }
-    reader.readAsDataURL(file);
-  }
-});
-</script>
-<!-- SELLER DASHBOARD -->
-<div id="sellerDash" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0f0f1e; z-index:9999; flex-direction:column; padding:15px; box-sizing:border-box; overflow-y:auto;">
-  <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-    <span onclick="closeSellerDash()" style="font-size:24px; color:#6d7cff; cursor:pointer;">← Back</span>
-    <b style="color:white; font-size:18px;">Seller Dashboard</b>
-  </div>
-  <div style="background:#1c1c2e; padding:15px; border-radius:12px; margin-bottom:15px;">
-    <b style="color:white;">Add New Product</b>
-    <input id="sProdName" placeholder="Product name" style="width:100%; padding:10px; margin-top:10px; border-radius:8px; border:none; background:#2a2a40; color:white;">
-    <input id="sProdPrice" type="number" placeholder="Price $" style="width:100%; padding:10px; margin-top:8px; border-radius:8px; border:none; background:#2a2a40; color:white;">
-    <input id="sProdImg" placeholder="Emoji or image link e.g. 👟 or https://..." style="width:100%; padding:10px; margin-top:8px; border-radius:8px; border:none; background:#2a2a40; color:white;">
-    <input type="file" id="sProdFile" accept="image/*" style="width:100%; margin-top:10px; background:#2a2a40; color:white; padding:10px; border-radius:10px; border:1px solid #444;">
-<img id="sProdPreview" style="width:100%; max-height:180px; object-fit:cover; border-radius:10px; margin-top:10px; display:none;">
-    <button onclick="sellerAddProduct()" style="width:100%; margin-top:10px; padding:12px; background:#6d7cff; color:white; border:none; border-radius:8px; font-weight:bold;">+ Add Product</button>
-  </div>
-  <div style="background:#1c1c2e; padding:15px; border-radius:12px; margin-bottom:15px;">
-    <b style="color:white;">My Contact (for buyers)</b>
-    <input id="sWhatsApp" placeholder="WhatsApp number e.g. 233..." style="width:100%; padding:10px; margin-top:10px; border-radius:8px; border:none; background:#2a2a40; color:white;">
-    <input id="sPhone" placeholder="Call number" style="width:100%; padding:10px; margin-top:8px; border-radius:8px; border:none; background:#2a2a40; color:white;">
-    <button onclick="sellerSaveContact()" style="width:100%; margin-top:10px; padding:12px; background:#00c851; color:white; border:none; border-radius:8px; font-weight:bold;">Save Contact</button>
-  </div>
-  <div id="sellerMyProductsList" style="display:flex; flex-direction:column; gap:10px;"></div>
-</div></body></html>
+</script></body></html>
