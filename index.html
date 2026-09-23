@@ -712,17 +712,16 @@ document.querySelector('#mainView h1').onclick = function(){
   document.getElementById('shopView').style.display='none';
   document.getElementById('chatList').style.display='block';
 };
-// FILTER RENTED STORES BY MARKET
+// FILTER RENTED STORES - Simple version (shows all for now)
 window.filterMarketShops = function(marketName){
-  const stores = document.querySelectorAll('#rentedStoresList > div');
-  stores.forEach(store=>{
-    const m = store.getAttribute('data-market') || '';
-    if(m.toLowerCase().includes(marketName.toLowerCase()) || m===''){
-      store.style.display='block';
-    } else {
-      store.style.display='none';
-    }
-  });
+  // Just make sure rented list is visible
+  const list = document.getElementById('rentedStoresList');
+  if(list) {
+    list.style.display='block';
+    // show all stores
+    list.querySelectorAll('div').forEach(d=>d.style.display='block');
+  }
+  console.log('Opened market:', marketName);
 };
 // FIX SUB-MARKET CARDS - Fashion, Craft, Tech, Food
 function openSubMarket(name){
