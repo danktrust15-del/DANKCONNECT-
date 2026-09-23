@@ -169,6 +169,18 @@ document.getElementById('chipAll').addEventListener('click',()=>{currentTab='all
 document.getElementById('chipChats').addEventListener('click',()=>{currentTab='chats'; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); document.getElementById('chipChats').classList.add('active'); renderChats();});
 document.getElementById('chipGroups').addEventListener('click',()=>{currentTab='groups'; document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); document.getElementById('chipGroups').classList.add('active'); renderChats();});
 document.getElementById('chipAddGroup').addEventListener('click', async()=>{let name=prompt('Group name?'); if(!name) return;let membersStr=prompt('Add members comma separated:');let members=membersStr? membersStr.split(',').map(m=>cleanU(m)).filter(m=>m):[];members.push(currentUsername); members=[...new Set(members)];for(let m of members){ if(m===currentUsername) continue; let qs=await getDocs(query(collection(db,"users"), where("username","==", m))); if(qs.empty){ alert('User '+m+' not found'); return; } }addDoc(collection(db,"group_chats"),{name:name,members:members,admins:[currentUsername],created:serverTimestamp(),lastMessage:'Group created',lastTime:serverTimestamp(),unread:{}});});
+document.getElementById('newChatBtn').addEventListener('click', async()=>{
+  let u=prompt('Enter username to chat with:'); if(!u) return; u=cleanU(u);
+  if(u===currentUsername){ alert("You can't chat with yourself"); return; }
+  let qs=await getDocs(query(collection(db,"users"), where("username","==",u)));
+  if(qs.empty){ alert('User '+u+' not found'); return; }
+  let chatId=[currentUsername,u].sort().join('_');
+  let ref=doc(db,"private_chats",chatId); let snap=await getDoc(ref);
+  if(!snap.exists()){
+    await setDoc(ref,{participants:[currentUsername,u],lastMessage:'',lastTime:serverTimestamp(),unread:{}});
+  }
+  openChat(chatId,'private',u);
+});
 async function openChat(chatId, chatType, chatName){currentChatId=chatId; currentChatType=chatType; currentChatOther=chatType==='private'?chatName:null;document.getElementById('mainView').style.display='none'; document.getElementById('chatView').style.display='flex';document.getElementById('chatName').textContent=chatName;let avEl=document.getElementById('chatAv'); avEl.textContent=chatName.slice(0,2).toUpperCase(); if(profilesCache[chatName]?.avatarBase64){ avEl.innerHTML='<img src="data:image/jpeg;base64,'+profilesCache[chatName].avatarBase64+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } else avEl.textContent=chatName.slice(0,2).toUpperCase();if(chatId==='official'){ document.getElementById('chatStatus').textContent='Official Verified'; document.getElementById('inputBar').style.display='none'; if(isAdminUser(currentUsername)){ document.getElementById('inputBar').style.display='flex'; document.getElementById('viewOnlyBar').style.display='none'; } else { document.getElementById('viewOnlyBar').style.display='flex'; } }else { document.getElementById('inputBar').style.display='flex'; document.getElementById('viewOnlyBar').style.display='none'; updateChatHeader(); }
 let cached=loadFromCache(chatId);
 if(cached && cached.length){
