@@ -679,53 +679,58 @@ window.handleShopClick = async function(market, id){
   if(rented){ openShopProducts(market,id,rented); return; }
   if(!confirm('Rent Shop #'+id+' in '+market+' Market for $100? This will contact DankBoss for payment.')) return;
 
-  let currentUsername = localStorage.getItem('username') || localStorage.getItem('userName') || '';
-  let u = 'DankBoss'; // Your inbox
-  if(currentUsername.toLowerCase() === u.toLowerCase()){
-    alert("You are DankBoss, you can't rent your own shop 😅");
+  // GET USERNAME CORRECTLY - from your app variable, not localStorage
+  let currentUser = (typeof currentUsername!== 'undefined'? currentUsername : window.currentUsername) || localStorage.getItem('username') || localStorage.getItem('userName') || 'buyer';
+  console.log('Current user is:', currentUser);
+
+  if(currentUser.toLowerCase() === 'dankboss'){
+    alert("You are DankBoss 😅");
     return;
   }
-  let msg=`Hello DankBoss 👋 I want to rent Shop #${id} in ${market} Market for $100. My username is ${currentUsername}. Please send payment details.`;
+
+  let msg=`Hello DankBoss 👋 I want to rent Shop #${id} in ${market} Market for $100. My username is ${currentUser}. Please send payment details.`;
 
   // Save pending
   let pending=JSON.parse(localStorage.getItem('pendingShops')||'[]');
   pending.push({market, shopId:id, date:new Date().toISOString(), status:'pending_payment'});
   localStorage.setItem('pendingShops',JSON.stringify(pending));
 
-  // Close market views
   try{
     document.getElementById('marketShopsView').style.display='none';
     document.getElementById('generalMarketView').style.display='none';
   }catch(e){}
 
-  // DIRECT CREATE/OPEN CHAT WITH YOU - using your own code from line 298-304
+  // DIRECT OPEN - NO SEARCH, NO QUERY, JUST OPEN
   try{
-    let qs = await getDocs(query(collection(db,"users"), where("username","==",u)));
-    if(qs.empty){
-      // If not found in DB, try lowercase
-      qs = await getDocs(query(collection(db,"users"), where("username","==","dankboss")));
-    }
-    let chatId=[currentUsername,u].sort().join('_');
+    let targetUser = 'dankboss'; // lower case - how it is in your DB
+    let chatId=[currentUser.toLowerCase(), targetUser].sort().join('_');
+    console.log('Opening chat:', chatId);
+
+    // Create chat doc if not exists
     let ref=doc(db,"private_chats",chatId);
     let snap=await getDoc(ref);
     if(!snap.exists()){
-      await setDoc(ref,{participants:[currentUsername,u], lastMessage:'', lastTime:serverTimestamp(), unread:{}});
+      await setDoc(ref,{participants:[currentUser.toLowerCase(), targetUser], lastMessage:'', lastTime:serverTimestamp(), unread:{}});
     }
-    openChat(chatId,'private',u);
 
-    // After chat opens, fill the message box
+    // OPEN IT
+    openChat(chatId,'private',targetUser);
+
     setTimeout(()=>{
-      let input=document.getElementById('messageInput') || document.querySelector('input[placeholder*="Type"]') || document.querySelector('textarea') || document.getElementById('chatInput');
+      let input=document.getElementById('messageInput') || document.querySelector('input[placeholder*="Type a message"]') || document.getElementById('chatInput') || document.querySelector('textarea');
       if(input){
         input.value=msg;
         input.focus();
         input.dispatchEvent(new Event('input',{bubbles:true}));
+        input.style.border='2px solid #00ff00';
       }
-    }, 800);
+    }, 900);
+
   }catch(err){
-    console.error(err);
-    alert('Message ready for DankBoss (copied):\n\n'+msg+'\n\nPaste and send!');
+    console.error('Chat open failed:', err);
+    // FALLBACK - at least copy message
     try{ navigator.clipboard.writeText(msg); }catch(e){}
+    alert('Error: '+err.message+'\n\nMessage copied:\n'+msg);
   }
 }
 document.getElementById('backToMarketShops').onclick=function(){ document.getElementById('shopProductsView').style.display='none'; document.getElementById('marketShopsView').style.display='flex'; };
