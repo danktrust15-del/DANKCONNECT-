@@ -209,6 +209,16 @@ const firebaseConfig = { apiKey: "AIzaSyDfWReJ-A4J2W5V_FahYjLwfXv3-sNvXZE", auth
 const VAPID_KEY = "BN-Saty-5GQ_jpyEV4HWQcI3U6nHbkC-kGfLDoHWZRvmdKaxMBDRl0vrvhfmqUlYIGm8beL62hjGsf4UaGTbovs";
 const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app); const messaging = getMessaging(app);
 await setPersistence(auth, browserLocalPersistence); enableIndexedDbPersistence(db).catch(()=>{});
+// Make Firebase available to rent button
+window._db = db;
+window._doc = doc;
+window._getDoc = getDoc;
+window._setDoc = setDoc;
+window._serverTimestamp = serverTimestamp;
+window._collection = collection;
+window._query = query;
+window._where = where;
+window._getDocs = getDocs;
 const ADMIN_USERNAMES = ['dankboss']; function isAdminUser(u){ return ADMIN_USERNAMES.includes((u||'').toLowerCase()); }
 function applyTheme(t){ if(t==='light'){document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');} else {document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');}}
 (function(){let saved=localStorage.getItem('dc_theme');if(saved) applyTheme(saved); else applyTheme('dark');})();
@@ -648,81 +658,84 @@ function openMarketShops(market){
     grid.innerHTML+=`<div onclick="handleShopClick('${market}',${i})" style="background:#252538; border-radius:14px; padding:12px; cursor:pointer;"><div style="color:white; font-weight:700;">Shop #${i}<br>${rented? rented : 'Available $100'}</div><div style="background:${rented? '#3d5afe':'#1e90ff'}; color:white; padding:6px; border-radius:20px; text-align:center; font-size:12px; margin-top:6px;">${rented? 'Visit':'Rent $100'}</div></div>`;
   }
 }
-window.handleShopClick=function(market,id){
-  let rented=rentedShops[market]&&rentedShops[market][id];
-  if(rented){ alert('Opening '+rented); }
-  else { if(confirm('Rent '+market+' Shop #'+id+' for $100?')){ let n=prompt('Shop name:')||'My Shop'; rentedShops[market][id]=n; openMarketShops(market); } }
-};
-document.getElementById('backToSubMarkets').onclick=function(){ document.getElementById('marketShopsView').style.display='none'; document.getElementById('face3Content').style.display='flex'; };
-document.getElementById('fashionCard').onclick=function(){ openMarketShops('Fashion'); };
-document.getElementById('craftCard').onclick=function(){ openMarketShops('Craft'); };
-document.getElementById('techCard').onclick=function(){ openMarketShops('Tech'); };
-document.getElementById('foodCard').onclick=function(){ openMarketShops('Food'); };
-// --- FACE 4 + CONTACT ---
-let cart=[]; let currentShop='';
-function openShopProducts(market,shopId,shopName){
-  currentShop=shopName;
-  document.getElementById('marketShopsView').style.display='none';
-  document.getElementById('shopProductsView').style.display='flex';
-  document.getElementById('shopProductsTitle').innerText=shopName;
-  document.getElementById('shopNameDisplay').innerText=shopName;
-  let grid=document.getElementById('productsGrid'); grid.innerHTML='';
-  for(let i=1;i<=20;i++){
-    let price=Math.floor(Math.random()*50)+10;
-    grid.innerHTML+=`<div style="background:#252538; border-radius:14px; padding:10px;"><div style="background:#1a1a2e; height:80px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#6d7cff; font-size:24px;">👕</div><div style="color:white; font-size:13px; margin-top:6px;">Product ${i}</div><div style="color:#1e90ff; font-weight:700;">$${price}</div><div onclick="addToCart('Product ${i}',${price})" style="background:#2a2a4a; color:white; padding:6px; border-radius:20px; text-align:center; font-size:12px; margin-top:6px; cursor:pointer;">Add to Cart</div></div>`;
-  }
-}
-window.addToCart=function(name,price){ cart.push({name,price}); document.getElementById('cartBar').style.display='flex'; document.getElementById('cartCount').innerText=cart.length; let total=cart.reduce((s,i)=>s+i.price,0); document.getElementById('cartTotal').innerText=total; };
-window.checkout=function(){ alert('Checkout $'+document.getElementById('cartTotal').innerText+' for '+currentShop); cart=[]; document.getElementById('cartBar').style.display='none'; };
-window.handleShopClick = function(market, id){
+window.handleShopClick = async function(market, id){
   let rented = rentedShops[market] && rentedShops[market][id];
   if(rented){ openShopProducts(market,id,rented); return; }
   if(!confirm('Rent Shop #'+id+' in '+market+' Market for $100?')) return;
 
-  // Get username from your app
-  let currentUser = (typeof currentUsername!== 'undefined' && currentUsername)? currentUsername : (window.currentUsername || 'buyer');
-  console.log('Buyer:', currentUser);
+  // Get real username - your app stores it here
+  let currentUser = window.currentUsername || (typeof currentUsername!=='undefined'?currentUsername:'') || localStorage.getItem('username') || '';
+  if(!currentUser){
+    currentUser = prompt('Enter your username:') || 'buyer';
+  }
 
   if(currentUser.toLowerCase() === 'dankboss'){
     alert("You are DankBoss");
     return;
   }
 
-  let msg=`Hello DankBoss 👋 I want to rent Shop #${id} in ${market} Market for $100. My username is ${currentUser}. Please send payment details.`;
+  let msg = `Hello DankBoss 👋 I want to rent Shop #${id} in ${market} Market for $100. My username is ${currentUser}. Please send payment details.`;
 
-  // Save pending
-  let pending=JSON.parse(localStorage.getItem('pendingShops')||'[]');
-  pending.push({market, shopId:id, date:new Date().toISOString(), status:'pending_payment'});
-  localStorage.setItem('pendingShops',JSON.stringify(pending));
-
-  // Close shops
+  // Close shop view
   try{
     document.getElementById('marketShopsView').style.display='none';
     document.getElementById('generalMarketView').style.display='none';
   }catch(e){}
 
-  // DIRECT OPEN - NO doc, NO Firebase query - just openChat
-  let targetUser = 'dankboss';
-  let chatId=[currentUser.toLowerCase(), targetUser].sort().join('_');
+  try{
+    let target = 'dankboss';
+    let chatId = [currentUser.toLowerCase(), target].sort().join('_');
 
-  // This function already exists in your code and works!
-  openChat(chatId,'private',targetUser);
+    // Use exposed Firebase
+    let db = window._db;
+    let docFn = window._doc;
+    let getDocFn = window._getDoc;
+    let setDocFn = window._setDoc;
+    let ts = window._serverTimestamp;
 
-  // Fill message box after 0.8 sec
-  setTimeout(()=>{
-    let input = document.getElementById('messageInput') || document.querySelector('#chatInput') || document.querySelector('input[placeholder*="Type"]') || document.querySelector('textarea');
-    if(input){
-      input.value = msg;
-      input.focus();
-      input.dispatchEvent(new Event('input',{bubbles:true}));
-      input.dispatchEvent(new Event('change',{bubbles:true}));
-      console.log('Message filled!');
-    } else {
-      console.log('Input not found, copying');
-      try{ navigator.clipboard.writeText(msg); }catch(e){}
-      alert('Chat opened! Message copied:\n\n'+msg+'\n\nPaste and SEND');
+    if(db && docFn && getDocFn && setDocFn){
+      // 1. Create private chat with you
+      let chatRef = docFn(db, "private_chats", chatId);
+      let snap = await getDocFn(chatRef);
+      if(!snap.exists()){
+        await setDocFn(chatRef, {
+          participants: [currentUser.toLowerCase(), target],
+          lastMessage: msg,
+          lastTime: ts(),
+          unread: {}
+        });
+      }
+      // 2. Also save to rent_requests so YOU have a list in Firebase
+      let reqRef = docFn(db, "rent_requests", chatId+'_'+id+'_'+market);
+      await setDocFn(reqRef, {
+        buyer: currentUser.toLowerCase(),
+        market: market,
+        shopId: id,
+        amount: 100,
+        message: msg,
+        status: 'pending_payment',
+        createdAt: ts()
+      });
     }
-  }, 800);
+
+    // 3. OPEN YOUR DM DIRECTLY - not ASK DANK
+    openChat(chatId, 'private', target);
+
+    // 4. Auto-fill the message box after chat opens
+    setTimeout(()=>{
+      let input = document.getElementById('messageInput') || document.getElementById('chatInput') || document.querySelector('input[placeholder*="Type"]') || document.querySelector('textarea');
+      if(input){
+        input.value = msg;
+        input.focus();
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+      }
+    }, 800);
+
+  }catch(err){
+    console.error(err);
+    alert('Failed: '+err.message);
+    try{ navigator.clipboard.writeText(msg); }catch(e){}
+  }
 }
 document.getElementById('backToMarketShops').onclick=function(){ document.getElementById('shopProductsView').style.display='none'; document.getElementById('marketShopsView').style.display='flex'; };
 window.openContactSeller=function(){ document.getElementById('contactModal').style.display='flex'; document.getElementById('contactShopName').innerText=currentShop; };
