@@ -328,9 +328,9 @@ window.handleDankTypedMessage = async function(userText){
    }
  }
 
- // SHOW REPLY - BLUE BUBBLE
+ // SHOW REPLY - BLUE BUBBLE NO ROBOT
  const box = document.getElementById('msgs');
- const replyHTML = `<div class="bubble other" style="background:#0084FF; color:white; padding:12px 14px; border-radius:18px 18px 18px 4px; margin:10px; max-width:80%; box-shadow:0 2px 8px rgba(0,132,255,0.4); font-family:system-ui; line-height:1.4;"><b style="color:#fff;"> Dank Assistant:</b><br><br>${reply}</div>`;
+ const replyHTML = `<div class="bubble other" style="background:#0084FF; color:white; padding:12px 14px; border-radius:18px 18px 18px 4px; margin:10px; max-width:80%; box-shadow:0 2px 8px rgba(0,132,255,0.4); font-family:system-ui; line-height:1.4;">${reply}</div>`;
  if(box){
    box.insertAdjacentHTML('beforeend', replyHTML);
    box.scrollTop = box.scrollHeight;
