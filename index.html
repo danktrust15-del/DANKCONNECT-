@@ -667,6 +667,72 @@ window.closeContact=function(){ document.getElementById('contactModal').style.di
 window.contactWhatsApp=function(){ let msg=encodeURIComponent('Hi '+currentShop+', I am interested in your products.'); window.open('https://wa.me/233000000000?text='+msg,'_blank'); };
 window.contactCall=function(){ alert('Calling '+currentShop); };
 window.sendMessage=function(){ let m=document.getElementById('contactMsg').value; if(!m) return alert('Type message'); alert('Message sent to '+currentShop+': '+m); closeContact(); document.getElementById('contactMsg').value=''; };
+    // === SELLER DASHBOARD JS - SAFE ===
+window.closeSellerDash = function(){
+  document.getElementById('sellerDash').style.display='none';
+}
+window.openSellerDash = function(shopName){
+  if(shopName) currentShop = shopName;
+  if(!currentShop) return alert('Open a shop first!');
+  document.getElementById('sellerDash').style.display='flex';
+  // load saved contact
+  let saved = localStorage.getItem('sellerContact_'+currentShop);
+  if(saved){
+    try{ let c=JSON.parse(saved); document.getElementById('sWhatsApp').value=c.wa||''; document.getElementById('sPhone').value=c.ph||''; }catch(e){}
+  }
+  loadSellerMyProducts();
+}
+function loadSellerMyProducts(){
+  let list = document.getElementById('sellerMyProductsList');
+  let products = JSON.parse(localStorage.getItem('sellerProducts_'+currentShop)||'[]');
+  if(products.length==0){ list.innerHTML='<p style="color:#888;">No products yet. Add one above!</p>'; return; }
+  list.innerHTML='';
+  products.forEach((p,i)=>{
+    list.innerHTML+=`<div style="background:#2a2a40; padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+      <div><b style="color:white;">${p.name}</b><br><span style="color:#6d7cff;">$${p.price}</span> ${p.img||''}</div>
+      <div style="display:flex; gap:5px;">
+        <button onclick="sellerEditPrice(${i})" style="padding:6px 10px; background:#6d7cff; color:white; border:none; border-radius:6px;">Edit</button>
+        <button onclick="sellerDelProduct(${i})" style="padding:6px 10px; background:#ff4757; color:white; border:none; border-radius:6px;">X</button>
+      </div>
+    </div>`;
+  });
+}
+window.sellerAddProduct = function(){
+  let name=document.getElementById('sProdName').value.trim();
+  let price=document.getElementById('sProdPrice').value.trim();
+  let img=document.getElementById('sProdImg').value.trim();
+  if(!name||!price) return alert('Enter name and price!');
+  let products = JSON.parse(localStorage.getItem('sellerProducts_'+currentShop)||'[]');
+  products.push({name:name, price:price, img:img});
+  localStorage.setItem('sellerProducts_'+currentShop, JSON.stringify(products));
+  document.getElementById('sProdName').value=''; document.getElementById('sProdPrice').value=''; document.getElementById('sProdImg').value='';
+  loadSellerMyProducts();
+  alert('Product added to '+currentShop+'!');
+}
+window.sellerEditPrice = function(i){
+  let products = JSON.parse(localStorage.getItem('sellerProducts_'+currentShop)||'[]');
+  let newPrice = prompt('New price for '+products[i].name, products[i].price);
+  if(newPrice===null) return;
+  products[i].price=newPrice;
+  localStorage.setItem('sellerProducts_'+currentShop, JSON.stringify(products));
+  loadSellerMyProducts();
+}
+window.sellerDelProduct = function(i){
+  if(!confirm('Delete this product?')) return;
+  let products = JSON.parse(localStorage.getItem('sellerProducts_'+currentShop)||'[]');
+  products.splice(i,1);
+  localStorage.setItem('sellerProducts_'+currentShop, JSON.stringify(products));
+  loadSellerMyProducts();
+}
+window.sellerSaveContact = function(){
+  let wa=document.getElementById('sWhatsApp').value.trim();
+  let ph=document.getElementById('sPhone').value.trim();
+  if(!wa &&!ph) return alert('Enter WhatsApp or Phone');
+  localStorage.setItem('sellerContact_'+currentShop, JSON.stringify({wa:wa, ph:ph}));
+  // also save for buyer buttons to use
+  localStorage.setItem('contact_'+currentShop, JSON.stringify({wa:wa, ph:ph}));
+  alert('Contact saved for buyers! WhatsApp: '+wa);
+}
 </script>
 <!-- SELLER DASHBOARD -->
 <div id="sellerDash" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0f0f1e; z-index:9999; flex-direction:column; padding:15px; box-sizing:border-box; overflow-y:auto;">
