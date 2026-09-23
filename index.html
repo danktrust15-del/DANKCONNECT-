@@ -274,51 +274,69 @@ window.dankBrainReply = function(userText){
   return "<b>🤔 I'm not sure I understand.</b><br><br>Please try rephrasing your question, or tap the button below to talk directly to DankBoss for human support.";
 };
 
-// ========= V49 ULTIMATE BRAIN - GEMINI FREE =========
-const GEMINI_API_KEY = "AQ.Ab8RN6K2j9CcmbOnU_9FDNQiTjJackOhCuGQJg4iQvWgiEBrtQ";
-
+// ======== V50-HUMAN BRAIN - DANK ASSISTANT =========
+    
 window.handleDankTypedMessage = async function(userText){
-  const chatArea=document.getElementById('msgs'); if(!chatArea) return;
-  const text = userText;
-  const q = text.toLowerCase();
+ const t = (userText || "").trim();
+ if(!t) return;
+ let reply = "";
+ const lower = t.toLowerCase().trim();
 
-  const typing=document.createElement('div'); typing.className='bubble other'; typing.id='dankTyping';
-  typing.style.cssText='background:#eef0ff;padding:10px 12px;border-radius:12px;margin:8px;max-width:80%;color:#000!important';
-  typing.innerHTML="<span style='color:#555'>Dank Assistant is typing...</span>"; chatArea.appendChild(typing);
-  chatArea.scrollTop=chatArea.scrollHeight;
+ // WHO ARE YOU
+ if(lower.includes("who are you") || lower.includes("what are you") || lower.includes("who be you") || lower === "who are u"){
+   reply = "I be <b>Dank Assistant 🤖</b> — the official AI assistant to <b>DankBoss</b> of the <b>Dank Empire!</b> 👑 I dey here to help you with anything for DankConnect!";
+ }
+ // HOW ARE YOU
+ else if(lower.includes("how are you") || lower.includes("how you dey") || lower.includes("how are u") || lower.includes("how are u doing")){
+   reply = "I dey fine boss! 😊 Dank Assistant dey always active for you! How you self dey? Wetin I fit do for you today?";
+ }
+ // GREETINGS - Hi, Hello, Good Morning etc
+ else if(["hi","hello","hey","yo","sup","hola","hi there","greetings","gm"].includes(lower) || lower.startsWith("hi ") || lower.startsWith("hello") || lower.startsWith("hey ") || lower.includes("good morning") || lower.includes("good afternoon") || lower.includes("good evening") || lower.includes("good night") || lower.includes("gud morning") || lower.includes("good mornin")){
+   if(lower.includes("good morning") || lower.includes("gud morning") || lower === "gm" || lower.includes("good mornin")){
+     reply = "Good Morning boss! ☀️ Dank Assistant dey greet you! Hope your morning fresh! How I fit help you today?";
+   } else if(lower.includes("good afternoon")){
+     reply = "Good Afternoon! 🌤️ I be Dank Assistant — assistant to DankBoss! How your day dey go?";
+   } else if(lower.includes("good evening")){
+     reply = "Good Evening! 🌙 Welcome back — Dank Assistant dey here for you. Wetin you wan do tonight?";
+   } else if(lower.includes("good night")){
+     reply = "Good Night 🌙 Sleep tight! Dank Assistant go dey here tomorrow for you!";
+   } else {
+     const greetings = [
+       "Hi there! 👋 I'm Dank Assistant, assistant to DankBoss of the Dank Empire! How fit I help you?",
+       "Hello boss! 😊 Dank Assistant dey here — ready to sort you out!",
+       "Heyyy! 👑 Dank Assistant of Dank Empire at your service! Ask me anything!"
+     ];
+     reply = greetings[Math.floor(Math.random() * greetings.length)];
+   }
+ }
+ // WIKIPEDIA FOR REAL QUESTIONS
+ else {
+   try{
+     const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(t)}&format=json&origin=*`;
+     const searchData = await (await fetch(searchUrl)).json();
+     if(!searchData.query.search.length) {
+       reply = "Chale, I no find am o. Try rephrase am!";
+     } else {
+       const title = searchData.query.search[0].title;
+       const extractUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&titles=${encodeURIComponent(title)}&format=json&origin=*`;
+       const extractData = await (await fetch(extractUrl)).json();
+       const page = Object.values(extractData.query.pages)[0];
+       reply = `<b>${title}</b><br><br>${page.extract? page.extract.substring(0,700) : searchData.query.search[0].snippet}...<br><br><span style="opacity:0.6; font-size:0.8em;">— Dank Assistant 🤖 | Dank Empire</span>`;
+     }
+   } catch(e){
+     reply = "Network slow small, try again boss!";
+   }
+ }
 
-  let reply = "";
-  const t = q.trim();
-
-  if(t.includes('password')||t.includes('forgot')) reply = "<b>🔑 Password Reset:</b><br><br>Go to Login > Forgot Password. Enter your email.";
-  else if(t.includes('private')||t.includes('safe')||t.includes('secret')||t.includes('secure')) reply = "<b>🔒 Yes, your chats are private.</b><br><br>Private chats are visible only to you and the recipient.";
-  else if(t.includes('dankboss')||t.includes('admin')||t.includes('owner')||t.includes('human')||t.includes('support')) reply = "CONNECT_TO_DANKBOSS";
-  else {
-    try{
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({contents:[{parts:[{text:`You are DANK? Assistant inside DankConnect chat app. Be friendly, short (under 70 words), Ghanaian vibe. Question: ${text}`}]}]})
-      });
-    const tt=document.getElementById('dankTyping'); if(tt) tt.remove();
-      const data = await res.json();
-     console.log("Gemini says:", data);
-      reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I no get answer now, try again.";
-    }catch(e){ reply = "Network slow, check internet and try again."; }
-  }
-
-  setTimeout(()=>{
-    const tt=document.getElementById('dankTyping'); if(tt) tt.remove();
-    if(reply==="CONNECT_TO_DANKBOSS"){
-      const d=document.createElement('div'); d.className='bubble other'; d.style.cssText='background:#eef0ff;padding:10px 12px;border-radius:12px;margin:8px;max-width:80%;color:#000!important'; d.innerHTML="<span style='color:#000'>Connecting you to DankBoss now...</span>";
-      chatArea.appendChild(d); chatArea.scrollTop=chatArea.scrollHeight; setTimeout(()=>{ openOrCreatePrivateChat('dankboss'); },700); return;
-    }
-    const div=document.createElement('div'); div.className='bubble other'; div.style.cssText='background:#eef0ff;padding:10px 12px;border-radius:12px;margin:8px;max-width:80%;color:#000!important';
-    div.innerHTML = reply;
-    chatArea.appendChild(div); chatArea.scrollTop=chatArea.scrollHeight;
-  },800);
-};
-// ========= END V49 =========
+ // SHOW REPLY
+ const box = document.getElementById('dankMessages');
+ const typing = document.getElementById('dankTyping');
+ if(typing) typing.remove();
+ if(box){
+   box.innerHTML += `<div style="margin:10px 0; padding:10px; background:#1a1a1a; border-radius:10px; color:white; border-left:3px solid #a855f7;"><b style="color:#a855f7;">Dank Assistant:</b><br>${reply}</div>`;
+   box.scrollTop = box.scrollHeight;
+ }
+};// ========= END V49 =========
 document.getElementById('newChatBtn').addEventListener('click',async()=>{let u=prompt('Enter REAL username:'); if(!u) return; await openOrCreatePrivateChat(u);});document.getElementById('imageInput').addEventListener('change', async(e)=>{let file=e.target.files[0]; if(!file) return;if(freeMode){ showPushToast('Free Mode ON','Image blocked'); e.target.value=''; return; }try{let base64=await compressImage(file, 700, 0.7);let colName = currentChatId==='official'?'announcements':(currentChatType==='private'?'private_messages':'group_messages');let payload={ chatId:currentChatId, sender:currentUsername, text:'', type:'image', imageBase64:base64, time:serverTimestamp(), deletedFor:[], readBy:[currentUsername] };let temp=document.createElement('div'); temp.className='bubble me image-bubble'; temp.innerHTML='<img src="data:image/jpeg;base64,'+base64+'" style="max-width:220px;border-radius:10px">'; document.getElementById('msgs').appendChild(temp); document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;await addDoc(collection(db,colName), payload);if(currentChatId!=='official' && currentChatType==='private'){let curUnread=0; let cached=cachePrivate.find(c=>c.id===currentChatId); if(cached && cached.data.unread && cached.data.unread[currentChatOther]) curUnread=cached.data.unread[currentChatOther];let ref=doc(db,"private_chats", currentChatId); await updateDoc(ref, {lastMessage:'📷 Image', lastTime:serverTimestamp(), ['unread.'+currentChatOther]:curUnread+1});}}catch(err){ alert('Image fail: '+err.message); } e.target.value='';});
 document.getElementById('imgBtn').addEventListener('click',()=>{if(freeMode){ showPushToast('Free Mode ON','Photo blocked'); return; }document.getElementById('imageInput').click()});
 function getSupportedMime(){ if(typeof MediaRecorder==='undefined') return ''; if(MediaRecorder.isTypeSupported('audio/mp4')) return 'audio/mp4'; if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) return 'audio/webm;codecs=opus'; if(MediaRecorder.isTypeSupported('audio/webm')) return 'audio/webm'; if(MediaRecorder.isTypeSupported('audio/aac')) return 'audio/aac'; return ''; }
