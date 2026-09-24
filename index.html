@@ -712,24 +712,22 @@ document.querySelector('#mainView h1').onclick = function(){
   document.getElementById('shopView').style.display='none';
   document.getElementById('chatList').style.display='block';
 };
-// FILTER RENTED STORES - Simple version (shows all for now)
+// FILTER RENTED STORES - Simple version
 window.filterMarketShops = function(marketName){
-  // Just make sure rented list is visible
   const list = document.getElementById('rentedStoresList');
-  if(list) {
+  if(list){
     list.style.display='block';
-    // show all stores
-    list.querySelectorAll('div').forEach(d=>d.style.display='block');
   }
-  console.log('Opened market:', marketName);
+  console.log('Market opened:', marketName);
 };
+
 // FIX SUB-MARKET CARDS - Fashion, Craft, Tech, Food
 function openSubMarket(name){
   document.getElementById('shopHeaderTitle').innerText = name + ' Market';
-  // scroll to Rented Stores or show message
-  const rented = document.getElementById('rentedStoresList') || document.querySelector('[id*="Rented"]');
-  if(rented) rented.scrollIntoView({behavior:'smooth'});
-  // Optional: filter stores by market (if you have function)
+  const rented = document.getElementById('rentedStoresList');
+  if(rented){
+    rented.scrollIntoView({behavior:'smooth'});
+  }
   if(window.filterMarketShops) window.filterMarketShops(name);
 }
 
@@ -738,7 +736,6 @@ document.querySelector('[data-market="Craft"]')?.addEventListener('click', ()=>o
 document.querySelector('[data-market="Tech"]')?.addEventListener('click', ()=>openSubMarket('Tech'));
 document.querySelector('[data-market="Food"]')?.addEventListener('click', ()=>openSubMarket('Food'));
 
-// Also by IDs if you used them
 document.getElementById('fashionCard')?.addEventListener('click', ()=>openSubMarket('Fashion'));
 document.getElementById('craftCard')?.addEventListener('click', ()=>openSubMarket('Craft'));
 document.getElementById('techCard')?.addEventListener('click', ()=>openSubMarket('Tech'));
