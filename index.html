@@ -202,7 +202,6 @@ id="marketShopsView" style="display:none; flex-direction:column; background:#121
     </div>
   </div>
 </div>
-<div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="settingsBtn"><span>⚙️</span>Settings</div>
 <div id="chatView"><div class="chat-head" id="chatHead"><div id="closeChatBtn" style="font-size:28px;cursor:pointer">‹</div><div class="av" id="chatAv">DC</div><div style="flex:1"><div style="font-weight:800" id="chatName">Chat</div><div style="font-size:11px;opacity:0.8" id="chatStatus">online</div></div><div id="voiceCallBtn" class="call-btn">📞</div><div id="videoCallBtn" class="call-btn">🎥</div></div><div class="msgs" id="msgs"></div><div id="typingIndicator"><div class="typing-dots"><span></span><span></span><span></span></div><span id="typingText">typing...</span></div><div id="replyPreview"><div id="replyPreviewContent"><div id="replyPreviewSender">Replying</div><div id="replyPreviewText"></div></div><div id="replyClose">✕</div></div>
 <div class="input-bar" id="inputBar"><button id="imgBtn">📎</button><input type="text" id="msgInput" placeholder="Type message..."><div class="recording-bar" id="recordingBar"><div class="rec-dot"></div><span class="rec-timer" id="recTimer">0:00</span><span>recording...</span></div><button id="micBtn">🎤</button><button id="sendBtn">➤</button></div>
 <div id="viewOnlyBar">🔒 View-only — Only DankBoss can post</div>
@@ -816,4 +815,4 @@ window.closeContact=function(){ document.getElementById('contactModal').style.di
 window.contactWhatsApp=function(){ let msg=encodeURIComponent('Hi '+currentShop+', I am interested in your products.'); window.open('https://wa.me/233000000000?text='+msg,'_blank'); };
 window.contactCall=function(){ alert('Calling '+currentShop); };
 window.sendMessage=function(){ let m=document.getElementById('contactMsg').value; if(!m) return alert('Type message'); alert('Message sent to '+currentShop+': '+m); closeContact(); document.getElementById('contactMsg').value=''; };
-</script></body></html>
+</script><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="settingsBtn"><span>⚙️</span>Settings</div></body></html>
