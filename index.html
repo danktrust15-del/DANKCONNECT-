@@ -824,17 +824,16 @@ window.addEventListener('DOMContentLoaded', () => {
   document.body.appendChild(nav);
 
   function updateNav() {
-    // If any login/auth screen is visible, hide nav. Otherwise show it.
-    const authVisible = Array.from(document.querySelectorAll('div, section')).some(el => {
-      const id = (el.id || '').toLowerCase();
-      const cls = (el.className || '').toString().toLowerCase();
-      const looksLikeAuth = id.includes('auth') || id.includes('login') || cls.includes('auth') || cls.includes('login');
-      if (!looksLikeAuth) return false;
-      const s = window.getComputedStyle(el);
-      return s.display !== 'none' && s.visibility !== 'hidden' && el.offsetHeight > 100;
-    });
-    nav.style.display = authVisible ? 'none' : 'flex';
-  }
+  const inApp = Array.from(document.querySelectorAll('div, input')).some(el => {
+    const txt = (el.textContent || '').trim();
+    const ph = el.placeholder || '';
+    const match = txt === 'Search real users' || ph.includes('Search real users');
+    if (!match) return false;
+    const s = window.getComputedStyle(el);
+    return s.display !== 'none' && s.visibility !== 'hidden' && el.offsetHeight > 10;
+  });
+  nav.style.display = inApp ? 'flex' : 'none';
+}
 
   updateNav();
   // Re-check whenever the page changes (login/logout)
