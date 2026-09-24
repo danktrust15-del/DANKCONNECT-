@@ -822,7 +822,19 @@ window.addEventListener('DOMContentLoaded', () => {
   const nav = document.querySelector('.bottom-nav');
   if (!nav) return;
   document.body.appendChild(nav);
-
+nav.style.pointerEvents = 'auto';
+nav.style.zIndex = '99999';
+const settingsBtn = document.getElementById('settingsBtn');
+if (settingsBtn) {
+  settingsBtn.style.pointerEvents = 'auto';
+  settingsBtn.style.cursor = 'pointer';
+  settingsBtn.onclick = (e) => {
+    e.stopPropagation();
+   const modal = document.getElementById('settingsModal');
+console.log('btn clicked, modal found:', modal);
+if (modal) modal.style.display = 'flex';
+  };
+}
   function updateNav() {
   const inApp = Array.from(document.querySelectorAll('div, input')).some(el => {
     const txt = (el.textContent || '').trim();
