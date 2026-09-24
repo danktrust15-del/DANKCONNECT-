@@ -292,7 +292,7 @@ async function tryOpenAdmin(){
     alert("Wrong PIN");
   }
 }
-function doLogout(){ try{ if(currentUsername) await setDoc(doc(db,"presence",currentUsername),{online:false,lastSeen:serverTimestamp()},{merge:true}); }catch(e){} try{ await signOut(auth);}catch(e){} location.reload(); }
+async function doLogout(){ try{ if(currentUsername) await setDoc(doc(db,"presence",currentUsername),{online:false,lastSeen:serverTimestamp()},{merge:true}); }catch(e){} try{ await signOut(auth);}catch(e){} location.reload(); }
 document.getElementById('settingsBtn').addEventListener('click',()=>{ document.getElementById('settingsModal').classList.add('active'); });
 document.getElementById('closeSettingsBtn').addEventListener('click',()=>document.getElementById('settingsModal').classList.remove('active'));
 document.getElementById('settingsModal').addEventListener('click',(e)=>{ if(e.target.id==='settingsModal') document.getElementById('settingsModal').classList.remove('active'); });
