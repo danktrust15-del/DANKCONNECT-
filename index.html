@@ -815,4 +815,12 @@ window.closeContact=function(){ document.getElementById('contactModal').style.di
 window.contactWhatsApp=function(){ let msg=encodeURIComponent('Hi '+currentShop+', I am interested in your products.'); window.open('https://wa.me/233000000000?text='+msg,'_blank'); };
 window.contactCall=function(){ alert('Calling '+currentShop); };
 window.sendMessage=function(){ let m=document.getElementById('contactMsg').value; if(!m) return alert('Type message'); alert('Message sent to '+currentShop+': '+m); closeContact(); document.getElementById('contactMsg').value=''; };
-</script><div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="settingsBtn"><span>⚙️</span>Settings</div></body></html>
+</script>
+<div class="bottom-nav"><div class="nav-item active"><span>💬</span>Chats</div><div class="nav-item" id="settingsBtn"><span>⚙️</span>Settings</div></div>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const nav = document.querySelector('.bottom-nav');
+  if (nav) document.body.appendChild(nav);
+});
+</script>
+</body></html>
