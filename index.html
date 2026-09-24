@@ -726,9 +726,9 @@ function openSubMarket(name){
   document.getElementById('shopHeaderTitle').innerText = name + ' Market';
   const rented = document.getElementById('rentedStoresList');
   if(rented){
-    rented.scrollIntoView({behavior:'smooth'});
+    rented.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">No rented stores in '+name+' Market yet</div>';
+    rented.scrollIntoView({behavior:'smooth', block:'start'});
   }
-  if(window.filterMarketShops) window.filterMarketShops(name);
 }
 
 document.querySelector('[data-market="Fashion"]')?.addEventListener('click', ()=>openSubMarket('Fashion'));
