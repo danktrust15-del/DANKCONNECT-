@@ -724,13 +724,27 @@ window.filterMarketShops = function(marketName){
 // FIX SUB-MARKET CARDS - Fashion, Craft, Tech, Food
 function openSubMarket(name){
   document.getElementById('shopHeaderTitle').innerText = name + ' Market';
-  const rented = document.getElementById('rentedStoresList');
-  if(rented){
-    rented.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">No rented stores in '+name+' Market yet</div>';
-    rented.scrollIntoView({behavior:'smooth', block:'start'});
+  
+  // HIDE Rented Stores completely
+  const rentedList = document.getElementById('rentedStoresList');
+  if(rentedList){
+    // hide the list AND its title
+    rentedList.style.display = 'none';
+    // try to hide the "Rented Stores" header too
+    let header = rentedList.previousElementSibling;
+    if(header) header.style.display = 'none';
   }
+  
+  // Also hide with timeout in case it re-renders
+  setTimeout(()=>{
+    const r = document.getElementById('rentedStoresList');
+    if(r){
+      r.style.display='none';
+      r.innerHTML='';
+      if(r.previousElementSibling) r.previousElementSibling.style.display='none';
+    }
+  }, 100);
 }
-
 document.querySelector('[data-market="Fashion"]')?.addEventListener('click', ()=>openSubMarket('Fashion'));
 document.querySelector('[data-market="Craft"]')?.addEventListener('click', ()=>openSubMarket('Craft'));
 document.querySelector('[data-market="Tech"]')?.addEventListener('click', ()=>openSubMarket('Tech'));
