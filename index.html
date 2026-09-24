@@ -725,25 +725,22 @@ window.filterMarketShops = function(marketName){
 function openSubMarket(name){
   document.getElementById('shopHeaderTitle').innerText = name + ' Market';
   
-  // HIDE Rented Stores completely
-  const rentedList = document.getElementById('rentedStoresList');
-  if(rentedList){
-    // hide the list AND its title
-    rentedList.style.display = 'none';
-    // try to hide the "Rented Stores" header too
-    let header = rentedList.previousElementSibling;
-    if(header) header.style.display = 'none';
-  }
-  
-  // Also hide with timeout in case it re-renders
-  setTimeout(()=>{
-    const r = document.getElementById('rentedStoresList');
-    if(r){
-      r.style.display='none';
-      r.innerHTML='';
-      if(r.previousElementSibling) r.previousElementSibling.style.display='none';
+  // Hide Rented Stores header
+  document.querySelectorAll('*').forEach(el=>{
+    if(el.textContent.trim() === 'Rented Stores'){
+      el.style.display = 'none';
     }
-  }, 100);
+  });
+  
+  // Hide any div containing StyleHub with an Open button
+  document.querySelectorAll('div').forEach(d=>{
+    if(d.textContent.includes('StyleHub') && d.textContent.includes('Open')){
+      // only hide the smallest card, not big containers
+      if(d.querySelector('button')){
+        d.style.display = 'none';
+      }
+    }
+  });
 }
 document.querySelector('[data-market="Fashion"]')?.addEventListener('click', ()=>openSubMarket('Fashion'));
 document.querySelector('[data-market="Craft"]')?.addEventListener('click', ()=>openSubMarket('Craft'));
