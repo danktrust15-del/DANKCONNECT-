@@ -329,7 +329,8 @@ document.getElementById('setLogoutRow').addEventListener('click', doLogout);
  if(logoutRow) logoutRow.parentNode.insertBefore(row, logoutRow);
  else box.appendChild(row);
 })();
-// --- ADMIN PANEL BUTTON ---
+/_
+    // --- ADMIN PANEL BUTTON ---
 let adminRow = document.createElement('div');
 adminRow.id = 'adminSettingsBtn';
 adminRow.style.cssText = 'display:none;flex;justify-content:space-between;align-items:center;padding:14px;background:#1a1a2e;border-radius:10px;margin:8px 0;border:1px solid #1e90ff;cursor:pointer;';
@@ -339,6 +340,7 @@ let box2 = document.querySelector('#settingsModal .settings-box') || document.ge
 if(box2){ let lr2=document.getElementById('setLogoutRow'); if(lr2) lr2.parentNode.insertBefore(adminRow, lr2); else box2.appendChild(adminRow); }
 console.log("admin check:", currentUsername, isAdminUser());
 if(isAdminUser()){ adminRow.style.display='flex'; }
+_/
 // SHOP BUTTON - WHITE PILL
 document.getElementById('shopTopBtn')?.addEventListener('click',()=>{ showPushToast('DANK-TRUST Shop','🛒 Shop coming soon — Ghana products loading!'); });function initListeners(){stopListeners();unsubProfiles=onSnapshot(collection(db,"profiles"), (s)=>{ s.forEach(d=>profilesCache[d.id]=d.data()); renderChats(); if(currentChatId) updateChatHeader(); if(profilesCache[currentUsername]?.avatarBase64){ document.getElementById('myAvImg').src='data:image/jpeg;base64,'+profilesCache[currentUsername].avatarBase64; document.getElementById('myAvImg').style.display='block'; document.getElementById('myAvTxt').style.display='none'; } });unsubPresence=onSnapshot(collection(db,"presence"), (s)=>{ s.forEach(d=>presenceCache[d.id]=d.data()); renderChats(); if(currentChatId) updateChatHeader(); });unsubPriv=onSnapshot(query(collection(db,"private_chats"), where("participants","array-contains", currentUsername)), (s)=>{ cachePrivate=[]; s.forEach(d=>cachePrivate.push({id:d.id,data:d.data()})); renderChats(); });unsubGroup=onSnapshot(query(collection(db,"group_chats"), where("members","array-contains", currentUsername)), (s)=>{ cacheGroups=[]; s.forEach(d=>cacheGroups.push({id:d.id,data:d.data()})); renderChats(); });}
 function stopListeners(){ if(unsubMsgs) unsubMsgs(); if(unsubPriv) unsubPriv(); if(unsubGroup) unsubGroup(); if(unsubProfiles) unsubProfiles(); if(unsubPresence) unsubPresence(); if(unsubTyping) unsubTyping(); if(unsubRec) unsubRec(); }
