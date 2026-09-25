@@ -224,7 +224,10 @@ const firebaseConfig = { apiKey: "AIzaSyDfWReJ-A4J2W5V_FahYjLwfXv3-sNvXZE", auth
 const VAPID_KEY = "BN-Saty-5GQ_jpyEV4HWQcI3U6nHbkC-kGfLDoHWZRvmdKaxMBDRl0vrvhfmqUlYIGm8beL62hjGsf4UaGTbovs";
 const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app); const messaging = getMessaging(app);
 await setPersistence(auth, browserLocalPersistence); enableIndexedDbPersistence(db).catch(()=>{});
-const ADMIN_USERNAMES = ['dankboss']; function isAdminUser(u){ return ADMIN_USERNAMES.includes(((u || currentUsername)||'').toLowerCase()); }
+const ADMIN_USERNAMES = ['dankboss']; function isAdminUser(u){ 
+  const cu = (typeof currentUsername !== 'undefined' ? currentUsername : window.currentUsername) || '';
+  return ADMIN_USERNAMES.includes((u || cu || '').toLowerCase()); 
+}
 function applyTheme(t){ if(t==='light'){document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');} else {document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');}}
 (function(){let saved=localStorage.getItem('dc_theme');if(saved) applyTheme(saved); else applyTheme('dark');})();
 let freeMode = localStorage.getItem('dc_freeMode')==='1'; function applyFreeModeUI(){ const tog=document.getElementById('freeModeToggle'); if(freeMode) tog.classList.add('on'); else tog.classList.remove('on'); } function toggleFreeMode(){ freeMode=!freeMode; localStorage.setItem('dc_freeMode', freeMode?'1':'0'); applyFreeModeUI(); showPushToast('Free Mode', freeMode?'ON - Images & Voice blocked':'OFF - All allowed'); } applyFreeModeUI();
@@ -295,7 +298,7 @@ document.getElementById('loginBtn').addEventListener('click', async()=>{
   else{ document.getElementById('authMsg').textContent=e.message;return; }
  }
 });
-onAuthStateChanged(auth, async(user)=>{if(user){let snap=await getDoc(doc(db,"users",user.uid)); currentUsername=snap.exists()?snap.data().username:cleanU(user.email.split('@')[0]);document.getElementById('splashView').style.display='none'; document.getElementById('authView').style.display='none'; document.getElementById('mainView').style.display='flex';document.getElementById('myAvTxt').textContent=currentUsername.slice(0,2).toUpperCase();document.getElementById('settingsUsername').textContent=currentUsername;var adminBtn=document.getElementById('adminSettingsBtn');if(adminBtn){if(isAdminUser()){adminBtn.style.display='block';}else{adminBtn.style.display='none';}}if(profilesCache[currentUsername]?.avatarBase64){ document.getElementById('myAvImg').src='data:image/jpeg;base64,'+profilesCache[currentUsername].avatarBase64; document.getElementById('myAvImg').style.display='block'; document.getElementById('myAvTxt').style.display='none'; }initListeners(); initPush(); startPresence();} else { currentUsername=null;var ab=document.getElementById('adminSettingsBtn');if(ab)ab.style.display='none'; stopListeners(); document.getElementById('splashView').style.display='flex'; document.getElementById('authView').style.display='none'; document.getElementById('mainView').style.display='none'; document.getElementById('chatView').style.display='none'; }});
+onAuthStateChanged(auth, async(user)=>{if(user){let snap=await getDoc(doc(db,"users",user.uid)); currentUsername=snap.exists()?snap.data().username:cleanU(user.email.split('@')[0]);window.currentUsername = currentUsername;document.getElementById('splashView').style.display='none'; document.getElementById('authView').style.display='none'; document.getElementById('mainView').style.display='flex';document.getElementById('myAvTxt').textContent=currentUsername.slice(0,2).toUpperCase();document.getElementById('settingsUsername').textContent=currentUsername;var adminBtn=document.getElementById('adminSettingsBtn');if(adminBtn){if(isAdminUser()){adminBtn.style.display='block';}else{adminBtn.style.display='none';}}if(profilesCache[currentUsername]?.avatarBase64){ document.getElementById('myAvImg').src='data:image/jpeg;base64,'+profilesCache[currentUsername].avatarBase64; document.getElementById('myAvImg').style.display='block'; document.getElementById('myAvTxt').style.display='none'; }initListeners(); initPush(); startPresence();} else { currentUsername=null;window.currentUsername = null;var ab=document.getElementById('adminSettingsBtn');if(ab)ab.style.display='none'; stopListeners(); document.getElementById('splashView').style.display='flex'; document.getElementById('authView').style.display='none'; document.getElementById('mainView').style.display='none'; document.getElementById('chatView').style.display='none'; }});
 function startPresence(){ const upd=async()=>{ if(!currentUsername) return; try{ await setDoc(doc(db,"presence",currentUsername),{username:currentUsername,online:true,lastSeen:serverTimestamp()},{merge:true}); }catch(e){} }; upd(); setInterval(upd,30000); }
 async function tryOpenAdmin(){
   const pin=prompt("Enter admin PIN:");
@@ -829,8 +832,9 @@ const modal = document.getElementById('settingsModal');
 console.log('btn clicked, modal found:', modal);
 if(modal){
   const adminRow = modal.querySelector('#adminRow');
-  if(adminRow) adminRow.style.display = isAdminUser() ? 'flex' : 'none';
-  console.log('admin check on open:', currentUsername, isAdminUser());
+const cu = (typeof currentUsername !== 'undefined' ? currentUsername : window.currentUsername);
+if(adminRow) adminRow.style.display = isAdminUser(cu) ? 'flex' : 'none';
+console.log('admin check on open:', cu, isAdminUser(cu));
   modal.style.display = 'flex';
 }
 };
