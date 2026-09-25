@@ -116,10 +116,21 @@
     <div class="auth-card">
       <h2>Create Account</h2>
       <p>Join DankConnect securely</p>
-      <input type="text" id="name" placeholder="Full Name">
-      <input type="tel" id="phone" placeholder="Phone Number">
-      <input type="password" id="pass" placeholder="Password">
-      <button class="auth-btn" onclick="createAccount()">Create Account</button>
+    <input type="text" id="name" placeholder="Full Name">
+<div style="position:relative; margin-bottom:14px;">
+  <input type="password" id="pass" placeholder="Password" style="margin-bottom:0; padding-right:50px;">
+  <span onclick="togglePass('pass', this)" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; display:flex;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+  </span>
+</div>
+
+<div style="position:relative; margin-bottom:14px;">
+  <input type="password" id="pass2" placeholder="Confirm Password" style="margin-bottom:0; padding-right:50px;">
+  <span onclick="togglePass('pass2', this)" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; display:flex;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+  </span>
+</div>
+        <button class="auth-btn" onclick="createAccount()">Create Account</button>
       <div class="back-link" onclick="showSplash()">← Back</div>
     </div>
   </div>
