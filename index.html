@@ -823,12 +823,17 @@ const settingsBtn = document.getElementById('settingsBtn');
 if (settingsBtn) {
   settingsBtn.style.pointerEvents = 'auto';
   settingsBtn.style.cursor = 'pointer';
-  settingsBtn.onclick = (e) => {
-    e.stopPropagation();
-   const modal = document.getElementById('settingsModal');
+ settingsBtn.onclick = (e) => {
+e.stopPropagation();
+const modal = document.getElementById('settingsModal');
 console.log('btn clicked, modal found:', modal);
-if (modal) modal.style.display = 'flex';
-  };
+if(modal){
+  const adminRow = modal.querySelector('#adminRow');
+  if(adminRow) adminRow.style.display = isAdminUser() ? 'flex' : 'none';
+  console.log('admin check on open:', currentUsername, isAdminUser());
+  modal.style.display = 'flex';
+}
+};
 }
   function updateNav() {
   const inApp = Array.from(document.querySelectorAll('div, input')).some(el => {
