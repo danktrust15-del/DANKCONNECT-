@@ -227,7 +227,7 @@ await setPersistence(auth, browserLocalPersistence); enableIndexedDbPersistence(
 const ADMIN_USERNAMES = ['dankboss']; function isAdminUser(u){ 
   const cu = (typeof currentUsername !== 'undefined' ? currentUsername : window.currentUsername) || '';
   return ADMIN_USERNAMES.includes((u || cu || '').toLowerCase()); 
-}
+}window.isAdminUser = isAdminUser;
 function applyTheme(t){ if(t==='light'){document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');} else {document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');}}
 (function(){let saved=localStorage.getItem('dc_theme');if(saved) applyTheme(saved); else applyTheme('dark');})();
 let freeMode = localStorage.getItem('dc_freeMode')==='1'; function applyFreeModeUI(){ const tog=document.getElementById('freeModeToggle'); if(freeMode) tog.classList.add('on'); else tog.classList.remove('on'); } function toggleFreeMode(){ freeMode=!freeMode; localStorage.setItem('dc_freeMode', freeMode?'1':'0'); applyFreeModeUI(); showPushToast('Free Mode', freeMode?'ON - Images & Voice blocked':'OFF - All allowed'); } applyFreeModeUI();
