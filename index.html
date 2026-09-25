@@ -831,7 +831,7 @@ e.stopPropagation();
 const modal = document.getElementById('settingsModal');
 console.log('btn clicked, modal found:', modal);
 if(modal){
-  const adminRow = modal.querySelector('#adminRow');
+ const adminRow = document.getElementById('adminSettingsBtn');
 const cu = (typeof currentUsername !== 'undefined' ? currentUsername : window.currentUsername);
 if(adminRow) adminRow.style.display = isAdminUser(cu) ? 'flex' : 'none';
 console.log('admin check on open:', cu, isAdminUser(cu));
