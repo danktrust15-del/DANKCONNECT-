@@ -512,7 +512,7 @@ function secretAdminUnlock(){
   if(adminTaps === 5){
     adminTaps = 0;
     var pw = prompt("Enter admin password:");
-    if(pw === ADMIN_PASSWORD){
+   if(pw && pw.trim() === String(ADMIN_PASSWORD).trim()){
       document.getElementById('adminQuotesSection').style.display = 'block';
       alert('Admin mode unlocked');
     } else if(pw !== null){
