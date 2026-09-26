@@ -310,8 +310,7 @@ function togglePass(id, el){
 
   <!-- List -->
   <div style="padding:10px 16px;">
-<div onclick="document.getElementById('settingsPage').style.display='none'; document.getElementById('quotes-admin').style.display='block'" style="display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid #222d34; cursor:pointer;">
-<div style="color:white; font-size:16px;">Admin Panel</div>
+<div onclick="document.getElementById('pin-modal').style.display='flex'" style="display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid #222d34; cursor:pointer;"><div style="color:white; font-size:16px;">Admin Panel</div>
 </div> 
     <div style="display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid #222d34;">
       <div style="width:40px; height:40px; background:#e7e9fb; border-radius:50%; display:flex; align-items:center; justify-content:center;">
@@ -361,6 +360,16 @@ function togglePass(id, el){
   <button onclick="backToApps()" style="background:#2b2d42; color:white; border:none; padding:10px 16px; border-radius:8px; margin-bottom:16px;">← Back</button>
   <h2 style="color:white;">Daily Quotes</h2>
   <div id="quotes-list" style="margin-top:16px;"></div>
+</div>
+    <div id="pin-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:rgba(0,0,0,0.7); z-index:10000; align-items:center; justify-content:center;">
+  <div style="background:#0b141a; padding:20px; border-radius:12px; width:85%; max-width:320px; border:1px solid #222d34;">
+    <div style="color:white; font-size:17px; font-weight:600; margin-bottom:12px;">Enter Admin PIN</div>
+    <input id="admin-pin-input" type="password" inputmode="numeric" style="width:100%; padding:12px; border-radius:8px; border:1px solid #222d34; background:#111b21; color:white; font-size:16px; box-sizing:border-box; outline:none;">
+    <div style="display:flex; gap:10px; margin-top:16px; justify-content:flex-end;">
+      <button onclick="document.getElementById('pin-modal').style.display='none'" style="background:#222d34; color:white; border:none; padding:10px 18px; border-radius:8px;">Cancel</button>
+      <button onclick="if(document.getElementById('admin-pin-input').value==='1969'){document.getElementById('pin-modal').style.display='none'; document.getElementById('admin-pin-input').value=''; document.getElementById('settingsPage').style.display='none'; document.getElementById('quotes-admin').style.display='block'} else {alert('Wrong PIN')}" style="background:#00a884; color:white; border:none; padding:10px 22px; border-radius:8px; font-weight:600;">OK</button>
+    </div>
+  </div>
 </div>
 <div id="quotes-admin" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; padding:20px;">
  <button onclick="document.getElementById('quotes-admin').style.display='none'; document.getElementById('settingsPage').style.display='block'" style="background:#2b2d42; color:white; border:none; padding:10px 16px; border-radius:8px; margin-bottom:16px;">Back</button>
