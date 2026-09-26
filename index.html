@@ -508,14 +508,9 @@ var adminTaps = 0;
 var adminTapTimer;
 
 function secretAdminUnlock(){
-  adminTaps++;
-  clearTimeout(adminTapTimer);
-  adminTapTimer = setTimeout(()=>{ adminTaps = 0 }, 3000);
-  if(adminTaps === 5){
-    adminTaps = 0;
-    document.getElementById('adminModal').style.display = 'flex';
-    setTimeout(()=> document.getElementById('adminPwInput').focus(), 100);
-  }
+  document.getElementById('adminModal').style.display = 'flex';
+  setTimeout(()=> document.getElementById('adminPwInput').focus(), 100);
+}
 }
 function closeAdminModal(){
   document.getElementById('adminModal').style.display = 'none';
