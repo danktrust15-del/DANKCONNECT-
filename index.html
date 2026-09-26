@@ -466,10 +466,10 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 function openQuotes(){
-  document.getElementById('apps-home').style.display='none';
+  var a = document.getElementById('apps-home'); if(a) a.style.display='none';
+  var b = document.getElementById('app-home'); if(b) b.style.display='none';
   document.getElementById('quotes-page').style.display='block';
-  document.getElementById('quotes-admin').style.display='none';
-  db.collection("quotes").orderBy("time","desc").onSnapshot((snap)=>{
+  var c = document.getElementById('quotes-admin'); if(c) c.style.display='none';  db.collection("quotes").orderBy("time","desc").onSnapshot((snap)=>{
     const list = document.getElementById('quotes-list');
     list.innerHTML = '';
     if(snap.empty){
@@ -501,15 +501,24 @@ function saveQuoteToFirebase(){
   document.getElementById('quotes-page').style.display='none';
   document.getElementById('quotes-admin').style.display='none';
 }
-    var adminTaps = 0;
+var adminTaps = 0;
+var adminTapTimer = null;
+var ADMIN_PASSWORD = "1969";
+
 function secretAdminUnlock(){
   adminTaps++;
+  clearTimeout(adminTapTimer);
+  adminTapTimer = setTimeout(()=>{ adminTaps = 0 }, 3000);
   if(adminTaps === 5){
-    document.getElementById('adminQuotesSection').style.display = 'block';
     adminTaps = 0;
-    alert('Admin mode unlocked');
+    var pw = prompt("Enter admin password:");
+    if(pw === ADMIN_PASSWORD){
+      document.getElementById('adminQuotesSection').style.display = 'block';
+      alert('Admin mode unlocked');
+    } else if(pw !== null){
+      alert('Wrong password');
+    }
   }
-  setTimeout(()=>{ adminTaps = 0 }, 3000);
 }
 </script>
 <div id="shopPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; flex-direction:column;">
