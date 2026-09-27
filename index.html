@@ -540,29 +540,32 @@ function backToMarketHome(){
 
 const db = firebase.firestore();
 function openQuotesAdmin(){
+  alert('openQuotesAdmin called!');
+  document.getElementById('pin-modal').style.display='none';
   document.getElementById('settingsPage').style.display='none';
+  document.getElementById('quotesPage').style.display='none';
   document.getElementById('quotes-admin').style.display='block';
-  
+  // loadQuotesAdmin(); // commented out for test
+}
+
+function loadQuotesAdmin(){
   const list = document.getElementById('admin-quotes-list');
- firebase.firestore().collection("quotes")
-  .onSnapshot((snapshot)=>{
+  db.collection('quotes').orderBy('createdAt','desc').onSnapshot((snapshot)=>{
     list.innerHTML='';
     snapshot.forEach((doc)=>{
       const q = doc.data();
       const div = document.createElement('div');
-      div.style.cssText='background:#222;padding:10px;border-radius:8px;margin-bottom:8px;color:white;display:flex;justify-content:space-between;align-items:center;';
-div.innerHTML = '<span>' + q.text + '</span><button onclick="deleteQuote(\'' + doc.id + '\')" style="background:red;color:white;border:none;padding:6px 10px;border-radius:6px;">Delete</button>';
-list.appendChild(div);
+      div.style.cssText='background:#222d34;padding:10px;border-radius:8px;margin-bottom:8px;color:white;display:flex;justify-content:space-between;align-items:center;';
+      div.innerHTML = '<span>'+ q.text + '</span><button onclick="deleteQuote(\'' + doc.id + '\')" style="background:red;color:white;border:none;padding:6px 10px;border-radius:6px">Delete</button>';
+      list.appendChild(div);
     });
   });
 }
-
 function deleteQuote(id){
   if(!confirm('Delete this quote?')) return;
   db.collection('quotes').doc(id).delete()
     .then(()=>{ loadQuotesAdmin(); })
     .catch(e=>alert('Delete failed: '+e.message));
-}
 }
 function saveQuoteToFirebase(){
   const btn = document.querySelector('#quotes-admin button');
