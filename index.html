@@ -558,9 +558,11 @@ list.appendChild(div);
 }
 
 function deleteQuote(id){
-  if(confirm('Delete this quote?')){
-    firebase.firestore().collection("quotes").doc(id).delete();
-  }
+  if(!confirm('Delete this quote?')) return;
+  db.collection('quotes').doc(id).delete()
+    .then(()=>{ loadQuotesAdmin(); })
+    .catch(e=>alert('Delete failed: '+e.message));
+}
 }
 function saveQuoteToFirebase(){
   const btn = document.querySelector('#quotes-admin button');
