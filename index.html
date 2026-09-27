@@ -24,6 +24,17 @@ firebase.initializeApp(firebaseConfig);
     min-height:100vh;
     color:#fff;
   }
+    .quote-card{
+  background: #1a2a44;
+  color: white;
+  padding: 18px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  font-size: 17px;
+  line-height: 1.4;
+  border-left: 4px solid #4a90e2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
   /* SPLASH */
   #splash{
     background:#100ab6;
@@ -384,10 +395,12 @@ function togglePass(id, el){
   </div>
 </div>
 <div id="quotes-admin" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; padding:20px;">
- <button onclick="document.getElementById('quotes-admin').style.display='none'; document.getElementById('settingsPage').style.display='block'" style="background:#2b2d42; color:white; border:none; padding:10px 16px; border-radius:8px; margin-bottom:16px;">Back</button>
-  <h2 style="color:white;">Post New Quote</h2>
-  <textarea id="admin-quote-input" placeholder="Type quote here..." style="width:100%; height:120px; border-radius:12px; padding:12px; margin-top:12px;"></textarea>
-  <button onclick="saveQuoteToFirebase()" style="background:#00a884; color:white; border:none; padding:12px 20px; border-radius:10px; margin-top:12px; font-weight:bold;">Post Quote</button>
+<button onclick="document.getElementById('quotes-admin').style.display='none'; document.getElementById('settingsPage').style.display='block'" style="background:#2b2d42; color:white; border:none; padding:10px 16px; border-radius:8px; margin-bottom:16px;">Back</button>
+<h2 style="color:white;">Post New Quote</h2>
+<textarea id="admin-quote-input" placeholder="Type quote here..." style="width:100%; height:120px; border-radius:12px; padding:12px; margin-top:12px;"></textarea>
+<div><button onclick="saveQuoteToFirebase()" style="background:#00a884; color:white; border:none; padding:12px 20px; border-radius:10px; margin-top:12px; font-weight:bold;">Post Quote</button></div>
+<h3 style="color:white; margin-top:20px;">Manage Quotes</h3>
+<div id="admin-quotes-list"></div>
 </div>
 <script>
 
@@ -530,6 +543,26 @@ const db = firebase.firestore();
 function openQuotesAdmin(){
   document.getElementById('quotesPage').style.display='none';
   document.getElementById('quotes-admin').style.display='block';
+  
+  const list = document.getElementById('admin-quotes-list');
+  firebase.firestore().collection("quotes").orderBy("createdAt","desc")
+  .onSnapshot((snapshot)=>{
+    list.innerHTML='';
+    snapshot.forEach((doc)=>{
+      const q = doc.data();
+      const div = document.createElement('div');
+      div.style.cssText='background:#222;padding:10px;border-radius:8px;margin-bottom:8px;color:white;display:flex;justify-content:space-between;align-items:center;';
+div.innerHTML = `<span>${q.text}</span>
+  <button onclick="deleteQuote('${doc.id}')" style="background:red;color:white;border:none;padding:6px 10px;border-radius:6px;">Delete</button>`;
+      list.appendChild(div);
+    });
+  });
+}
+
+function deleteQuote(id){
+  if(confirm('Delete this quote?')){
+    firebase.firestore().collection("quotes").doc(id).delete();
+  }
 }
 function saveQuoteToFirebase(){
   const btn = document.querySelector('#quotes-admin button');
