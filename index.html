@@ -468,7 +468,8 @@ let channels = [{name:"Dank Updates", followers:"1.2k"}];
 
 function renderStatus(){
   const el = document.getElementById('statusList');
-  let html = `<div onclick="addStatus()" style="min-width:70px; text-align:center; cursor:pointer;">
+  if(!el) return;
+    let html = `<div onclick="addStatus()" style="min-width:70px; text-align:center; cursor:pointer;">
     <div style="width:60px; height:60px; border-radius:50%; background:#00a884; display:flex; align-items:center; justify-content:center; color:white; font-size:30px; font-weight:bold;">+</div>
     <div style="font-size:11px; margin-top:4px; color:#e9edef;">My Status</div>
   </div>`;
@@ -480,8 +481,9 @@ function renderStatus(){
   el.innerHTML = html;
 }
 function renderChannels(){
-  const el = document.getElementById('channelList');
-  el.innerHTML = channels.map(c=>`
+  const el = document.getElementById('channellist');
+  if(!el) return;
+    el.innerHTML = channels.map(c=>`
     <div style="background:#111b21; padding:12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between;">
       <span>${c.name}</span><span style="color:#8696a0; font-size:12px;">${c.followers}</span>
     </div>`).join('');
@@ -540,14 +542,12 @@ function backToMarketHome(){
 
 const db = firebase.firestore();
 function openQuotesAdmin(){
-  alert('openQuotesAdmin called!');
   document.getElementById('pin-modal').style.display='none';
   document.getElementById('settingsPage').style.display='none';
   document.getElementById('quotesPage').style.display='none';
   document.getElementById('quotes-admin').style.display='block';
-  // loadQuotesAdmin(); // commented out for test
+  loadQuotesAdmin();
 }
-
 function loadQuotesAdmin(){
   const list = document.getElementById('admin-quotes-list');
   db.collection('quotes').orderBy('createdAt','desc').onSnapshot((snapshot)=>{
