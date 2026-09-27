@@ -523,14 +523,16 @@ function openQuotesAdmin(){
   document.getElementById('quotes-admin').style.display='block';
 }
 function saveQuoteToFirebase(){
-    const text = document.getElementById('admin-quote-input').value.trim();
+  const text = document.getElementById('admin-quote-input').value.trim();
   if(!text) return alert('Type a quote first');
   db.collection("quotes").add({
     text: text,
-    time: firebase.firestore.FieldValue.serverTimestamp()
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   }).then(()=>{
     document.getElementById('admin-quote-input').value = '';
     alert('Posted! All users will see it now.');
+  }).catch((err)=>{
+    alert('Error: ' + err.message);
   });
 }
 function backToApps(){
