@@ -552,8 +552,7 @@ function openQuotesAdmin(){
       const q = doc.data();
       const div = document.createElement('div');
       div.style.cssText='background:#222;padding:10px;border-radius:8px;margin-bottom:8px;color:white;display:flex;justify-content:space-between;align-items:center;';
-div.innerHTML = `<span>${q.text}</span>
-  <button onclick="deleteQuote('${doc.id}')" style="background:red;color:white;border:none;padding:6px 10px;border-radius:6px;">Delete</button>`;      
+div.innerHTML = '<span>' + q.text + '</span><button onclick="deleteQuote(\'' + doc.id + '\')" style="background:red;color:white;border:none;padding:6px 10px;border-radius:6px;">Delete</button>';
 list.appendChild(div);
     });
   });
