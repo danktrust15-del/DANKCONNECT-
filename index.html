@@ -349,31 +349,38 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('auth').style.display = 'none';
     var splash = document.getElementById('splash');
     if(splash) splash.style.display = 'none';
-    var chatList = document.getElementById('chatsPage');
-    if(chatList) chatList.style.display = 'flex';
+var chatList = document.getElementById('chatsPage');
+if(chatList) chatList.style.display = 'flex';
+var bottomNav = document.getElementById('bottomNav');
+if(bottomNav) bottomNav.style.display = 'flex';
   }
 });
 
-function logout(){
-  if(!confirm('Log out of DankConnect?')) return;
-  ['dank_uid','dank_username','dank_displayName'].forEach(k=>localStorage.removeItem(k));
-
-  // hide app, show login
+function logout() {
+  if (!confirm('Log out of DankConnect?')) return;
+  
+  localStorage.removeItem('dc_currentUser');
+  currentUser = null;
+  currentChatUser = null;
+  
+if (typeof unsubscribeChats !== 'undefined' && unsubscribeChats) unsubscribeChats();
+if (typeof unsubscribeMessages !== 'undefined' && unsubscribeMessages) unsubscribeMessages();
+if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscribeRequests();  
   document.getElementById('chatsPage').style.display = 'none';
   document.getElementById('settingsPage').style.display = 'none';
-  const auth = document.getElementById('auth');
-  if(auth) auth.style.display = 'flex';
-
+  document.getElementById('bottomNav').style.display = 'none'; // <-- ADD THIS LINE HERE
+  document.getElementById('auth').style.display = 'flex';
+  
   // reset to Login mode
   isLoginMode = true;
-  document.getElementById('authTitle').innerText = 'Welcome Back';
-  document.getElementById('authBtn').innerText = 'Log In';
-  document.getElementById('authSwitchText').innerText = "Don't have an account?";
-  document.getElementById('authSwitchLink').innerText = ' Create Account';
+  document.getElementById('authTitle').textContent = 'Welcome Back';
+  document.getElementById('authBtn').textContent = 'Log In';
+  document.getElementById('authSwitchText').textContent = "Don't have an account?";
+  document.getElementById('authSwitchLink').textContent = 'Create Account';
   document.getElementById('name').style.display = 'none';
   document.getElementById('username').value = '';
   document.getElementById('pass').value = '';
-  document.getElementById('authError').innerText = '';
+  document.getElementById('authError').textContent = '';
 }
 </script>
 <!-- SETTINGS PAGE -->
@@ -423,8 +430,7 @@ function logout(){
     </div>
   </div>
 
-<div onclick="alert('Logged out')" style="display:flex; align-items:center; gap:16px; padding:14px 20px; border-top:1px solid #222d34; margin-top:10px; cursor:pointer;">
-  <div style="width:40px; height:40px; background:#fde8e8; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+<div onclick="logout()" style="display:flex; align-items:center; gap:16px; padding:14px 20px; border-top:1px solid #222d34; margin-top:10px; cursor:pointer;">  <div style="width:40px; height:40px; background:#fde8e8; border-radius:50%; display:flex; align-items:center; justify-content:center;">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
   </div>
   <span style="color:#FF3B30; font-size:16px; font-weight:500;">Log Out</span>
@@ -437,7 +443,7 @@ function logout(){
 <div id="callsPage" style="display:none; background:#0b141a; min-height:100vh; color:white;">
   <div style="padding:12px 16px; font-size:20px; font-weight:bold;">Calls</div>
   <div style="padding:40px 16px; text-align:center; color:#8696a0;">No calls yet</div>
-  <div style="display:flex; flex-direction:row; justify-content:space-around; align-items:center; padding:10px 0 20px; background:#0b141a; border-top:1px solid #1f2c34; width:100%;">
+<div id="bottomNav" style="display:flex; flex-direction:row; justify-content:space-around; align-items:center; padding:10px 0 20px; background:#0b141a; border-top:1px solid #1f2c34; width:100%;">
     <div onclick="showPage('updatesPage')" style="text-align:center; color:#8696a0; font-size:11px; cursor:pointer; padding:4px 12px;">Updates</div>
     <div onclick="showPage('callsPage')" style="text-align:center; color:white; font-size:11px; cursor:pointer; padding:4px 12px; font-weight:bold;">Calls</div>
     <div style="text-align:center; color:#8696a0; font-size:11px; padding:4px 12px;">Communities</div>
