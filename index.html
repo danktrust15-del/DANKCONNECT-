@@ -883,7 +883,6 @@ function loadMyChats(){
   if(!list) return;
   firebase.firestore().collection('chats')
     .where('participants','array-contains', myUid)
-    .orderBy('lastMessageAt','desc')
     .onSnapshot(async snap => {
       list.innerHTML = '';
       if(snap.empty){
