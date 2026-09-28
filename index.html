@@ -782,34 +782,48 @@ function showAddResults(snap, resDiv){
   });
 }
 async function startChatWith(userId, userData){
-  const currentUid = firebase.auth().currentUser.uid;
-  const chatId = [currentUid, userId].sort().join('_');
-  const chatRef = firebase.firestore().collection("chats").doc(chatId);
+  const currentUid = localStorage.getItem('dank_uid');
+  const currentName = localStorage.getItem('dank_displayName') || 'Me';
+
+  if(!currentUid){ alert('Please create an account first'); return; }
+
+  // userId here is the doc.id from usernames (the username), but we need the actual uid
+  let targetUid = userId;
+  let otherName = 'User';
+
+  if(typeof userData === 'string'){
+    otherName = userData;
+  } else if(userData){
+    // userData comes from usernames collection, has.uid field
+    if(userData.uid) targetUid = userData.uid;
+    otherName = userData.displayName || userData.username || 'User';
+  }
+
+  if(targetUid === currentUid || userId === localStorage.getItem('dank_username')){
+    alert('You cannot chat with yourself');
+    return;
+  }
+
+  const chatId = [currentUid, targetUid].sort().join('_');
+  const chatRef = firebase.firestore().collection('chats').doc(chatId);
 
   const doc = await chatRef.get();
   if(!doc.exists){
-    // handle userData being either object or string
-    let otherName = 'User';
-    if(typeof userData === 'string'){
-      otherName = userData;
-    } else if(userData){
-      otherName = userData.displayName || userData.username || 'User';
-    }
-
     await chatRef.set({
-      participants: [currentUid, userId],
+      participants: [currentUid, targetUid],
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       lastMessage: '',
       names: {
-        [currentUid]: firebase.auth().currentUser.displayName || 'Me',
-        [userId]: otherName
+        [currentUid]: currentName,
+        [targetUid]: otherName
       }
     });
   }
   closeAddUser();
-  // open the chat - change this to your open-chat function name
+  // change this to your open-chat function name
   if(typeof openChat === 'function') openChat(chatId);
-  else alert('Chat created! Chat ID: ' + chatId);
+  else if(typeof openPrivateChat === 'function') openPrivateChat(chatId);
+  else alert('Chat ready! Chat ID: ' + chatId);
 }
 </script>
 <div id="shopPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; flex-direction:column;">
