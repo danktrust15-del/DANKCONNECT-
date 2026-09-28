@@ -732,20 +732,28 @@ function showAddResults(snap, resDiv){
     resDiv.appendChild(row);
   });
 }
-    async function startChatWith(userId, userData){
+async function startChatWith(userId, userData){
   const currentUid = firebase.auth().currentUser.uid;
   const chatId = [currentUid, userId].sort().join('_');
   const chatRef = firebase.firestore().collection("chats").doc(chatId);
 
   const doc = await chatRef.get();
   if(!doc.exists){
+    // handle userData being either object or string
+    let otherName = 'User';
+    if(typeof userData === 'string'){
+      otherName = userData;
+    } else if(userData){
+      otherName = userData.displayName || userData.username || 'User';
+    }
+
     await chatRef.set({
       participants: [currentUid, userId],
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       lastMessage: '',
       names: {
         [currentUid]: firebase.auth().currentUser.displayName || 'Me',
-        [userId]: userData.displayName || userData.username || 'User'
+        [userId]: otherName
       }
     });
   }
