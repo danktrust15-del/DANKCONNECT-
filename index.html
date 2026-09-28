@@ -454,13 +454,16 @@ function openQuotes(){
         list.innerHTML = '<p style="text-align:center;">No quotes yet.</p>';
         return;
       }
-      snapshot.forEach((doc)=>{
-        const div = document.createElement('div');
-        div.className = 'quote-card';
-        div.textContent = doc.data().text;
-        list.appendChild(div);
-      });
-    }, (err)=>{
+snapshot.forEach((doc)=>{
+  const q = doc.data();
+  const div = document.createElement('div');
+  div.className = 'quote-card';
+  div.style.cssText = 'padding:15px;margin-bottom:10px;border-radius:10px;background:#1a2333;color:white;cursor:pointer';
+  div.innerHTML = '<div style="font-weight:bold;font-size:16px;">'+ (q.title || 'Untitled') +'</div><div style="font-size:12px;opacity:0.6;margin-top:4px;">Tap to read</div><div class="quote-full" style="display:none;margin-top:10px;white-space:pre-wrap;line-height:1.5;">'+ q.text +'</div>';
+  div.onclick = function(){ const f = this.querySelector('.quote-full'); const isHidden = f.style.display==='none'; f.style.display = isHidden ? 'block' : 'none'; this.querySelector('div:nth-child(2)').textContent = isHidden ? 'Tap to hide' : 'Tap to read'; };
+  list.appendChild(div);
+}),
+}, (err)=>{
       list.innerHTML = '<p style="text-align:center;">Error loading: '+err.message+'</p>';
     });
 }
@@ -557,8 +560,7 @@ function loadQuotesAdmin(){
       const q = doc.data();
       const div = document.createElement('div');
       div.style.cssText='background:#222d34;padding:10px;border-radius:8px;margin-bottom:8px;color:white;display:flex;justify-content:space-between;align-items:center;';
-      div.innerHTML = '<span>'+ q.text + '</span><button onclick="deleteQuote(\'' + doc.id + '\')" style="background:red;color:white;border:none;padding:6px 10px;border-radius:6px">Delete</button>';
-      list.appendChild(div);
+div.innerHTML = '<span><b>'+ (q.title || 'Untitled') +'</b><br><span style="opacity:0.7;font-size:12px;">'+ q.text.substring(0,60) +'...</span></span><button onclick="deleteQuote(\'' + doc.id + '\')" style="background:red;color:white;border:none;padding:6px 10px;border-radius:6px">Delete</button>';      list.appendChild(div);
     });
   });
 }
