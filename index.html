@@ -825,9 +825,9 @@ function showAddResults(snap, resDiv){
   });
 }
 async function startChatWith(userId, userData){
-  const currentUid = localStorage.getItem('dank_uid');
-  const currentName = localStorage.getItem('dank_displayName') || 'Me';
-
+const currentUid = localStorage.getItem('dank_uid');
+const currentName = localStorage.getItem('dank_displayName') || 'Me';
+const currentUsername = localStorage.getItem('dank_username') || 'Me';
   if(!currentUid){ alert('Please create an account first'); return; }
 
   // userId here is the doc.id from usernames (the username), but we need the actual uid
@@ -840,6 +840,7 @@ async function startChatWith(userId, userData){
     // userData comes from usernames collection, has.uid field
     if(userData.uid) targetUid = userData.uid;
     otherName = userData.displayName || userData.username || 'User';
+    let otherUsername = userData.username || userId || 'User';
   }
 
   if(targetUid === currentUid || userId === localStorage.getItem('dank_username')){
@@ -852,16 +853,20 @@ async function startChatWith(userId, userData){
 
   const doc = await chatRef.get();
   if(!doc.exists){
-    await chatRef.set({
-      participants: [currentUid, targetUid],
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      lastMessage: '',
-      names: {
-        [currentUid]: currentName,
-        [targetUid]: otherName
-      }
-    });
+await chatRef.set({
+  participants: [currentUid, targetUid],
+  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  lastMessage: '',
+  names: {
+    [currentUid]: currentName,
+    [targetUid]: otherName
+  },
+  usernames: {
+    [currentUid]: currentUsername,
+    [targetUid]: otherUsername
   }
+});
+}
   closeAddUser();
 openChat(chatId, otherName);
 }
@@ -1018,7 +1023,7 @@ let chats = [];
       chats.forEach(chat => {
         const chatId = chat.id;
         const otherUid = chat.participants.find(u => u!== myUid);
-        const otherName = (chat.names && chat.names[otherUid]) || 'Chat';
+ const otherName = (chat.usernames && chat.usernames[otherUid]) || (chat.names && chat.names[otherUid]) || 'Chat';
         const item = document.createElement('div');
         item.style.cssText = 'padding:14px 12px;border-bottom:1px solid #1f2c34;cursor:pointer;display:flex;align-items:center;gap:12px;';
         item.innerHTML = `<div style="width:48px;height:48px;border-radius:50%;background:#0000FF;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;">${otherName.charAt(0).toUpperCase()}</div><div style="flex:1;"><div style="font-weight:600;color:white;">${otherName}</div><div style="color:#888;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${chat.lastMessage || ''}</div></div>`;
