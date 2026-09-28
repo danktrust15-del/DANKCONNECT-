@@ -201,21 +201,7 @@ firebase.initializeApp(firebaseConfig);
   </div>
 
   <!-- Chat items -->
-  <div style="flex:1; overflow-y:auto;">
-    <div style="display:flex; gap:14px; padding:12px 16px; align-items:center; cursor:pointer;">
-      <div style="width:52px; height:52px; border-radius:50%; background:#2a3942; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#aebac1; font-weight:600;">DC</div>
-      <div style="flex:1; border-bottom:1px solid #1f2c34; padding-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-         <div style="display:flex; align-items:center; gap:6px;">
-<div style="color:#fff; font-weight:700; font-size:16px;">DANKCONNECT Official</div>
-<div style="width:18px; height:18px; background:#1DA1F2; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:900;">✓</div>
-<div style="font-size:14px;">📌</div>
-</div>
-          <div style="font-size:12px; color:#8696a0;">19:51</div>
-        </div>
-        <div style="color:#8696a0; font-size:14px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">How can I help you today?</div>
-      </div>
-    </div>
+ <div id="chatsList" style="flex:1; overflow-y:auto; padding:10px;">
   </div>
  </div>
  
@@ -891,6 +877,37 @@ function sendPrivateMessage(){
   });
   inp.value = '';
 }
+function loadMyChats(){
+  const myUid = localStorage.getItem('dank_uid');
+  const list = document.getElementById('chatsList');
+  if(!list) return;
+  firebase.firestore().collection('chats')
+    .where('participants','array-contains', myUid)
+    .orderBy('lastMessageAt','desc')
+    .onSnapshot(async snap => {
+      list.innerHTML = '';
+      if(snap.empty){
+        list.innerHTML = '<div style="text-align:center;color:#888;margin-top:40px;">No chats yet<br>Tap + to start one</div>';
+        return;
+      }
+      for(const doc of snap.docs){
+        const chat = doc.data();
+        const chatId = doc.id;
+        const otherUid = chat.participants.find(u => u !== myUid);
+        let otherName = 'Chat';
+        try{
+          const uDoc = await firebase.firestore().collection('users').doc(otherUid).get();
+          if(uDoc.exists) otherName = uDoc.data().name || uDoc.data().username || 'Chat';
+        }catch(e){}
+        const item = document.createElement('div');
+        item.style.cssText = 'padding:14px 12px;border-bottom:1px solid #1f2c34;cursor:pointer;display:flex;align-items:center;gap:12px;';
+        item.innerHTML = `<div style="width:48px;height:48px;border-radius:50%;background:#0000FF;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;">${otherName.charAt(0).toUpperCase()}</div><div style="flex:1;"><div style="font-weight:600;color:white;">${otherName}</div><div style="color:#888;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${chat.lastMessage || ''}</div></div>`;
+        item.onclick = () => openChat(chatId, otherName);
+        list.appendChild(item);
+      }
+    });
+}
+loadMyChats();
 </script>
 <div id="shopPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; flex-direction:column;">
   <div style="background:#0000FF; padding:16px; display:flex; align-items:center; gap:12px;">
