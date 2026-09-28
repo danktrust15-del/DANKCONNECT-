@@ -669,20 +669,24 @@ function closeAddUser(){
   document.getElementById('addUserModal').style.display = 'none';
 }
 async function searchUserToAdd(){
-  const val = document.getElementById('addUserInput').value.trim().toLowerCase();
+  const inp = document.getElementById('addUserInput');
   const resDiv = document.getElementById('addUserResults');
+  const val = inp.value.trim().toLowerCase();
+  if(!val){ resDiv.innerHTML = 'Type a username'; return; }
   resDiv.innerHTML = 'Searching...';
-  if(!val) return;
-  
-  const snap = await firebase.firestore().collection("users").where("username_lower", "==", val).get();
-  
-  if(snap.empty){
-    // fallback: try displayName
-    const snap2 = await firebase.firestore().collection("users").where("displayName_lower", "==", val).get();
-    if(snap2.empty){ resDiv.innerHTML = '<div style="opacity:0.6; font-size:14px;">No user found</div>'; return; }
-    showAddResults(snap2, resDiv);
-  } else {
+  try{
+    const fs = firebase.firestore();
+    console.log('searching for:', val);
+    let snap = await fs.collection("users").where("username_lower","==",val).get();
+    console.log('first query done, empty?', snap.empty);
+    if(snap.empty){
+      snap = await fs.collection("users").where("displayName_lower","==",val).get();
+      console.log('second query done, empty?', snap.empty);
+    }
     showAddResults(snap, resDiv);
+  }catch(e){
+    console.error(e);
+    resDiv.innerHTML = 'Error: '+e.message;
   }
 }
 function showAddResults(snap, resDiv){
