@@ -344,16 +344,24 @@ async function handleAuth(){
 }
 // Also add this for auto-login on page load - put it right after the function
 window.addEventListener('DOMContentLoaded', () => {
-  const savedUid = localStorage.getItem('dank_uid');
-  if(savedUid){
-    document.getElementById('auth').style.display = 'none';
-    var splash = document.getElementById('splash');
-    if(splash) splash.style.display = 'none';
-var chatList = document.getElementById('chatsPage');
-if(chatList) chatList.style.display = 'flex';
-var bottomNav = document.getElementById('bottomNav');
-if(bottomNav) bottomNav.style.display = 'flex';
-  }
+ const savedUid = localStorage.getItem('dank_uid');
+ if(savedUid){
+  document.getElementById('auth').style.display = 'none';
+  var splash = document.getElementById('splash');
+  if(splash) splash.style.display = 'none';
+  var chatList = document.getElementById('chatsPage');
+  if(chatList) chatList.style.display = 'flex';
+  var bottomNav = document.getElementById('bottomNav');
+  if(bottomNav) bottomNav.style.display = 'flex';
+ } else {
+  document.getElementById('auth').style.display = 'flex';
+  var splash2 = document.getElementById('splash');
+  if(splash2) splash2.style.display = 'none';
+  var chatList2 = document.getElementById('chatsPage');
+  if(chatList2) chatList2.style.display = 'none';
+  var bottomNav2 = document.getElementById('bottomNav');
+  if(bottomNav2) bottomNav2.style.display = 'none';
+ }
 });
 
 function logout() {
