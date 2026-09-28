@@ -19,6 +19,11 @@ firebase.initializeApp(firebaseConfig);
 </script>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
+    html, body{
+  height:100%;
+  overflow:hidden;
+  overscroll-behavior:none;
+}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
     min-height:100vh;
@@ -119,6 +124,29 @@ firebase.initializeApp(firebaseConfig);
     border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;margin-top:8px;
   }
   .back-link{margin-top:18px;font-size:14px;color:#100ab6;cursor:pointer}
+    .screen{
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.sticky-top{
+  position:sticky;
+  top:0;
+  z-index:50;
+  flex-shrink:0;
+}
+.sticky-bottom{
+  position:sticky;
+  bottom:0;
+  z-index:50;
+  flex-shrink:0;
+}
+.scroll-mid{
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
 </style>
 </head>
 <body>
@@ -152,10 +180,9 @@ firebase.initializeApp(firebaseConfig);
   <p id="authError" style="color:red;text-align:center;"></p>
  </div>
 </div>    
-<div id="chatsPage" style="display:none; flex-direction:column; height:100vh; background:#0b141a; color:white; font-family:-apple-system, sans-serif;">
-  
+<div id="chatsPage" class="screen" style="display:none; flex-direction:column; height:100dvh; background:#0b141a; color:white; font-family:-apple-system, sans-serif;">  
 <!-- MAIN HEADER - Deep Blue -->
-  <div style="background:#0000FF; padding:12px 16px 16px; border-bottom-left-radius:16px; border-bottom-right-radius:16px;">
+<div class="sticky-top" style="background:#0000FF; padding:12px 16px 16px; border-bottom-left-radius:16px; border-bottom-right-radius:16px;">
     
     <!-- Top icons row -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -195,7 +222,7 @@ firebase.initializeApp(firebaseConfig);
   </div>
 
   <!-- Chat items -->
- <div id="chatsList" style="flex:1; overflow-y:auto; padding:10px;">
+<div id="chatsList" class="scroll-mid" style="flex:1; overflow-y:auto; padding:10px;">
   </div>
  </div>
  
@@ -258,7 +285,7 @@ function closeStatus(){
 }
 </script>
     <!-- Bottom nav -->
-<div id="bottomNav" style="display:flex; flex-direction:row; justify-content:space-around; align-items:center; padding:10px 0 20px; background:#0b141a; border-top:1px solid #1f2c34; width:100%;">
+<div id="bottomNav" class="sticky-bottom" style="display:flex; flex-direction:row; justify-content:space-around; align-items:center; padding:10px 0 20px; background:#0b141a; border-top:1px solid #1f2c34; width:100%;">
 <div onclick="showPage('updatesPage')" style="text-align:center; color:#8696a0; font-size:11px; cursor:pointer; padding:4px 12px;">Updates</div>
 <div onclick="showPage('callsPage')" style="text-align:center; color:#8696a0; font-size:11px; cursor:pointer; padding:4px 12px;">Calls</div>
 <div style="text-align:center; color:#8696a0; font-size:11px; padding:4px 12px;">Communities</div>
