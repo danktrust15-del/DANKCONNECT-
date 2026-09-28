@@ -359,7 +359,9 @@ if(bottomNav) bottomNav.style.display = 'flex';
 function logout() {
   if (!confirm('Log out of DankConnect?')) return;
   
-  localStorage.removeItem('dc_currentUser');
+localStorage.removeItem('dank_uid');
+localStorage.removeItem('dank_username');
+localStorage.removeItem('dank_displayName');
   currentUser = null;
   currentChatUser = null;
   
