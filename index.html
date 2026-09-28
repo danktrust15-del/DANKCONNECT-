@@ -136,29 +136,24 @@ firebase.initializeApp(firebaseConfig);
     </div>
   </div>
 
-  <div id="auth">
-    <div class="auth-card">
-      <h2>Create Account</h2>
-      <p>Join DankConnect securely</p>
-    <input type="text" id="name" placeholder="Full Name">
-<div style="position:relative; margin-bottom:14px;">
-  <input type="password" id="pass" placeholder="Password" style="margin-bottom:0; padding-right:50px;">
-  <span onclick="togglePass('pass', this)" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; display:flex;">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-  </span>
-</div>
-
-<div style="position:relative; margin-bottom:14px;">
-  <input type="password" id="pass2" placeholder="Confirm Password" style="margin-bottom:0; padding-right:50px;">
-  <span onclick="togglePass('pass2', this)" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; display:flex;">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-  </span>
-</div>
-        <button class="auth-btn" onclick="createAccount()">Create Account</button>
-      <div class="back-link" onclick="showSplash()">← Back</div>
-    </div>
+<div id="auth">
+ <div class="auth-card">
+  <h2 id="authTitle">Create Account</h2>
+  <p>Join DankConnect securely</p>
+  <input type="text" id="name" placeholder="Full Name" style="display:block">
+  <input type="text" id="username" placeholder="Username" style="display:block;margin-top:14px;">
+  <input type="password" id="pass" placeholder="Password" style="margin-top:14px;">
+  
+  <button class="auth-btn" onclick="handleAuth()" id="authBtn">Create Account</button>
+  <div class="back-link" style="margin-top:12px;">
+    <span id="authSwitchText">Already have an account?</span>
+    <span onclick="toggleAuth()" style="color:#0000FF;cursor:pointer;" id="authSwitchLink"> Log In</span>
   </div>
-    <div id="chatsPage" style="display:none; flex-direction:column; height:100vh; background:#0b141a; color:white; font-family:-apple-system, sans-serif;">
+  <div class="back-link" onclick="showSplash()">~- Back</div>
+  <p id="authError" style="color:red;text-align:center;"></p>
+ </div>
+</div>    
+<div id="chatsPage" style="display:none; flex-direction:column; height:100vh; background:#0b141a; color:white; font-family:-apple-system, sans-serif;">
   
 <!-- MAIN HEADER - Deep Blue -->
   <div style="background:#0000FF; padding:12px 16px 16px; border-bottom-left-radius:16px; border-bottom-right-radius:16px;">
@@ -292,51 +287,61 @@ function togglePass(id, el){
     document.getElementById('auth').classList.remove('show');
     document.getElementById('splash').classList.remove('hidden');
   }
- async function createAccount(){
+let isLoginMode = false;
+
+function toggleAuth(){
+  isLoginMode = !isLoginMode;
+  document.getElementById('authTitle').innerText = isLoginMode ? 'Welcome Back' : 'Create Account';
+  document.getElementById('authBtn').innerText = isLoginMode ? 'Log In' : 'Create Account';
+  document.getElementById('authSwitchText').innerText = isLoginMode ? "Don't have an account?" : "Already have an account?";
+  document.getElementById('authSwitchLink').innerText = isLoginMode ? ' Create Account' : ' Log In';
+  document.getElementById('name').style.display = isLoginMode ? 'none' : 'block';
+  document.getElementById('authError').innerText = '';
+}
+
+async function handleAuth(){
   const n = document.getElementById('name').value.trim();
+  const usernameInput = document.getElementById('username').value.trim().toLowerCase();
   const p = document.getElementById('pass').value.trim();
-  const p2 = document.getElementById('pass2').value.trim();
-  if(!n || !p){ alert('Please enter name and password'); return; }
-  if(p !== p2){ alert('Passwords do not match'); return; }
+  const err = document.getElementById('authError');
+  err.innerText = '';
+  if(!usernameInput || !p){ err.innerText = 'Please enter username and password'; return; }
+  if(!isLoginMode && !n){ err.innerText = 'Please enter name'; return; }
 
-  const username = n.toLowerCase();
-  const uid = 'uid_' + Date.now() + '_' + Math.random().toString(36).substr(2,5);
+  const fs = firebase.firestore();
+  const unameRef = fs.collection('usernames').doc(usernameInput);
+  const existing = await unameRef.get();
 
-  try{
-    const fs = firebase.firestore();
-    // check if username taken
-    const existing = await fs.collection('usernames').doc(username).get();
-    if(existing.exists){ alert('Username already taken'); return; }
-
-    // save to usernames collection (this is what your search uses)
-    await fs.collection('usernames').doc(username).set({
+  if(isLoginMode){
+    if(!existing.exists){ err.innerText = 'User not found. Please create account.'; return; }
+    const data = existing.data();
+    // support old accounts that didn't save password
+    if(data.password && data.password !== p){ err.innerText = 'Wrong password'; return; }
+    localStorage.setItem('dank_uid', data.uid);
+    localStorage.setItem('dank_username', usernameInput);
+    localStorage.setItem('dank_displayName', data.displayName || data.name || usernameInput);
+    location.reload();
+  } else {
+    if(existing.exists){ err.innerText = 'User exists already. Please Log In.'; return; }
+    const uid = 'uid_' + Date.now() + '_' + Math.random().toString(36).substr(2,5);
+    await unameRef.set({
       uid: uid,
-      username: username,
+      username: usernameInput,
+      displayName: n,
+      password: p,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await fs.collection('users').doc(uid).set({
+      username: usernameInput,
       displayName: n,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-
-    // 1. SAVE LOGIN - this fixes persistence + chat button
     localStorage.setItem('dank_uid', uid);
-    localStorage.setItem('dank_username', username);
+    localStorage.setItem('dank_username', usernameInput);
     localStorage.setItem('dank_displayName', n);
-
-  }catch(e){
-    console.error(e);
-    alert('Error creating account: ' + e.message);
-    return;
+    location.reload();
   }
-
-  // hide auth + splash
-  document.getElementById('auth').style.display = 'none';
-  var splash = document.getElementById('splash');
-  if(splash) splash.style.display = 'none';
-
-  // show chat list
-  var chatList = document.getElementById('chatsPage');
-  if(chatList) chatList.style.display = 'flex';
 }
-
 // Also add this for auto-login on page load - put it right after the function
 window.addEventListener('DOMContentLoaded', () => {
   const savedUid = localStorage.getItem('dank_uid');
