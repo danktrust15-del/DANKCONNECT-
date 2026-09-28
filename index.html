@@ -169,7 +169,7 @@ firebase.initializeApp(firebaseConfig);
         <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
       </div>
       <div style="display:flex; gap:12px;">
-<button onclick="openShop()" style="background:white; color:#0000FF; border:none; border-radius:999px; padding:10px 18px; font-weight:700; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:6px; height:38px;">🛒 Shop</button>        <div style="width:38px; height:38px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+<button onclick="openShop()" style="background:white; color:#0000FF; border:none; border-radius:999px; padding:10px 18px; font-weight:700; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:6px; height:38px;">🛒 Shop</button>      <div onclick="openAddUser()" style="width:38px; height:38px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 </div>
     </div></div>
@@ -181,6 +181,17 @@ firebase.initializeApp(firebaseConfig);
   <span style="font-size:16px;">🔍</span>
   <span style="font-size:15px;">Search real users</span>
 </div>
+</div>
+        <div id="addUserModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999; align-items:center; justify-content:center;">
+  <div style="background:#1a2333; padding:20px; border-radius:16px; width:85%; max-width:350px;">
+    <h3 style="margin:0 0 12px 0;">Add New Chat</h3>
+    <input id="addUserInput" placeholder="Enter username..." style="width:100%; padding:12px; border-radius:10px; border:none; margin-bottom:12px; box-sizing:border-box;" />
+    <div id="addUserResults" style="max-height:200px; overflow-y:auto; margin-bottom:12px;"></div>
+    <div style="display:flex; gap:10px;">
+      <button onclick="closeAddUser()" style="flex:1; padding:10px; border-radius:10px; border:none; background:#333; color:white;">Cancel</button>
+      <button onclick="searchUserToAdd()" style="flex:1; padding:10px; border-radius:10px; border:none; background:#0000FF; color:white; font-weight:bold;">Search</button>
+    </div>
+  </div>
 </div>
   <!-- END HEADER -->
   <!-- Archived -->
@@ -650,6 +661,66 @@ function checkAdminPw(){
   } else {
     alert('Wrong password');
   }
+}
+function openAddUser(){
+  document.getElementById('addUserModal').style.display = 'flex';
+}
+function closeAddUser(){
+  document.getElementById('addUserModal').style.display = 'none';
+}
+async function searchUserToAdd(){
+  const val = document.getElementById('addUserInput').value.trim().toLowerCase();
+  const resDiv = document.getElementById('addUserResults');
+  resDiv.innerHTML = 'Searching...';
+  if(!val) return;
+  
+  const snap = await firebase.firestore().collection("users").where("username_lower", "==", val).get();
+  
+  if(snap.empty){
+    // fallback: try displayName
+    const snap2 = await firebase.firestore().collection("users").where("displayName_lower", "==", val).get();
+    if(snap2.empty){ resDiv.innerHTML = '<div style="opacity:0.6; font-size:14px;">No user found</div>'; return; }
+    showAddResults(snap2, resDiv);
+  } else {
+    showAddResults(snap, resDiv);
+  }
+}
+function showAddResults(snap, resDiv){
+  resDiv.innerHTML = '';
+  snap.forEach(doc=>{
+    const u = doc.data();
+    const row = document.createElement('div');
+    row.style.cssText = 'padding:10px; background:#0b141a; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;';
+    row.innerHTML = '<span>'+ (u.displayName || u.username || 'User') +'</span>';
+    const btn = document.createElement('button');
+    btn.textContent = 'Chat +';
+    btn.style.cssText = 'background:#c9a86a; border:none; padding:6px 12px; border-radius:20px; font-weight:bold; cursor:pointer;';
+    btn.onclick = ()=> startChatWith(doc.id, u);
+    row.appendChild(btn);
+    resDiv.appendChild(row);
+  });
+}
+    async function startChatWith(userId, userData){
+  const currentUid = firebase.auth().currentUser.uid;
+  const chatId = [currentUid, userId].sort().join('_');
+  const chatRef = firebase.firestore().collection("chats").doc(chatId);
+
+  const doc = await chatRef.get();
+  if(!doc.exists){
+    await chatRef.set({
+      participants: [currentUid, userId],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastMessage: '',
+      names: {
+        [currentUid]: firebase.auth().currentUser.displayName || 'Me',
+        [userId]: userData.displayName || userData.username || 'User'
+      }
+    });
+  }
+  closeAddUser();
+  // open the chat - change this to your open-chat function name
+  if(typeof openChat === 'function') openChat(chatId);
+  else alert('Chat created! Chat ID: ' + chatId);
 }
 </script>
 <div id="shopPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; flex-direction:column;">
