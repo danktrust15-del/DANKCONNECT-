@@ -677,13 +677,41 @@ async function searchUserToAdd(){
   try{
     const fs = firebase.firestore();
     console.log('searching for:', val);
-    let snap = await fs.collection("users").where("username_lower","==",val).get();
-    console.log('first query done, empty?', snap.empty);
-    if(snap.empty){
-      snap = await fs.collection("users").where("displayName_lower","==",val).get();
-      console.log('second query done, empty?', snap.empty);
+    
+    // Your usernames are stored as doc IDs in "usernames" collection
+    let doc = await fs.collection("usernames").doc(val).get();
+    console.log('direct doc lookup, exists?', doc.exists);
+    
+    let results = [];
+    if(doc.exists){
+      results.push({ id: doc.id, data: () => doc.data() });
+    } else {
+      // fallback: try where query on username field
+      let snap = await fs.collection("usernames").where("username","==",val).get();
+      console.log('where query, empty?', snap.empty);
+      snap.forEach(d => results.push(d));
     }
-    showAddResults(snap, resDiv);
+    
+    // Show results
+    if(results.length === 0){
+      resDiv.innerHTML = 'No user found';
+      return;
+    }
+    resDiv.innerHTML = '';
+    results.forEach(d => {
+      const data = d.data();
+      const uname = data.username || d.id;
+      const uid = data.uid || d.id;
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:10px;background:#222;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;';
+      div.innerHTML = `<span>${uname}</span>`;
+      const btn = document.createElement('button');
+      btn.textContent = 'Chat';
+      btn.style.cssText = 'padding:6px 12px;border-radius:6px;border:none;background:#1a4dff;color:white;';
+      btn.onclick = () => startChatWith(uid, uname);
+      div.appendChild(btn);
+      resDiv.appendChild(div);
+    });
   }catch(e){
     console.error(e);
     resDiv.innerHTML = 'Error: '+e.message;
