@@ -462,7 +462,7 @@ snapshot.forEach((doc)=>{
   div.innerHTML = '<div style="font-weight:bold;font-size:16px;">'+ (q.title || 'Untitled') +'</div><div style="font-size:12px;opacity:0.6;margin-top:4px;">Tap to read</div><div class="quote-full" style="display:none;margin-top:10px;white-space:pre-wrap;line-height:1.5;">'+ q.text +'</div>';
   div.onclick = function(){ const f = this.querySelector('.quote-full'); const isHidden = f.style.display==='none'; f.style.display = isHidden ? 'block' : 'none'; this.querySelector('div:nth-child(2)').textContent = isHidden ? 'Tap to hide' : 'Tap to read'; };
   list.appendChild(div);
-}),
+})
 }, (err)=>{
       list.innerHTML = '<p style="text-align:center;">Error loading: '+err.message+'</p>';
     });
