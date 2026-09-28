@@ -820,10 +820,76 @@ async function startChatWith(userId, userData){
     });
   }
   closeAddUser();
-  // change this to your open-chat function name
-  if(typeof openChat === 'function') openChat(chatId);
-  else if(typeof openPrivateChat === 'function') openPrivateChat(chatId);
-  else alert('Chat ready! Chat ID: ' + chatId);
+openChat(chatId, otherName);
+}
+    let activeChatId = null;
+let activeChatName = '';
+
+function openChat(chatId, otherName = 'Chat'){
+  activeChatId = chatId;
+  activeChatName = otherName;
+
+  if(!document.getElementById('privateChatView')){
+    const div = document.createElement('div');
+    div.id = 'privateChatView';
+    div.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100vh;background:#0b141a;z-index:10000;display:flex;flex-direction:column;color:white;';
+    div.innerHTML = `
+      <div style="background:#0000FF;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div onclick="closePrivateChat()" style="cursor:pointer;font-size:24px;">←</div>
+        <div id="privateChatTitle" style="font-weight:700;flex:1;"></div>
+      </div>
+      <div id="privateMessages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;"></div>
+      <div style="padding:12px;display:flex;gap:8px;background:#111;">
+        <input id="privateMsgInput" placeholder="Type a message..." style="flex:1;padding:12px;border-radius:25px;border:none;outline:none;" />
+        <button onclick="sendPrivateMessage()" style="background:#0000FF;color:white;border:none;border-radius:50%;width:48px;height:48px;font-size:20px;cursor:pointer;">➤</button>
+      </div>`;
+    document.body.appendChild(div);
+  }
+
+  document.getElementById('privateChatView').style.display = 'flex';
+  document.getElementById('privateChatTitle').textContent = activeChatName;
+  loadPrivateMessages();
+}
+
+function closePrivateChat(){
+  document.getElementById('privateChatView').style.display = 'none';
+  activeChatId = null;
+}
+
+function loadPrivateMessages(){
+  const box = document.getElementById('privateMessages');
+  const myUid = localStorage.getItem('dank_uid');
+  firebase.firestore().collection('chats').doc(activeChatId).collection('messages')
+    .orderBy('createdAt')
+    .onSnapshot(snap => {
+      box.innerHTML = '';
+      snap.forEach(d => {
+        const m = d.data();
+        const isMe = m.senderId === myUid;
+        const b = document.createElement('div');
+        b.style.cssText = `max-width:75%;padding:10px 14px;border-radius:16px;${isMe?'align-self:flex-end;background:#0000FF;':'align-self:flex-start;background:#1f2c34;'}`;
+        b.textContent = m.text;
+        box.appendChild(b);
+      });
+      box.scrollTop = box.scrollHeight;
+    });
+}
+
+function sendPrivateMessage(){
+  const inp = document.getElementById('privateMsgInput');
+  const text = inp.value.trim();
+  if(!text || !activeChatId) return;
+  const myUid = localStorage.getItem('dank_uid');
+  firebase.firestore().collection('chats').doc(activeChatId).collection('messages').add({
+    text: text,
+    senderId: myUid,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  firebase.firestore().collection('chats').doc(activeChatId).update({
+    lastMessage: text,
+    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  inp.value = '';
 }
 </script>
 <div id="shopPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; flex-direction:column;">
