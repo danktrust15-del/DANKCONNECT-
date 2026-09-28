@@ -266,27 +266,22 @@ function closeStatus(){
 <div onclick="document.getElementById('settingsPage').style.display='block'" style="text-align:center; color:#8696a0; font-size:11px; cursor:pointer; padding:4px 12px;">Settings</div>
 </div>
 <script>
-  function showAuth(){
-    document.getElementById('splash').classList.add('hidden');
-    document.getElementById('auth').classList.add('show');
-  } const eyeSVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-const eyeOffSVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A0AC5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
-
-function togglePass(id, el){
-  const inp = document.getElementById(id);
-  if(inp.type === 'password'){
-    inp.type = 'text';
-    el.innerHTML = eyeOffSVG;
-  } else {
-    inp.type = 'password';
-    el.innerHTML = eyeSVG;
-  }
+function showAuth(){
+  var s = document.getElementById('splash');
+  s.classList.add('hidden');
+  s.style.display = 'none';
+  var a = document.getElementById('auth');
+  a.classList.add('show');
+  a.style.display = 'flex';
 }
-  function showSplash(){
-    document.getElementById('auth').classList.remove('show');
-    document.getElementById('splash').classList.remove('hidden');
-  }
-let isLoginMode = false;
+function showSplash(){
+  var a = document.getElementById('auth');
+  a.classList.remove('show');
+  a.style.display = 'none';
+  var s = document.getElementById('splash');
+  s.classList.remove('hidden');
+  s.style.display = 'flex';
+}let isLoginMode = false;
 
 function toggleAuth(){
   isLoginMode = !isLoginMode;
@@ -352,15 +347,15 @@ window.addEventListener('DOMContentLoaded', () => {
   if(chatList) chatList.style.display = 'flex';
   var bottomNav = document.getElementById('bottomNav');
   if(bottomNav) bottomNav.style.display = 'flex';
- } else {
-  document.getElementById('auth').style.display = 'flex';
+} else {
+  document.getElementById('auth').style.display = 'none';
   var splash2 = document.getElementById('splash');
-  if(splash2) splash2.style.display = 'none';
+  if(splash2) splash2.style.display = 'flex';
   var chatList2 = document.getElementById('chatsPage');
   if(chatList2) chatList2.style.display = 'none';
   var bottomNav2 = document.getElementById('bottomNav');
   if(bottomNav2) bottomNav2.style.display = 'none';
- }
+}
 });
 
 function logout() {
@@ -944,19 +939,6 @@ let chats = [];
     });
 }
 loadMyChats();
-(function() {
- const savedUser = localStorage.getItem('dank_uid');
- const btn = document.getElementById('splashCreateBtn');
- if (!btn) return;
- if (savedUser) {
-  btn.style.display = 'none';
-  setTimeout(showAuth, 1000);
- } else {
-  btn.style.display = 'inline-block';
-  showSplash(); // keeps splash visible using your own function
-  btn.onclick = function() { showAuth(); };
- }
-})();
 </script>
 <div id="shopPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; flex-direction:column;">
   <div style="background:#0000FF; padding:16px; display:flex; align-items:center; gap:12px;">
