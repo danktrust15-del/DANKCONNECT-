@@ -889,12 +889,17 @@ function loadMyChats(){
         list.innerHTML = '<div style="text-align:center;color:#888;margin-top:40px;">No chats yet<br>Tap + to start one</div>';
         return;
       }
-      snap.forEach(doc => {
-        const chat = doc.data();
-        const chatId = doc.id;
+let chats = [];
+      snap.forEach(doc => chats.push({id: doc.id,...doc.data()}));
+      chats.sort((a,b) => {
+        const aTime = a.lastMessageAt? a.lastMessageAt.toMillis() : 0;
+        const bTime = b.lastMessageAt? b.lastMessageAt.toMillis() : 0;
+        return bTime - aTime;
+      });
+      chats.forEach(chat => {
+        const chatId = chat.id;
         const otherUid = chat.participants.find(u => u!== myUid);
         const otherName = (chat.names && chat.names[otherUid]) || 'Chat';
-
         const item = document.createElement('div');
         item.style.cssText = 'padding:14px 12px;border-bottom:1px solid #1f2c34;cursor:pointer;display:flex;align-items:center;gap:12px;';
         item.innerHTML = `<div style="width:48px;height:48px;border-radius:50%;background:#0000FF;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;">${otherName.charAt(0).toUpperCase()}</div><div style="flex:1;"><div style="font-weight:600;color:white;">${otherName}</div><div style="color:#888;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${chat.lastMessage || ''}</div></div>`;
