@@ -306,19 +306,68 @@ function togglePass(id, el){
     document.getElementById('auth').classList.remove('show');
     document.getElementById('splash').classList.remove('hidden');
   }
-  function createAccount(){
+ async function createAccount(){
   const n = document.getElementById('name').value.trim();
   const p = document.getElementById('pass').value.trim();
+  const p2 = document.getElementById('pass2').value.trim();
   if(!n || !p){ alert('Please enter name and password'); return; }
+  if(p !== p2){ alert('Passwords do not match'); return; }
+
+  const username = n.toLowerCase();
+  const uid = 'uid_' + Date.now() + '_' + Math.random().toString(36).substr(2,5);
+
+  try{
+    const fs = firebase.firestore();
+    // check if username taken
+    const existing = await fs.collection('usernames').doc(username).get();
+    if(existing.exists){ alert('Username already taken'); return; }
+
+    // save to usernames collection (this is what your search uses)
+    await fs.collection('usernames').doc(username).set({
+      uid: uid,
+      username: username,
+      displayName: n,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // 1. SAVE LOGIN - this fixes persistence + chat button
+    localStorage.setItem('dank_uid', uid);
+    localStorage.setItem('dank_username', username);
+    localStorage.setItem('dank_displayName', n);
+
+  }catch(e){
+    console.error(e);
+    alert('Error creating account: ' + e.message);
+    return;
+  }
 
   // hide auth + splash
   document.getElementById('auth').style.display = 'none';
   var splash = document.getElementById('splash');
   if(splash) splash.style.display = 'none';
-  
+
   // show chat list
   var chatList = document.getElementById('chatsPage');
   if(chatList) chatList.style.display = 'flex';
+}
+
+// Also add this for auto-login on page load - put it right after the function
+window.addEventListener('DOMContentLoaded', () => {
+  const savedUid = localStorage.getItem('dank_uid');
+  if(savedUid){
+    document.getElementById('auth').style.display = 'none';
+    var splash = document.getElementById('splash');
+    if(splash) splash.style.display = 'none';
+    var chatList = document.getElementById('chatsPage');
+    if(chatList) chatList.style.display = 'flex';
+  }
+});
+
+function logout(){
+  localStorage.removeItem('dank_uid');
+  localStorage.removeItem('dank_username');
+  localStorage.removeItem('dank_displayName');
+  location.reload();
 }  
 </script>
 <!-- SETTINGS PAGE -->
