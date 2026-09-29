@@ -974,22 +974,83 @@ function loadPrivateMessages(){
     .orderBy('createdAt')
     .onSnapshot(snap => {
       box.innerHTML = '';
-      snap.forEach(d => {
-        const m = d.data();
-        const isMe = m.senderId === myUid;
-        const b = document.createElement('div');
-        b.style.cssText = `max-width:75%;padding:10px 14px;border-radius:16px;${isMe?'align-self:flex-end;background:#0000FF;':'align-self:flex-start;background:#1f2c34;'}`;
-        b.textContent = m.text;
-        box.appendChild(b);
-      });
-      box.scrollTop = box.scrollHeight;
+snap.forEach(d => {
+  const m = d.data();
+    if (m.hiddenFor && m.hiddenFor.includes(myUid)) return;
+  const msgId = d.id;
+  const isMe = m.senderId === myUid;
+  const b = document.createElement('div');
+  b.style.cssText = `max-width:75%;padding:10px 14px;border-radius:16px;${isMe?'align-self:flex-end;background:#0000FF;':'align-self:flex-start;background:#1f2c34;'}`;
+  b.textContent = m.text;
+
+  // Long-press menu
+  let msgPressTimer = null;
+  const showMsgMenu = () => {
+    const old = document.getElementById('msgMenuOverlay');
+    if (old) old.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'msgMenuOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10001;';
+    overlay.innerHTML = `
+      <div style="background:#1f1f1f;border-radius:12px;width:70%;max-width:250px;overflow:hidden;">
+        ${isMe ? `<div id="msgEditBtn" style="padding:15px;color:white;font-size:15px;border-bottom:1px solid #2a2a2a;cursor:pointer;">✏️ Edit</div>` : ``}
+        <div id="msgDeleteBtn" style="padding:15px;color:#ff4444;font-size:15px;cursor:pointer;">🗑️ Delete</div>
+        <div id="msgCancelBtn" style="padding:15px;color:#8696a0;font-size:15px;border-top:1px solid #2a2a2a;cursor:pointer;text-align:center;">Cancel</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    const close = () => overlay.remove();
+    overlay.onclick = (e) => { if (e.target === overlay) close(); };
+    document.getElementById('msgCancelBtn').onclick = close;
+document.getElementById('msgDeleteBtn').onclick = async () => {
+  close();
+const choice = await window.customDeleteChoice();
+  if (!choice) return;
+  const myUid = localStorage.getItem('dank_uid');
+  if (choice === 'everyone') {
+    await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').doc(msgId).delete();
+  } else {
+    await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').doc(msgId).update({
+      hiddenFor: firebase.firestore.FieldValue.arrayUnion(myUid)
     });
+  }
+};
+      if (isMe) {
+document.getElementById('msgEditBtn').onclick = () => {
+  close();
+  const input = document.querySelector('input[placeholder="Message"], textarea[placeholder="Message"]');
+  if (input) {
+    input.value = m.text;
+    input.focus();
+    window.editingMsgId = msgId;
+  }
+};
+}
+  };
+
+  b.addEventListener('touchstart', () => { msgPressTimer = setTimeout(showMsgMenu, 600); });
+  b.addEventListener('touchend', () => { if (msgPressTimer) clearTimeout(msgPressTimer); });
+  b.addEventListener('touchmove', () => { if (msgPressTimer) clearTimeout(msgPressTimer); });
+  b.addEventListener('contextmenu', (e) => { e.preventDefault(); showMsgMenu(); });
+
+  box.appendChild(b);
+});
+});        
 }
 
 function sendPrivateMessage(){
   const inp = document.getElementById('privateMsgInput');
   const text = inp.value.trim();
   if(!text || !activeChatId) return;
+    if (window.editingMsgId) {
+  firebase.firestore().collection('chats').doc(activeChatId).collection('messages').doc(window.editingMsgId).update({
+    text: text,
+    edited: true
+  });
+  window.editingMsgId = null;
+  inp.value = '';
+  return;
+}
   const myUid = localStorage.getItem('dank_uid');
   firebase.firestore().collection('chats').doc(activeChatId).collection('messages').add({
     text: text,
@@ -1030,7 +1091,26 @@ let chats = [];
         item.innerHTML = `<div style="width:48px;height:48px;border-radius:50%;background:#0000FF;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;">${otherName.charAt(0).toUpperCase()}</div><div style="flex:1;"><div style="font-weight:600;color:white;">${otherName}</div><div style="color:#888;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${chat.lastMessage || ''}</div></div>`;
         item.onclick = () => openChat(chatId, otherName);
           let pressTimer = null;
-function customConfirm(message) {
+window.customDeleteChoice = function(){
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999999;';
+    overlay.innerHTML = `
+      <div style="background:#1f1f1f;color:#fff;border-radius:12px;padding:20px;width:300px;text-align:center;">
+        <div style="font-weight:600;margin-bottom:16px;">Delete this message?</div>
+        <div id="delEveryone" style="padding:12px;background:#ff4444;border-radius:8px;margin-bottom:8px;cursor:pointer;">Delete for everyone</div>
+        <div id="delMe" style="padding:12px;background:#333;border-radius:8px;margin-bottom:8px;cursor:pointer;">Delete for me</div>
+        <div id="delCancel" style="padding:12px;color:#aaa;cursor:pointer;">Cancel</div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const close = (val) => { overlay.remove(); resolve(val); };
+    overlay.onclick = (e) => { if(e.target===overlay) close(null); };
+    overlay.querySelector('#delCancel').onclick = () => close(null);
+    overlay.querySelector('#delMe').onclick = () => close('me');
+    overlay.querySelector('#delEveryone').onclick = () => close('everyone');
+  });
+};
+    function customConfirm(message) {
   return new Promise((resolve) => {
     const old = document.getElementById('customConfirmOverlay');
     if (old) old.remove();
