@@ -1004,16 +1004,11 @@ function closePrivateChat(){
 }
 function getPlayableAudioUrl(url) {
   if (!url) return url;
-  // already playable
-  if (url.match(/\.(m4a|mp4|mp3|aac)(\?|$)/i)) return url;
-  // webm -> convert to mp3
-  // from: /video/upload/v123/xxx.webm
-  // to:   /video/upload/f_mp3/v123/xxx.mp3
+  if (url.includes('/video/upload/f_mp3/')) return url;
   if (url.includes('/video/upload/')) {
-    return url.replace('/video/upload/', '/video/upload/f_mp3/').replace(/\.webm(\?|$)/i, '.mp3$1');
-  }
-  if (url.includes('/auto/upload/')) {
-    return url.replace('/auto/upload/', '/video/upload/f_mp3/').replace(/\.webm(\?|$)/i, '.mp3$1');
+    let base = url.replace('/video/upload/', '/video/upload/f_mp3/');
+    base = base.split('?')[0].replace(/\.(webm|mp4|m4a|ogg|opus)$/i, '');
+    return base + '.mp3';
   }
   return url;
 }
