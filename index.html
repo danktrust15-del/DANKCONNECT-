@@ -968,7 +968,7 @@ async function sendVoiceNote(){
   formData.append('upload_preset', 'voice_notes2');
 
   try {
-   const res = await fetch('https://api.cloudinary.com/v1_1/aqx4n0dz/auto/upload', {
+  const res = await fetch('https://api.cloudinary.com/v1_1/aqx4n0dz/video/upload', {
       method: 'POST',
       body: formData
     });
@@ -1004,12 +1004,16 @@ function closePrivateChat(){
 }
 function getPlayableAudioUrl(url) {
   if (!url) return url;
-  if (url.match(/\.(m4a|mp4|mp3)(\?|$)/i)) return url;
-  if (url.includes('/auto/upload/')) {
-    return url.replace('/auto/upload/', '/video/upload/f_mp3/');
+  // already playable
+  if (url.match(/\.(m4a|mp4|mp3|aac)(\?|$)/i)) return url;
+  // webm -> convert to mp3
+  // from: /video/upload/v123/xxx.webm
+  // to:   /video/upload/f_mp3/v123/xxx.mp3
+  if (url.includes('/video/upload/')) {
+    return url.replace('/video/upload/', '/video/upload/f_mp3/').replace(/\.webm(\?|$)/i, '.mp3$1');
   }
-  if (url.includes('/upload/')) {
-    return url.replace('/upload/', '/upload/f_mp3/');
+  if (url.includes('/auto/upload/')) {
+    return url.replace('/auto/upload/', '/video/upload/f_mp3/').replace(/\.webm(\?|$)/i, '.mp3$1');
   }
   return url;
 }
