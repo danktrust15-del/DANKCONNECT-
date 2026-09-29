@@ -1005,6 +1005,9 @@ function closePrivateChat(){
 function getPlayableAudioUrl(url) {
   if (!url) return url;
   if (url.match(/\.(m4a|mp4|mp3)(\?|$)/i)) return url;
+  if (url.includes('/auto/upload/')) {
+    return url.replace('/auto/upload/', '/video/upload/f_mp3/');
+  }
   if (url.includes('/upload/')) {
     return url.replace('/upload/', '/upload/f_mp3/');
   }
