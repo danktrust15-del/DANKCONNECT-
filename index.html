@@ -924,9 +924,15 @@ btn.onclick = () => {
 
 async function startRecording() {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    audioChunks = [];
-    mediaRecorder = new MediaRecorder(stream);
+const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+audioChunks = [];
+let mimeType = 'audio/webm';
+if (typeof MediaRecorder.isTypeSupported === 'function') {
+  if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+  else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+}
+mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
+mediaRecorder._mimeType = mimeType;
     mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
     mediaRecorder.onstop = sendVoiceNote;
     mediaRecorder.start();
@@ -950,7 +956,8 @@ function stopRecording() {
 
 async function sendVoiceNote(){
   console.log('sendVoiceNote called', audioChunks.length, activeChatId);
-  const blob = new Blob(audioChunks, { type: 'audio/webm' });
+ const mime = mediaRecorder._mimeType || 'audio/mp4';
+ const blob = new Blob(audioChunks, { type: mime });
   audioChunks = [];
   
   const myUid = localStorage.getItem('dank_uid');
