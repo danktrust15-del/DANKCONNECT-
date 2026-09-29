@@ -800,7 +800,7 @@ async function searchUserToAdd(){
       const btn = document.createElement('button');
       btn.textContent = 'Chat';
       btn.style.cssText = 'padding:6px 12px;border-radius:6px;border:none;background:#1a4dff;color:white;';
-      btn.onclick = () => startChatWith(uid, uname);
+      btn.onclick = () => startChatWith(uid, { username: uname, displayName: uname, uid: uid });
       div.appendChild(btn);
       resDiv.appendChild(div);
     });
@@ -833,6 +833,7 @@ const currentUsername = localStorage.getItem('dank_username') || 'Me';
   // userId here is the doc.id from usernames (the username), but we need the actual uid
   let targetUid = userId;
   let otherName = 'User';
+  let otherUsername = userId;
 
   if(typeof userData === 'string'){
     otherName = userData;
@@ -840,7 +841,7 @@ const currentUsername = localStorage.getItem('dank_username') || 'Me';
     // userData comes from usernames collection, has.uid field
     if(userData.uid) targetUid = userData.uid;
     otherName = userData.displayName || userData.username || 'User';
-    let otherUsername = userData.username || userId || 'User';
+    otherUsername = userData.username || userId || 'User';
   }
 
   if(targetUid === currentUid || userId === localStorage.getItem('dank_username')){
@@ -868,7 +869,7 @@ await chatRef.set({
 });
 }
   closeAddUser();
-openChat(chatId, otherName);
+openChat(chatId, otherUsername);
 }
     let activeChatId = null;
 let activeChatName = '';
