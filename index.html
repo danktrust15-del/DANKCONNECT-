@@ -1002,7 +1002,14 @@ function closePrivateChat(){
   document.getElementById('privateChatView').style.display = 'none';
   activeChatId = null;
 }
-
+function getPlayableAudioUrl(url) {
+  if (!url) return url;
+  if (url.match(/\.(m4a|mp4|mp3)(\?|$)/i)) return url;
+  if (url.includes('/upload/')) {
+    return url.replace('/upload/', '/upload/f_mp3/');
+  }
+  return url;
+}
 function loadPrivateMessages(){
   const box = document.getElementById('privateMessages');
   const myUid = localStorage.getItem('dank_uid');
@@ -1018,7 +1025,7 @@ snap.forEach(d => {
   const b = document.createElement('div');
   b.style.cssText = `max-width:75%;padding:10px 14px;border-radius:16px;${isMe?'align-self:flex-end;background:#0000FF;':'align-self:flex-start;background:#1f2c34;'}`;
 if(m.type === 'voice' && m.audioUrl){
-  b.innerHTML = `<audio controls src="${m.audioUrl}" style="max-width:200px;"></audio>`;
+  b.innerHTML = `<audio controls preload="auto" src="${getPlayableAudioUrl(m.audioUrl)}" style="max-width:200px;"></audio>`;
 } else {
   b.textContent = m.text;
 }
