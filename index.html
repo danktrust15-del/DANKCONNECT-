@@ -873,7 +873,10 @@ openChat(chatId, otherUsername);
 }
     let activeChatId = null;
 let activeChatName = '';
-
+let mediaRecorder;
+let audioChunks = [];
+let isRecording = false;
+let recTimeout;
 function openChat(chatId, otherName = 'Chat'){
   activeChatId = chatId;
   activeChatName = otherName;
@@ -931,7 +934,7 @@ async function startRecording() {
     btn.innerHTML = stopIcon;
     btn.style.background = '#ff3b30';
     ta.placeholder = 'Recording... 0:30 max - tap stop to send';
-    recTimeout = setTimeout(() => { if(isRecording) stopRecording(); }, 30000);
+    recTimeout = setTimeout(() => { if(isRecording) stopRecording(); }, 120000);
   } catch(err) { alert('Mic permission needed'); }
 }
 
@@ -945,18 +948,43 @@ function stopRecording() {
   if(mediaRecorder && mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t=>t.stop());
 }
 
-function sendVoiceNote() {
+async function sendVoiceNote(){
   const blob = new Blob(audioChunks, { type: 'audio/webm' });
-  const url = URL.createObjectURL(blob);
-  const box = document.getElementById('privateMessages');
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'align-self:flex-end;background:#005c4b;padding:8px 10px;border-radius:12px;max-width:80%;';
-  wrap.innerHTML = `<audio controls src="${url}" style="width:200px;"></audio><div style="font-size:11px;opacity:0.7;text-align:right;">${new Date().toLocaleTimeString()}</div>`;
-  box.appendChild(wrap);
-  box.scrollTop = box.scrollHeight;
-}
-  }
+  audioChunks = [];
+  
+  const myUid = localStorage.getItem('dank_uid');
+  if(!activeChatId || !myUid) return;
 
+  const formData = new FormData();
+  formData.append('file', blob);
+  formData.append('upload_preset', 'voice_notes2');
+
+  try {
+    const res = await fetch('https://api.cloudinary.com/v1_1/aqu4n0dz/video/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if(!data.secure_url) throw new Error('upload failed');
+
+    await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').add({
+      audioUrl: data.secure_url,
+      type: 'voice',
+      senderId: myUid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    firebase.firestore().collection('chats').doc(activeChatId).update({
+      lastMessage: '🎤 Voice note',
+      lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+  } catch(e){
+    console.error(e);
+    alert('Voice upload failed');
+  }
+}
+}
   document.getElementById('privateChatView').style.display = 'flex';
   document.getElementById('privateChatTitle').textContent = activeChatName;
   loadPrivateMessages();
@@ -981,8 +1009,11 @@ snap.forEach(d => {
   const isMe = m.senderId === myUid;
   const b = document.createElement('div');
   b.style.cssText = `max-width:75%;padding:10px 14px;border-radius:16px;${isMe?'align-self:flex-end;background:#0000FF;':'align-self:flex-start;background:#1f2c34;'}`;
+if(m.type === 'voice' && m.audioUrl){
+  b.innerHTML = `<audio controls src="${m.audioUrl}" style="max-width:200px;"></audio>`;
+} else {
   b.textContent = m.text;
-
+}
   // Long-press menu
   let msgPressTimer = null;
   const showMsgMenu = () => {
@@ -1063,6 +1094,42 @@ function sendPrivateMessage(){
   });
   inp.value = '';
 }
+    mediaRecorder.onstop = async () => {
+  const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+  audioChunks = [];
+  
+  const myUid = localStorage.getItem('dank_uid');
+  if(!activeChatId || !myUid) return;
+
+  const formData = new FormData();
+  formData.append('file', audioBlob);
+  formData.append('upload_preset', 'voice_notes');
+
+  try {
+    const res = await fetch('https://api.cloudinary.com/v1_1/aqu4n0dz/video/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if(!data.secure_url) throw new Error('upload failed');
+
+    await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').add({
+      audioUrl: data.secure_url,
+      type: 'voice',
+      senderId: myUid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    firebase.firestore().collection('chats').doc(activeChatId).update({
+      lastMessage: '🎤 Voice note',
+      lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+  } catch(e){
+    console.error(e);
+    alert('Voice upload failed');
+  }
+};
 function loadMyChats(){
   const myUid = localStorage.getItem('dank_uid');
   const list = document.getElementById('chatsList');
