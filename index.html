@@ -1029,7 +1029,58 @@ let chats = [];
         item.style.cssText = 'padding:14px 12px;border-bottom:1px solid #1f2c34;cursor:pointer;display:flex;align-items:center;gap:12px;';
         item.innerHTML = `<div style="width:48px;height:48px;border-radius:50%;background:#0000FF;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;">${otherName.charAt(0).toUpperCase()}</div><div style="flex:1;"><div style="font-weight:600;color:white;">${otherName}</div><div style="color:#888;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${chat.lastMessage || ''}</div></div>`;
         item.onclick = () => openChat(chatId, otherName);
-        list.appendChild(item);
+          let pressTimer = null;
+function customConfirm(message) {
+  return new Promise((resolve) => {
+    const old = document.getElementById('customConfirmOverlay');
+    if (old) old.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'customConfirmOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;';
+    overlay.innerHTML = `
+      <div style="background:#1f1f1f;color:white;padding:20px;border-radius:12px;width:85%;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+        <div style="font-size:16px;margin-bottom:20px;line-height:1.4;">${message}</div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;">
+          <button id="ccCancel" style="background:#2a2a2a;color:white;border:none;padding:10px 20px;border-radius:20px;font-size:14px;cursor:pointer;">Cancel</button>
+          <button id="ccOk" style="background:#0000FF;color:white;border:none;padding:10px 24px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;">Delete</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('ccCancel').onclick = () => { overlay.remove(); resolve(false); };
+    document.getElementById('ccOk').onclick = () => { overlay.remove(); resolve(true); };
+    overlay.onclick = (e) => { if (e.target === overlay) { overlay.remove(); resolve(false); } };
+  });
+}
+
+const askDelete = async () => {
+  const yes = await customConfirm(`Delete chat with ${otherName}?<br><span style="color:#8696a0;font-size:13px;">This will delete all messages too.</span>`);
+  if (!yes) return;
+  try {
+    const chatRef = firebase.firestore().collection('chats').doc(chatId);
+    const msgsSnap = await chatRef.collection('messages').get();
+    const batch = firebase.firestore().batch();
+    msgsSnap.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+    await chatRef.delete();
+  } catch(e) {
+    alert('Delete failed: ' + e.message);
+  }
+};
+          item.addEventListener('touchstart', () => {
+  pressTimer = setTimeout(askDelete, 600);
+});
+item.addEventListener('touchend', () => {
+  if (pressTimer) clearTimeout(pressTimer);
+});
+item.addEventListener('touchmove', () => {
+  if (pressTimer) clearTimeout(pressTimer);
+});
+item.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  askDelete();
+});
+          list.appendChild(item);
       });
     });
 }
