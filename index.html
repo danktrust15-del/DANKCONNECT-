@@ -231,7 +231,7 @@ firebase.initializeApp(firebaseConfig);
 
   <!-- Status -->
   <div style="display:flex; gap:16px; margin-bottom:20px;">
-    <div style="text-align:center; cursor:pointer;" onclick="openStatus()">
+    <div style="text-align:center; cursor:pointer;" onclick="addStatus()">
       <div style="width:64px; height:64px; border-radius:50%; border:2px dashed #1E90FF; display:flex; align-items:center; justify-content:center; font-size:28px; color:#1E90FF; background:#0F2447;">+</div>
       <div style="font-size:12px; margin-top:6px;">My Status</div>
     </div>
@@ -266,14 +266,6 @@ firebase.initializeApp(firebaseConfig);
   </div>
 
   <button style="width:100%; padding:14px; border:none; border-radius:12px; background:#133E87; color:white; font-weight:bold; font-size:15px;">+ Create channel</button>
-</div>
-
-<!-- STATUS VIEWER -->
-<div id="statusViewer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:999; color:white; text-align:center; padding-top:60px;">
-  <div style="font-size:18px; margin-bottom:20px;">My Status</div>
-  <div style="font-size:60px;">😎</div>
-  <div style="margin-top:20px;">Hello Dank!</div>
-  <button onclick="closeStatus()" style="margin-top:30px; padding:10px 20px; border:none; border-radius:8px; background:#133E87; color:white;">Close</button>
 </div>
 
 <script>
@@ -505,6 +497,14 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
 <h3 style="color:white; margin-top:20px;">Manage Quotes</h3>
 <div id="admin-quotes-list"></div>
 </div>
+    <div id="statusViewer" style="display:none;position:fixed;inset:0;background:#000;z-index:9999">
+  <div id="statusProgress" style="height:3px;background:#fff;width:0%"></div>
+  <img id="statusImg" style="display:none;width:100%;height:90vh;object-fit:contain">
+  <video id="statusVideo" style="display:none;width:100%;height:90vh" controls autoplay></video>
+  <button id="closeStatus" style="position:absolute;top:10px;right:15px;color:#fff;background:none;border:none;font-size:28px">×</button>
+  <button id="deleteStatus" style="display:none;position:absolute;bottom:20px;right:15px;color:red">Delete</button>
+</div>
+<input type="file" id="statusInput" accept="image/*,video/*" style="display:none">
 <script>
 
 function showPage(id){
@@ -628,8 +628,7 @@ function renderChannels(){
     </div>`).join('');
 }
 function addStatus(){
-  const t = prompt("Enter status text:");
-  if(t){ myStatuses.push({text:t}); renderStatus(); }
+  document.getElementById('statusInput').click();
 }
 function viewStatus(i){
   document.getElementById('statusViewer').style.display='flex';
@@ -1250,6 +1249,48 @@ item.addEventListener('contextmenu', (e) => {
     });
 }
 loadMyChats();
+    
+document.getElementById('statusInput').onchange = async function() {
+  const file = this.files[0];
+  if(!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', 'dank_upload');
+  const res = await fetch('https://api.cloudinary.com/v1_1/djbjtsf8o/auto/upload', {method:'POST', body:fd});
+  const data = await res.json();
+  await db.collection('statuses').add({
+    userId: localStorage.getItem('dank_uid'),
+    username: localStorage.getItem('dank_username') || 'Me',
+    mediaUrl: data.secure_url,
+    type: data.resource_type === 'image'? 'image' : 'video',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    expiresAt: Date.now() + 24*60*60*1000
+  });
+  loadStatuses();
+};
+    async function loadStatuses() {
+  const now = Date.now();
+  const myUid = localStorage.getItem('dank_uid');
+  const snap = await db.collection('statuses').where('expiresAt','>',now).get();
+  // group by userId, render rings here...
+  // on click:
+  window.openStatus = (doc) => {
+    const d = doc.data();
+    document.getElementById('statusViewer').style.display='block';
+    if(d.type==='image'){
+      document.getElementById('statusImg').src=d.mediaUrl;
+      document.getElementById('statusImg').style.display='block';
+    } else {
+      document.getElementById('statusVideo').src=d.mediaUrl;
+      document.getElementById('statusVideo').style.display='block';
+    }
+    if(d.userId===myUid) document.getElementById('deleteStatus').style.display='block';
+  };
+}
+document.getElementById('closeStatus').onclick = () => {
+  document.getElementById('statusViewer').style.display='none';
+  document.getElementById('statusVideo').pause();
+};
 </script>
 <div id="shopPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; flex-direction:column;">
   <div style="background:#0000FF; padding:16px; display:flex; align-items:center; gap:12px;">
