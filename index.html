@@ -893,6 +893,8 @@ div.innerHTML = `
 <div id="privateMessages" class="scroll-mid" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;"></div>
 <div class="sticky-bottom" style="display:flex; align-items:flex-end; gap:8px; padding:8px 10px 18px; background:#0b141a; border-top:1px solid #1f2c34; width:100%;">
 <div style="flex:1; display:flex; align-items:flex-end; background:#1f2c34; border-radius:24px; padding:6px 6px 6px 14px;">
+<input type="file" id="mediaInput" accept="image/*,video/*" style="display:none">
+<button id="mediaBtn" style="background:transparent;border:none;font-size:22px;cursor:pointer;">📎</button>
 <textarea id="privateMsgInput" rows="1" placeholder="Message" style="flex:1; background:transparent; border:none; outline:none; color:#e9edef; font-size:16px; resize:none; max-height:120px; padding:8px 0;"></textarea>
 </div>
 <button id="privateSendBtn" style="width:48px; height:48px; border-radius:50%; background:#00a884; border:none; display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer;">
@@ -914,6 +916,23 @@ ta.addEventListener('input', () => {
   btn.innerHTML = hasText ? sendSVG : micSVG;
 });
 let mediaRecorder, audioChunks = [], isRecording = false, recTimeout;
+var CLOUD_NAME = "dqx4n0dz";
+var PRESET = "dankconnect_unsigned";
+document.getElementById('mediaBtn').onclick = () => document.getElementById('mediaInput').click();
+document.getElementById('mediaInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("upload_preset", PRESET);
+  const res = await fetch("https://api.cloudinary.com/v1_1/"+CLOUD_NAME+"/auto/upload", {method:"POST", body:fd});
+  const data = await res.json();
+  if(data.secure_url){
+    sendPrivateMessage({type: data.resource_type, url: data.secure_url});
+  } else {
+    alert("Upload failed");
+  }
+});
 const stopIcon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
 
 btn.onclick = () => {
@@ -1027,11 +1046,15 @@ snap.forEach(d => {
   const b = document.createElement('div');
   b.style.cssText = `max-width:75%;padding:10px 14px;border-radius:16px;${isMe?'align-self:flex-end;background:#0000FF;':'align-self:flex-start;background:#1f2c34;'}`;
 if(m.type === 'voice' && m.audioUrl){
-  b.innerHTML = `<audio controls preload="auto" src="${getPlayableAudioUrl(m.audioUrl)}" style="max-width:200px;"></audio>`;
+b.innerHTML = '<audio controls preload="auto" src="'+getPlayableAudioUrl(m.audioUrl)+'" style="max-width:200px;"></audio>' ;
+} else if(m.type === 'image' && m.url){
+b.innerHTML = '<img src="'+m.url+'" style="max-width:200px;border-radius:10px;cursor:pointer;" onclick="window.open(\''+m.url+'\')">';
+} else if(m.type === 'video' && m.url){
+b.innerHTML = '<video src="'+m.url+'" controls style="max-width:200px;border-radius:10px;"></video>';
 } else {
-  b.textContent = m.text;
+b.textContent = m.text;
 }
-  // Long-press menu
+    // Long-press menu
   let msgPressTimer = null;
   const showMsgMenu = () => {
     const old = document.getElementById('msgMenuOverlay');
