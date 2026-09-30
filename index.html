@@ -927,9 +927,23 @@ document.getElementById('mediaInput').addEventListener('change', async (e) => {
   fd.append("upload_preset", PRESET);
   const res = await fetch("https://api.cloudinary.com/v1_1/"+CLOUD_NAME+"/auto/upload", {method:"POST", body:fd});
   const data = await res.json();
-  if(data.secure_url){
-    sendPrivateMessage({type: data.resource_type, url: data.secure_url});
-  } else {
+if(data.secure_url){
+  const myUid = localStorage.getItem('dank_uid');
+  const isImage = data.resource_type === 'image';
+  const msgType = isImage ? 'image' : 'video';
+  const label = isImage ? '📷 Photo' : '🎥 Video';
+  await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').add({
+    senderId: myUid,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    type: msgType,
+    url: data.secure_url,
+    text: label
+  });
+  firebase.firestore().collection('chats').doc(activeChatId).update({
+    lastMessage: label,
+    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+} else {
     alert("Upload failed");
   }
 });
