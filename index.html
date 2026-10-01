@@ -1255,7 +1255,7 @@ document.getElementById('statusInput').onchange = async function() {
   if(!file) return;
   const fd = new FormData();
   fd.append('file', file);
-  fd.append('upload_preset', 'dank_status');
+  fd.append('upload_preset', 'dankconnect_unsigned');
   const res = await fetch('https://api.cloudinary.com/v1_1/djbjtsf8o/auto/upload', {method:'POST', body:fd});
   const data = await res.json();
   await db.collection('statuses').add({
