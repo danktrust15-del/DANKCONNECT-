@@ -230,7 +230,7 @@ firebase.initializeApp(firebaseConfig);
 <div id="updatesPage" style="display:none; background:#0A1931; min-height:100vh; padding:16px; color:white;">
 
   <!-- Status -->
-  <div style="display:flex; gap:16px; margin-bottom:20px;">
+ <div id="statusRings" style="display:flex; gap:16px; margin-bottom:20px;">
     <div style="text-align:center; cursor:pointer;" onclick="addStatus()">
       <div style="width:64px; height:64px; border-radius:50%; border:2px dashed #1E90FF; display:flex; align-items:center; justify-content:center; font-size:28px; color:#1E90FF; background:#0F2447;">+</div>
       <div style="font-size:12px; margin-top:6px;">My Status</div>
@@ -269,8 +269,48 @@ firebase.initializeApp(firebaseConfig);
 </div>
 
 <script>
-function openStatus(){
-  document.getElementById('statusViewer').style.display='block';
+async function openStatus(d) {
+  document.getElementById('statusViewer').style.display = 'block';
+  const isImg = d.type === 'image';
+  document.getElementById('statusImg').style.display = isImg ? 'block' : 'none';
+  document.getElementById('statusVideo').style.display = isImg ? 'none' : 'block';
+  if (isImg) document.getElementById('statusImg').src = d.mediaUrl;
+  else {
+    const v = document.getElementById('statusVideo');
+    v.src = d.mediaUrl; v.play().catch(()=>{});
+  }
+
+  const myUid = localStorage.getItem('dank_uid');
+  const myName = localStorage.getItem('dank_username') || 'Someone';
+  const viewBtn = document.getElementById('viewCountBtn');
+
+  if (d.userId !== myUid) {
+    try {
+      await db.collection('statuses').doc(d.id).collection('views').doc(myUid).set({
+        username: myName, viewedAt: Date.now()
+      });
+    } catch(e) {}
+    viewBtn.style.display = 'none';
+  } else {
+    viewBtn.style.display = 'block';
+    viewBtn.textContent = '👁 loading...';
+    try {
+      const snap = await db.collection('statuses').doc(d.id).collection('views').get();
+      viewBtn.textContent = `👁 ${snap.size} views`;
+      viewBtn.onclick = async () => {
+        const s = await db.collection('statuses').doc(d.id).collection('views').get();
+        let names = [];
+        s.forEach(doc => names.push(doc.data().username));
+        alert('Viewed by:\n' + (names.join('\n') || 'No views yet'));
+      };
+    } catch(e){ viewBtn.textContent = '👁 views'; }
+  }
+
+  document.getElementById('deleteStatus').style.display = (d.userId === myUid) ? 'block' : 'none';
+  document.getElementById('deleteStatus').onclick = async () => {
+    await db.collection('statuses').doc(d.id).delete();
+    closeStatus(); loadStatuses();
+  };
 }
 function closeStatus(){
   document.getElementById('statusViewer').style.display='none';
@@ -501,8 +541,9 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
   <div id="statusProgress" style="height:3px;background:#fff;width:0%"></div>
   <img id="statusImg" style="display:none;width:100%;height:90vh;object-fit:contain">
   <video id="statusVideo" style="display:none;width:100%;height:90vh" controls autoplay></video>
-  <button id="closeStatus" style="position:absolute;top:10px;right:15px;color:#fff;background:none;border:none;font-size:28px">×</button>
-  <button id="deleteStatus" style="display:none;position:absolute;bottom:20px;right:15px;color:red">Delete</button>
+<button id="closeStatus" style="position:absolute;top:10px;right:15px;color:#fff;background:none;border:none;font-size:28px">X</button>
+<div id="viewCountBtn" style="position:absolute;bottom:20px;left:20px;color:white;background:rgba(0,0,0,0.6);padding:8px 12px;border-radius:20px;cursor:pointer;z-index:1002;display:none;">👁 views</div>
+<button id="deleteStatus" style="display:none;position:absolute;bottom:20px;right:15px;color:red">Delete</button>
 </div>
 <input type="file" id="statusInput" accept="image/*,video/*" style="display:none">
 <script>
@@ -629,13 +670,6 @@ function renderChannels(){
 }
 function addStatus(){
   document.getElementById('statusInput').click();
-}
-function viewStatus(i){
-  document.getElementById('statusViewer').style.display='flex';
-  document.getElementById('statusContent').innerHTML = `<h2>${myStatuses[i].text}</h2>`;
-}
-function closeStatus(){
-  document.getElementById('statusViewer').style.display='none';
 }
 renderStatus();
 renderChannels();
@@ -1268,29 +1302,85 @@ document.getElementById('statusInput').onchange = async function() {
   });
   loadStatuses();
 };
-    async function loadStatuses() {
+async function loadStatuses() {
   const now = Date.now();
   const myUid = localStorage.getItem('dank_uid');
-  const snap = await db.collection('statuses').where('expiresAt','>',now).get();
-  // group by userId, render rings here...
-  // on click:
-  window.openStatus = (doc) => {
+  const snap = await db.collection('statuses').where('expiresAt', '>', now).get();
+
+  const byUser = {};
+  snap.forEach(doc => {
     const d = doc.data();
-    document.getElementById('statusViewer').style.display='block';
-    if(d.type==='image'){
-      document.getElementById('statusImg').src=d.mediaUrl;
-      document.getElementById('statusImg').style.display='block';
-    } else {
-      document.getElementById('statusVideo').src=d.mediaUrl;
-      document.getElementById('statusVideo').style.display='block';
-    }
-    if(d.userId===myUid) document.getElementById('deleteStatus').style.display='block';
+    if (!byUser[d.userId]) byUser[d.userId] = [];
+    byUser[d.userId].push({id: doc.id,...d});
+  });
+
+  const container = document.getElementById('statusRings');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // 1. My Status (always first)
+  const myItems = byUser[myUid] || [];
+  const myDiv = document.createElement('div');
+  myDiv.style.textAlign = 'center';
+  myDiv.style.cursor = 'pointer';
+  if (myItems.length > 0) {
+    const first = myItems[0];
+    myDiv.innerHTML = `
+      <div style="width:64px;height:64px;border-radius:50%;border:3px solid #0000FF;padding:2px">
+        <img src="${first.mediaUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+      </div>
+      <div style="font-size:12px;margin-top:6px;color:white">My Status</div>`;
+    myDiv.onclick = () => openStatus(first);
+  } else {
+    myDiv.innerHTML = `
+      <div style="width:64px;height:64px;border-radius:50%;border:2px dashed #1E9FFF;display:flex;align-items:center;justify-content:center;font-size:28px;color:#1E9FFF;background:#0F2447;">+</div>
+      <div style="font-size:12px;margin-top:6px;color:white">My Status</div>`;
+    myDiv.onclick = () => addStatus();
+  }
+  container.appendChild(myDiv);
+
+  // 2. Other users
+  Object.keys(byUser).forEach(uid => {
+    if (uid === myUid) return;
+    const items = byUser[uid];
+    const first = items[0];
+    const div = document.createElement('div');
+    div.style.textAlign = 'center';
+    div.style.cursor = 'pointer';
+    div.innerHTML = `
+      <div style="width:64px;height:64px;border-radius:50%;border:3px solid #1E9FFF;padding:2px">
+        <img src="${first.mediaUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">
+      </div>
+      <div style="font-size:12px;margin-top:6px;color:white">${first.username}</div>`;
+    div.onclick = () => openStatus(first);
+    container.appendChild(div);
+  });
+}
+
+function openStatus(d) {
+  document.getElementById('statusViewer').style.display = 'block';
+  const isImg = d.type === 'image';
+  document.getElementById('statusImg').style.display = isImg? 'block' : 'none';
+  document.getElementById('statusVideo').style.display = isImg? 'none' : 'block';
+  if (isImg) document.getElementById('statusImg').src = d.mediaUrl;
+  else document.getElementById('statusVideo').src = d.mediaUrl;
+
+  const myUid = localStorage.getItem('dank_uid');
+  document.getElementById('deleteStatus').style.display = (d.userId === myUid)? 'block' : 'none';
+  document.getElementById('deleteStatus').onclick = async () => {
+    await db.collection('statuses').doc(d.id).delete();
+    document.getElementById('statusViewer').style.display = 'none';
+    loadStatuses();
   };
 }
-document.getElementById('closeStatus').onclick = () => {
-  document.getElementById('statusViewer').style.display='none';
-  document.getElementById('statusVideo').pause();
-};
+
+// add this helper if you don't have it
+function addStatus() {
+  document.getElementById('statusInput').click();
+}
+
+// call on start
+loadStatuses();
 </script>
 <div id="shopPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; flex-direction:column;">
   <div style="background:#0000FF; padding:16px; display:flex; align-items:center; gap:12px;">
