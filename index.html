@@ -270,6 +270,7 @@ firebase.initializeApp(firebaseConfig);
 
 <script>
 async function openStatus(d) {
+  console.log('DEBUG', 'd.userId=', d.userId, 'myUid=', localStorage.getItem('dank_uid'));
   document.getElementById('statusViewer').style.display = 'block';
   const isImg = d.type === 'image';
   document.getElementById('statusImg').style.display = isImg ? 'block' : 'none';
@@ -282,7 +283,7 @@ async function openStatus(d) {
 
   const myUid = localStorage.getItem('dank_uid');
   const myName = localStorage.getItem('dank_username') || 'Someone';
-  const viewBtn = document.getElementById('viewCountBtn');
+  const viewBtn = document.getElementById('vcount');
 
   if (d.userId !== myUid) {
     try {
@@ -542,7 +543,7 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
   <img id="statusImg" style="display:none;width:100%;height:90vh;object-fit:contain">
   <video id="statusVideo" style="display:none;width:100%;height:90vh" controls autoplay></video>
 <button id="closeStatus" style="position:absolute;top:10px;right:15px;color:#fff;background:none;border:none;font-size:28px">X</button>
-<div id="viewCountBtn" style="position:absolute;bottom:20px;left:20px;color:white;background:rgba(0,0,0,0.6);padding:8px 12px;border-radius:20px;cursor:pointer;z-index:1002;display:none;">👁 views</div>
+<div id="vcount" style="position:absolute;bottom:20px;left:20px;color:white;background:rgba(0,0,0,0.6);padding:8px 12px;border-radius:20px;cursor:pointer;z-index:1002;display:none;">👁 views</div>
 <button id="deleteStatus" style="display:none;position:absolute;bottom:20px;right:15px;color:red">Delete</button>
 </div>
 <input type="file" id="statusInput" accept="image/*,video/*" style="display:none">
