@@ -277,13 +277,13 @@ async function openStatus(d){
   const vcount = document.getElementById('vcount');
   const vnum = document.getElementById('vnum');
 
- const mediaUrl = d.mediaUrl || d.img || d.image || d.url || '';
+  const mediaUrl = d.mediaUrl || d.img || d.image || d.url || '';
   const isVideo = mediaUrl.match(/\.(mp4|webm|mov)/i) || d.type === 'video';
 
   img.style.display = 'none';
   video.style.display = 'none';
-  video.pause();
-  
+  try{ video.pause(); }catch(e){}
+
   if(isVideo){
     video.src = mediaUrl;
     video.style.display = 'block';
@@ -298,22 +298,40 @@ async function openStatus(d){
 
   const myUid = localStorage.getItem('dank_uid');
   const isMine = String(d.userId) === String(myUid);
+
   delBtn.style.display = isMine ? 'block' : 'none';
   vcount.style.display = isMine ? 'block' : 'none';
+
+  // Record view if not mine
+  if(!isMine){
+    try{
+      const db = firebase.firestore();
+      const myName = localStorage.getItem('dank_username') || localStorage.getItem('dank_name') || 'Someone';
+      await db.collection('statusViews').add({
+        statusId: d.id,
+        viewerId: myUid,
+        viewerName: myName,
+        viewedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }catch(e){ console.log("view save failed", e); }
+  }
 
   if(isMine){
     try{
       const db = firebase.firestore();
       const snap = await db.collection('statusViews').where('statusId','==', d.id).get();
       vnum.textContent = snap.size;
-    }catch(e){ vnum.textContent = '0'; }
+    }catch(e){ 
+      console.error(e);
+      vnum.textContent = '0'; 
+    }
   }
 }
 
 function closeStatusViewer(){
   document.getElementById('statusViewer').style.display = 'none';
   const video = document.getElementById('statusVideo');
-  if(video){ video.pause(); video.src=''; }
+  if(video){ try{ video.pause(); }catch(e){} video.src=''; }
 }
 
 async function deleteCurrentStatus(){
@@ -332,8 +350,11 @@ async function showViewers(){
     const snap = await firebase.firestore().collection('statusViews').where('statusId','==', window._currentStatus.id).get();
     let names = [];
     snap.forEach(doc=> names.push(doc.data().viewerName || 'Someone'));
-    alert('Viewed by:\n' + (names.join('\n') || 'No views yet'));
-  }catch(e){ alert('Could not load viewers'); }
+    alert('Viewed by ('+snap.size+'):\n' + (names.join('\n') || 'No views yet'));
+  }catch(e){
+    console.error(e);
+    alert('Could not load viewers: ' + e.message);
+  }
 }
 </script>
     <!-- Bottom nav -->
