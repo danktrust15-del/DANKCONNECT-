@@ -269,18 +269,18 @@ firebase.initializeApp(firebaseConfig);
 </div>
 
 <script>
-async function openStatus(d){
+    async function openStatus(d){
   const viewer = document.getElementById('statusViewer');
   const img = document.getElementById('statusImg');
-  const delBtn = document.getElementById('delBtn');
+  const delBtn = document.getElementById('deleteStatus');
   const vcount = document.getElementById('vcount');
   const vnum = document.getElementById('vnum');
 
-  img.src = d.img;
+  img.src = d.img || d.image || d.url || '';
   viewer.style.display = 'block';
   window._currentStatus = d;
 
-  const myUid = firebase.auth().currentUser.uid;
+  const myUid = localStorage.getItem('dank_uid');
   const isMine = String(d.userId) === String(myUid);
 
   delBtn.style.display = isMine ? 'block' : 'none';
