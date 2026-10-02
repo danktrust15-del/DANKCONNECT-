@@ -277,7 +277,7 @@ async function openStatus(d){
   const vcount = document.getElementById('vcount');
   const vnum = document.getElementById('vnum');
 
-  const mediaUrl = d.img || d.image || d.url || '';
+ const mediaUrl = d.mediaUrl || d.img || d.image || d.url || '';
   const isVideo = mediaUrl.match(/\.(mp4|webm|mov)/i) || d.type === 'video';
 
   img.style.display = 'none';
