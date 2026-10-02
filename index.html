@@ -382,23 +382,35 @@ function openStatusList(list, index){
   openStatus(currentStatusList[currentStatusIndex]);
 }
 async function sendStatusReply(){
-  const input = document.getElementById('statusReplyInput');
-  const text = input.value.trim();
-  if(!text ||!window._currentStatus) return;
+  try {
+    const input = document.getElementById('statusReplyInput');
+    const text = input.value.trim();
+    console.log('reply text:', text);
+    console.log('currentStatus:', window._currentStatus);
 
-  const status = window._currentStatus;
-  await window.db.collection('statusReplies').add({
-    statusId: status.id,
-    statusOwnerId: status.userId,
-    text: text,
-    senderId: window.currentUser.uid,
-    senderName: window.currentUser.displayName || window.currentUser.email?.split('@')[0] || 'Someone',
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+    if(!text) { alert('Type something first'); return; }
+    if(!window._currentStatus) { alert('No status loaded'); return; }
 
-  input.value = '';
-  alert('Reply sent!');
-  // Optional: also send as chat message to owner
+    const d = window._currentStatus;
+    const db = firebase.firestore();
+    const myUid = localStorage.getItem('dank_uid');
+    console.log('myUid:', myUid, 'status:', d.id, d.userId);
+
+    await db.collection('statusReplies').add({
+      statusId: d.id,
+      statusOwnerId: d.userId,
+      text: text,
+      senderId: myUid,
+      senderName: localStorage.getItem('dank_username') || 'Someone',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    input.value = '';
+    alert('Reply sent!');
+  } catch(e) {
+    console.error(e);
+    alert('Reply failed: ' + e.message);
+  }
 }
 async function showViewers(statusId) {
   if (window.event) window.event.stopPropagation();
