@@ -572,25 +572,7 @@ async function deleteCurrentStatus(){
 function closeViewers(){
   document.getElementById('viewersModal').style.display = 'none';
 }
-    // Auto-enhance status replies with thumbnail
-function enhanceStatusReplyThumbnails(){
-  const container = document.getElementById('chatMessages') || document.getElementById('messages') || document.querySelector('.chat-messages');
-  if(!container) return;
-  
-  const observer = new MutationObserver(()=>{
-    container.querySelectorAll('[data-status-reply]:not([data-enhanced])').forEach(el=>{
-      el.setAttribute('data-enhanced','1');
-      const imgUrl = el.getAttribute('data-img');
-      if(imgUrl){
-        el.insertAdjacentHTML('afterbegin', 
-          `<img src="${imgUrl}" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:4px;">`
-        );
-      }
-    });
-  });
-  observer.observe(container, {childList:true, subtree:true});
-}
-enhanceStatusReplyThumbnails();
+
 </script>
     <!-- Bottom nav -->
 <div id="bottomNav" class="sticky-bottom" style="display:flex; flex-direction:row; justify-content:space-around; align-items:center; padding:10px 0 20px; background:#0b141a; border-top:1px solid #1f2c34; width:100%;">
@@ -1388,6 +1370,14 @@ snap.forEach(d => {
   const isMe = m.senderId === myUid;
   const b = document.createElement('div');
   b.style.cssText = `max-width:75%;padding:10px 14px;border-radius:16px;${isMe?'align-self:flex-end;background:#0000FF;':'align-self:flex-start;background:#1f2c34;'}`;
+    if(m.isStatusReply && m.statusMediaUrl){
+  if(m.statusMediaType === 'video'){
+    b.innerHTML += `<video src="${m.statusMediaUrl}" style="max-width:200px;border-radius:10px;margin-bottom:6px;" muted></video>`;
+  } else {
+    b.innerHTML += `<img src="${m.statusMediaUrl}" style="max-width:200px;border-radius:10px;margin-bottom:6px;cursor:pointer;" onclick="window.open('${m.statusMediaUrl}')">`;
+  }
+  b.innerHTML += `<div style="font-size:11px;opacity:0.7;margin-bottom:4px;">Replied to status</div>`;
+}
 if(m.type === 'voice' && m.audioUrl){
 b.innerHTML = '<audio controls preload="auto" src="'+getPlayableAudioUrl(m.audioUrl)+'" style="max-width:200px;"></audio>' ;
 } else if(m.type === 'image' && m.url){
