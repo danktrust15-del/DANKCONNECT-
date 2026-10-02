@@ -269,52 +269,37 @@ firebase.initializeApp(firebaseConfig);
 </div>
 
 <script>
-async function openStatus(d) {
-  console.log('DEBUG', 'd.userId=', d.userId, 'myUid=', localStorage.getItem('dank_uid'));
-  document.getElementById('statusViewer').style.display = 'block';
-  const isImg = d.type === 'image';
-  document.getElementById('statusImg').style.display = isImg ? 'block' : 'none';
-  document.getElementById('statusVideo').style.display = isImg ? 'none' : 'block';
-  if (isImg) document.getElementById('statusImg').src = d.mediaUrl;
-  else {
-    const v = document.getElementById('statusVideo');
-    v.src = d.mediaUrl; v.play().catch(()=>{});
+async function openStatus(d){
+  const viewer = document.getElementById('statusViewer');
+  const img = document.getElementById('statusImg');
+  const delBtn = document.getElementById('delBtn');
+  const vcount = document.getElementById('vcount');
+  const vnum = document.getElementById('vnum');
+
+  img.src = d.img;
+  viewer.style.display = 'block';
+  window._currentStatus = d;
+
+  const myUid = firebase.auth().currentUser.uid;
+  const isMine = String(d.userId) === String(myUid);
+
+  delBtn.style.display = isMine ? 'block' : 'none';
+  vcount.style.display = isMine ? 'block' : 'none';
+
+  if(isMine){
+    try{
+      const db = firebase.firestore();
+      const viewsSnap = await db.collection('statusViews')
+        .where('statusId','==', d.id).get();
+      vnum.textContent = viewsSnap.size;
+    }catch(e){
+      vnum.textContent = '0';
+    }
   }
-
-  const myUid = localStorage.getItem('dank_uid');
-  const myName = localStorage.getItem('dank_username') || 'Someone';
-  const viewBtn = document.getElementById('vcount');
-
-  if (d.userId !== myUid) {
-    try {
-      await db.collection('statuses').doc(d.id).collection('views').doc(myUid).set({
-        username: myName, viewedAt: Date.now()
-      });
-    } catch(e) {}
-    viewBtn.style.display = 'none';
-  } else {
-    viewBtn.style.display = 'block';
-    viewBtn.textContent = '👁 loading...';
-    try {
-      const snap = await db.collection('statuses').doc(d.id).collection('views').get();
-      viewBtn.textContent = `👁 ${snap.size} views`;
-      viewBtn.onclick = async () => {
-        const s = await db.collection('statuses').doc(d.id).collection('views').get();
-        let names = [];
-        s.forEach(doc => names.push(doc.data().username));
-        alert('Viewed by:\n' + (names.join('\n') || 'No views yet'));
-      };
-    } catch(e){ viewBtn.textContent = '👁 views'; }
-  }
-
-  document.getElementById('deleteStatus').style.display = (d.userId === myUid) ? 'block' : 'none';
-  document.getElementById('deleteStatus').onclick = async () => {
-    await db.collection('statuses').doc(d.id).delete();
-    closeStatus(); loadStatuses();
-  };
 }
+
 function closeStatus(){
-  document.getElementById('statusViewer').style.display='none';
+  document.getElementById('statusViewer').style.display = 'none';
 }
 </script>
     <!-- Bottom nav -->
@@ -538,12 +523,12 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
 <h3 style="color:white; margin-top:20px;">Manage Quotes</h3>
 <div id="admin-quotes-list"></div>
 </div>
-    <div id="statusViewer" style="display:none;position:fixed;inset:0;background:#000;z-index:9999">
-  <div id="statusProgress" style="height:3px;background:#fff;width:0%"></div>
-  <img id="statusImg" style="display:none;width:100%;height:90vh;object-fit:contain">
-  <video id="statusVideo" style="display:none;width:100%;height:90vh" controls autoplay></video>
-<button id="closeStatus" style="position:absolute;top:10px;right:15px;color:#fff;background:none;border:none;font-size:28px">X</button>
-<div id="vcount" style="position:absolute;bottom:20px;left:20px;color:white;background:rgba(0,0,0,0.6);padding:8px 12px;border-radius:20px;cursor:pointer;z-index:1002;display:none;">👁 views</div>
+<div id="statusViewer" style="display:none;position:fixed;inset:0;background:#000;z-index:9999">
+<div id="statusProgress" style="height:3px;background:#fff;width:0%"></div>
+<img id="statusImg" style="display:none;width:100%;height:90vh;object-fit:contain">
+<video id="statusVideo" style="display:none;width:100%;height:90vh" controls autoplay></video>
+<button id="closeStatus" style="position:absolute;top:16px;right:15px;color:#fff;background:none;border:none;font-size:28px">X</button>
+<div id="vcount" style="position:absolute;bottom:20px;left:20px;color:white;background:rgba(0,0,0,0.6);padding:8px 12px;border-radius:20px;cursor:pointer;z-index:1002;display:none;">👁️ <span id="vnum">0</span> views</div>
 <button id="deleteStatus" style="display:none;position:absolute;bottom:20px;right:15px;color:red">Delete</button>
 </div>
 <input type="file" id="statusInput" accept="image/*,video/*" style="display:none">
@@ -1356,23 +1341,6 @@ async function loadStatuses() {
     div.onclick = () => openStatus(first);
     container.appendChild(div);
   });
-}
-
-function openStatus(d) {
-  document.getElementById('statusViewer').style.display = 'block';
-  const isImg = d.type === 'image';
-  document.getElementById('statusImg').style.display = isImg? 'block' : 'none';
-  document.getElementById('statusVideo').style.display = isImg? 'none' : 'block';
-  if (isImg) document.getElementById('statusImg').src = d.mediaUrl;
-  else document.getElementById('statusVideo').src = d.mediaUrl;
-
-  const myUid = localStorage.getItem('dank_uid');
-  document.getElementById('deleteStatus').style.display = (d.userId === myUid)? 'block' : 'none';
-  document.getElementById('deleteStatus').onclick = async () => {
-    await db.collection('statuses').doc(d.id).delete();
-    document.getElementById('statusViewer').style.display = 'none';
-    loadStatuses();
-  };
 }
 
 // add this helper if you don't have it
