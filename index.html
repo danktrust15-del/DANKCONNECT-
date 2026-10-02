@@ -389,32 +389,61 @@ function openStatusList(list, index){
   openStatus(currentStatusList[currentStatusIndex]);
 }
 async function sendStatusReply(){
-  try {
+  try{
     const input = document.getElementById('statusReplyInput');
     const text = input.value.trim();
-    console.log('reply text:', text);
-    console.log('currentStatus:', window._currentStatus);
-
-    if(!text) { alert('Type something first'); return; }
-    if(!window._currentStatus) { alert('No status loaded'); return; }
+    if(!text){ alert('Type something first'); return; }
+    if(!window._currentStatus){ alert('No status loaded'); return; }
 
     const d = window._currentStatus;
     const db = firebase.firestore();
     const myUid = localStorage.getItem('dank_uid');
-    console.log('myUid:', myUid, 'status:', d.id, d.userId);
+    const senderName = localStorage.getItem('dank_username') || 'Someone';
 
+    // 1. Your existing panel
     await db.collection('statusReplies').add({
       statusId: d.id,
       statusOwnerId: d.userId,
+      ownerId: d.userId,
       text: text,
       senderId: myUid,
-      senderName: localStorage.getItem('dank_username') || 'Someone',
+      senderName: senderName,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
+    // 2. ALSO send to private 1-1 chat
+    try{
+      const participants = [myUid, d.userId].sort();
+      const chatId = participants.join('_');
+      const chatRef = db.collection('chats').doc(chatId);
+      const chatSnap = await chatRef.get();
+
+      if(!chatSnap.exists){
+        await chatRef.set({
+          participants: participants,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          lastMessage: `Replied to status: ${text}`,
+          lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } else {
+        await chatRef.update({
+          lastMessage: `Replied to status: ${text}`,
+          lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+
+      await chatRef.collection('messages').add({
+        senderId: myUid,
+        text: text,
+        replyToStatusId: d.id,
+        isStatusReply: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch(e){ console.error('DM send error', e); }
+
     input.value = '';
     alert('Reply sent!');
-  } catch(e) {
+  } catch(e){
     console.error(e);
     alert('Reply failed: ' + e.message);
   }
