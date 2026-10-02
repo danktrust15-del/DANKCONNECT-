@@ -269,37 +269,71 @@ firebase.initializeApp(firebaseConfig);
 </div>
 
 <script>
-    async function openStatus(d){
+async function openStatus(d){
   const viewer = document.getElementById('statusViewer');
   const img = document.getElementById('statusImg');
+  const video = document.getElementById('statusVideo');
   const delBtn = document.getElementById('deleteStatus');
   const vcount = document.getElementById('vcount');
   const vnum = document.getElementById('vnum');
 
-  img.src = d.img || d.image || d.url || '';
+  const mediaUrl = d.img || d.image || d.url || '';
+  const isVideo = mediaUrl.match(/\.(mp4|webm|mov)/i) || d.type === 'video';
+
+  img.style.display = 'none';
+  video.style.display = 'none';
+  video.pause();
+  
+  if(isVideo){
+    video.src = mediaUrl;
+    video.style.display = 'block';
+    video.play().catch(()=>{});
+  } else {
+    img.src = mediaUrl;
+    img.style.display = 'block';
+  }
+
   viewer.style.display = 'block';
   window._currentStatus = d;
 
   const myUid = localStorage.getItem('dank_uid');
   const isMine = String(d.userId) === String(myUid);
-
   delBtn.style.display = isMine ? 'block' : 'none';
   vcount.style.display = isMine ? 'block' : 'none';
 
   if(isMine){
     try{
       const db = firebase.firestore();
-      const viewsSnap = await db.collection('statusViews')
-        .where('statusId','==', d.id).get();
-      vnum.textContent = viewsSnap.size;
-    }catch(e){
-      vnum.textContent = '0';
-    }
+      const snap = await db.collection('statusViews').where('statusId','==', d.id).get();
+      vnum.textContent = snap.size;
+    }catch(e){ vnum.textContent = '0'; }
   }
 }
 
-function closeStatus(){
+function closeStatusViewer(){
   document.getElementById('statusViewer').style.display = 'none';
+  const video = document.getElementById('statusVideo');
+  if(video){ video.pause(); video.src=''; }
+}
+
+async function deleteCurrentStatus(){
+  if(!window._currentStatus) return;
+  if(!confirm('Delete this status?')) return;
+  try{
+    await firebase.firestore().collection('statuses').doc(window._currentStatus.id).delete();
+    closeStatusViewer();
+    location.reload();
+  }catch(e){ alert('Delete failed: '+e.message); }
+}
+
+async function showViewers(){
+  if(!window._currentStatus) return;
+  try{
+    const snap = await firebase.firestore().collection('statusViews').where('statusId','==', window._currentStatus.id).get();
+    let names = [];
+    snap.forEach(doc=> names.push(doc.data().viewerName || 'Someone'));
+    alert('Viewed by:\n' + (names.join('\n') || 'No views yet'));
+  }catch(e){ alert('Could not load viewers'); }
 }
 </script>
     <!-- Bottom nav -->
@@ -525,11 +559,11 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
 </div>
 <div id="statusViewer" style="display:none;position:fixed;inset:0;background:#000;z-index:9999">
 <div id="statusProgress" style="height:3px;background:#fff;width:0%"></div>
-<img id="statusImg" style="display:none;width:100%;height:90vh;object-fit:contain">
+<img id="statusImg" style="display:none;width:100%;height:90vh;object-fit:contain" src="">
 <video id="statusVideo" style="display:none;width:100%;height:90vh" controls autoplay></video>
-<button id="closeStatus" style="position:absolute;top:16px;right:15px;color:#fff;background:none;border:none;font-size:28px">X</button>
-<div id="vcount" style="position:absolute;bottom:20px;left:20px;color:white;background:rgba(0,0,0,0.6);padding:8px 12px;border-radius:20px;cursor:pointer;z-index:1002;display:none;">👁️ <span id="vnum">0</span> views</div>
-<button id="deleteStatus" style="display:none;position:absolute;bottom:20px;right:15px;color:red">Delete</button>
+<button onclick="closeStatusViewer()" style="position:absolute;top:16px;right:15px;color:#fff;background:none;border:none;font-size:28px;cursor:pointer;z-index:1002;">X</button>
+<div id="vcount" onclick="showViewers()" style="position:absolute;bottom:20px;left:20px;color:white;background:rgba(0,0,0,0.6);padding:8px 12px;border-radius:20px;cursor:pointer;z-index:1002;display:none;">👁 <span id="vnum">0</span> views</div>
+<button id="deleteStatus" onclick="deleteCurrentStatus()" style="display:none;position:absolute;bottom:20px;right:15px;color:red;background:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;z-index:1002;">Delete</button>
 </div>
 <input type="file" id="statusInput" accept="image/*,video/*" style="display:none">
 <script>
