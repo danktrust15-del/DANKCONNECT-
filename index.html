@@ -338,7 +338,10 @@ const repliesPanel = document.getElementById('statusRepliesPanel');
 if(isMine){
   replyBar.style.display = 'none';
   document.getElementById('vcount').style.display = 'flex';
-  loadStatusReplies(d.id);
+  console.log('opening status', d);
+  const sid = d.id || window.currentStatusId;
+  console.log('loading replies for', sid);
+  loadStatusReplies(sid);
 } else {
   replyBar.style.display = 'flex';
   document.getElementById('vcount').style.display = 'none';
@@ -421,25 +424,33 @@ async function loadStatusReplies(statusId){
   const list = document.getElementById('statusRepliesList');
   const db = firebase.firestore();
   
-  const snap = await db.collection('statusReplies')
-    .where('statusId','==',statusId)
-    .orderBy('createdAt','desc')
-    .get();
-  
-  if(snap.empty){
-    panel.style.display = 'none';
-    return;
+  try {
+    const snap = await db.collection('statusReplies')
+      .where('statusId','==',statusId)
+      .get();
+    
+    console.log('Replies found:', snap.size);
+    
+    if(snap.empty){
+      panel.style.display = 'none';
+      return;
+    }
+    
+    panel.style.display = 'block';
+    list.innerHTML = '';
+    let docs = [];
+    snap.forEach(doc=> docs.push(doc.data()));
+    docs.sort((a,b)=> (b.createdAt?.toMillis?.()||0) - (a.createdAt?.toMillis?.()||0));
+    
+    docs.forEach(r=>{
+      const div = document.createElement('div');
+      div.style.cssText = 'color:white;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:13px;';
+      div.innerHTML = `<b>${r.senderName || 'Someone'}:</b> ${r.text}`;
+      list.appendChild(div);
+    });
+  } catch(e){
+    console.error('load replies error', e);
   }
-  
-  panel.style.display = 'block';
-  list.innerHTML = '';
-  snap.forEach(doc=>{
-    const r = doc.data();
-    const div = document.createElement('div');
-    div.style.cssText = 'color:white;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:13px;';
-    div.innerHTML = `<b>${r.senderName || 'Someone'}:</b> ${r.text}`;
-    list.appendChild(div);
-  });
 }
 async function showViewers(statusId) {
   if (window.event) window.event.stopPropagation();
