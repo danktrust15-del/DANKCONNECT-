@@ -331,15 +331,19 @@ progress.style.width = '0%';
   const myUid = localStorage.getItem('dank_uid');
   const isMine = String(d.userId) === String(myUid);
 
-  delBtn.style.display = isMine ? 'block' : 'none';
-  vcount.style.display = isMine ? 'flex' : 'none';
-  const replyBar = document.getElementById('statusReplyBar');
+delBtn.style.display = isMine ? 'block' : 'none';
+vcount.style.display = isMine ? 'flex' : 'none';
+const replyBar = document.getElementById('statusReplyBar');
+const repliesPanel = document.getElementById('statusRepliesPanel');
 if(isMine){
   replyBar.style.display = 'none';
+  document.getElementById('vcount').style.display = 'flex';
+  loadStatusReplies(d.id);
 } else {
   replyBar.style.display = 'flex';
+  document.getElementById('vcount').style.display = 'none';
+  repliesPanel.style.display = 'none';
 }
-
 // Only count views from OTHER users, and only once per user
 if(!isMine){
   try{
@@ -412,6 +416,31 @@ async function sendStatusReply(){
     alert('Reply failed: ' + e.message);
   }
 }
+async function loadStatusReplies(statusId){
+  const panel = document.getElementById('statusRepliesPanel');
+  const list = document.getElementById('statusRepliesList');
+  const db = firebase.firestore();
+  
+  const snap = await db.collection('statusReplies')
+    .where('statusId','==',statusId)
+    .orderBy('createdAt','desc')
+    .get();
+  
+  if(snap.empty){
+    panel.style.display = 'none';
+    return;
+  }
+  
+  panel.style.display = 'block';
+  list.innerHTML = '';
+  snap.forEach(doc=>{
+    const r = doc.data();
+    const div = document.createElement('div');
+    div.style.cssText = 'color:white;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:13px;';
+    div.innerHTML = `<b>${r.senderName || 'Someone'}:</b> ${r.text}`;
+    list.appendChild(div);
+  });
+}
 async function showViewers(statusId) {
   if (window.event) window.event.stopPropagation();
   if (typeof progressInterval !== 'undefined' && progressInterval) clearInterval(progressInterval);
@@ -475,7 +504,7 @@ function closeStatusViewer(){
   if(statusTimer) clearTimeout(statusTimer);
   if(progressInterval) clearInterval(progressInterval);
   document.getElementById('statusViewer').style.display='none';
-  const video=document.getElementById('statusVideo');
+  document.getElementById('statusRepliesPanel').style.display = 'none';  const video=document.getElementById('statusVideo');
   if(video){ try{video.pause();}catch(e){} video.src=''; }
 
   // Auto go to next status in list if exists
@@ -736,6 +765,10 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
 <div id="statusReplyBar" style="position:absolute;bottom:20px;left:16px;right:16px;display:none;z-index:1003;align-items:center;gap:8px;">
   <input id="statusReplyInput" placeholder="Reply..." style="flex:1;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:12px 16px;border-radius:25px;outline:none;font-size:14px;" />
   <button onclick="sendStatusReply()" style="background:#00a884;border:none;color:white;width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:18px;">➤</button>
+</div>
+    <div id="statusRepliesPanel" style="position:absolute;bottom:70px;left:16px;right:16px;max-height:200px;overflow-y:auto;display:none;z-index:1003;background:rgba(0,0,0,0.8);border-radius:12px;padding:12px;">
+  <div style="color:white;font-weight:bold;margin-bottom:8px;font-size:14px;">Replies</div>
+  <div id="statusRepliesList"></div>
 </div>
 </div>
     <!-- Viewers Modal -->
