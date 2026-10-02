@@ -433,12 +433,14 @@ async function sendStatusReply(){
       }
 
       await chatRef.collection('messages').add({
-        senderId: myUid,
-        text: text,
-        replyToStatusId: d.id,
-        isStatusReply: true,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+  senderId: myUid,
+  text: text,
+  replyToStatusId: d.id,
+  isStatusReply: true,
+  statusMediaUrl: d.mediaUrl || d.url || '',
+  statusMediaType: d.type || 'image',
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
     } catch(e){ console.error('DM send error', e); }
 
     input.value = '';
@@ -570,6 +572,25 @@ async function deleteCurrentStatus(){
 function closeViewers(){
   document.getElementById('viewersModal').style.display = 'none';
 }
+    // Auto-enhance status replies with thumbnail
+function enhanceStatusReplyThumbnails(){
+  const container = document.getElementById('chatMessages') || document.getElementById('messages') || document.querySelector('.chat-messages');
+  if(!container) return;
+  
+  const observer = new MutationObserver(()=>{
+    container.querySelectorAll('[data-status-reply]:not([data-enhanced])').forEach(el=>{
+      el.setAttribute('data-enhanced','1');
+      const imgUrl = el.getAttribute('data-img');
+      if(imgUrl){
+        el.insertAdjacentHTML('afterbegin', 
+          `<img src="${imgUrl}" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:4px;">`
+        );
+      }
+    });
+  });
+  observer.observe(container, {childList:true, subtree:true});
+}
+enhanceStatusReplyThumbnails();
 </script>
     <!-- Bottom nav -->
 <div id="bottomNav" class="sticky-bottom" style="display:flex; flex-direction:row; justify-content:space-around; align-items:center; padding:10px 0 20px; background:#0b141a; border-top:1px solid #1f2c34; width:100%;">
