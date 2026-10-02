@@ -147,6 +147,15 @@ firebase.initializeApp(firebaseConfig);
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
 }
+.viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center}
+.viewer-card{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.viewer-header{padding:14px 16px;font-weight:700;display:flex;justify-content:space-between;align-items:center;background:#0a1930;color:#fff;border-bottom:1px solid #0a1930}
+.viewer-close{cursor:pointer;font-size:20px;color:#fff;opacity:0.8}
+.viewer-list{overflow-y:auto;padding:8px 0;background:#fff}
+.viewer-row{padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f1f5f9}
+.viewer-avatar{width:36px;height:36px;border-radius:50%;background:#0a1930;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+.viewer-handle{width:40px;height:4px;background:#cbd5e1;border-radius:99px;margin:8px auto}
 </style>
 </head>
 <body>
@@ -304,12 +313,14 @@ async function openStatus(d){
   window._currentStatus = d;
 
   // Timer - 5s image, 15s video
-  const DURATION = isVideo ? 15000 : 5000;
-  let elapsed = 0;
-  progress.style.width = '0%';
-  
+const DURATION = isVideo ? 15000 : 5000;
+let elapsed = 0;
+window._DURATION = DURATION;
+window._elapsed = 0;
+progress.style.width = '0%';  
   progressInterval = setInterval(()=>{
     elapsed += 50;
+    window._elapsed = elapsed;
     const pct = Math.min((elapsed / DURATION) * 100, 100);
     progress.style.width = pct + '%';
     if(pct >= 100) clearInterval(progressInterval);
@@ -323,26 +334,38 @@ async function openStatus(d){
   delBtn.style.display = isMine ? 'block' : 'none';
   vcount.style.display = isMine ? 'flex' : 'none';
 
-  if(!isMine){
-    try{
-      const db = firebase.firestore();
-      const myName = localStorage.getItem('dank_username') || localStorage.getItem('dank_name') || 'Someone';
+// Only count views from OTHER users, and only once per user
+if(!isMine){
+  try{
+    const db = firebase.firestore();
+    const myName = localStorage.getItem('dank_username') || localStorage.getItem('dank_name') || 'Someone';
+    // Check if this user already viewed this status
+    const existing = await db.collection('statusViews')
+      .where('statusId', '==', d.id)
+      .where('viewerId', '==', myUid)
+      .limit(1).get();
+    if(existing.empty){
       await db.collection('statusViews').add({
         statusId: d.id,
         viewerId: myUid,
         viewerName: myName,
         viewedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-    }catch(e){ console.log("view save failed", e); }
-  }
-
-  if(isMine){
-    try{
-      const db = firebase.firestore();
-      const snap = await db.collection('statusViews').where('statusId','==', d.id).get();
-      vnum.textContent = snap.size;
-    }catch(e){ vnum.textContent = '0'; }
-  }
+    }
+  }catch(e){ console.log("view save failed", e); }
+}
+if(isMine){
+  try{
+    const db = firebase.firestore();
+    const snap = await db.collection('statusViews').where('statusId','==', d.id).get();
+    const unique = new Set();
+    snap.forEach(doc => {
+      const vd = doc.data();
+      if(vd.viewerId) unique.add(vd.viewerId);
+    });
+    vnum.textContent = unique.size;
+  }catch(e){ vnum.textContent = '0'; }
+}
 }
 let currentStatusList = [];
 let currentStatusIndex = 0;
@@ -352,7 +375,64 @@ function openStatusList(list, index){
   currentStatusIndex = index;
   openStatus(currentStatusList[currentStatusIndex]);
 }
+async function showViewers(statusId) {
+  if (window.event) window.event.stopPropagation();
+  if (typeof progressInterval !== 'undefined' && progressInterval) clearInterval(progressInterval);
+  if (typeof statusTimer !== 'undefined' && statusTimer) clearTimeout(statusTimer);
+  try { document.getElementById('statusVideo').pause(); } catch(e){}
+  window._isPaused = true;
 
+  const closeAndResume = (overlay) => {
+    if (overlay) overlay.remove();
+    if (!window._isPaused) return;
+    window._isPaused = false;
+    const progress = document.getElementById('statusProgress');
+    const video = document.getElementById('statusVideo');
+    const DURATION = window._DURATION || 5000;
+    let elapsed = window._elapsed || 0;
+    const isVideo = video && video.style.display !== 'none';
+    if (isVideo) { try { video.play().catch(()=>{}); } catch(e){} }
+    progressInterval = setInterval(()=>{
+      elapsed += 50;
+      window._elapsed = elapsed;
+      const pct = Math.min((elapsed / DURATION) * 100, 100);
+      progress.style.width = pct + '%';
+      if (pct >= 100) clearInterval(progressInterval);
+    }, 50);
+    const remaining = Math.max(DURATION - elapsed, 500);
+    statusTimer = setTimeout(()=>{ closeStatusViewer(); }, remaining);
+  };
+
+  try {
+    const db = firebase.firestore();
+    const snap = await db.collection('statusViews').where('statusId', '==', statusId).get();
+    const viewers = [];
+    const seen = new Set();
+    snap.forEach(doc => {
+      const data = doc.data();
+      if(!seen.has(data.viewerId)){
+        seen.add(data.viewerId);
+        viewers.push(data);
+      }
+    });
+    const overlay = document.createElement('div');
+    overlay.className = 'viewer-overlay';
+    let bodyHtml = '';
+    if (!viewers.length) {
+      bodyHtml = '<div style="padding:24px;text-align:center;color:#888">No views yet</div>';
+    } else {
+viewers.forEach(v => {
+    const name = v.name || v.viewerName || 'User';
+    const initial = name.charAt(0).toUpperCase();
+    bodyHtml += `<div class="viewer-row"><div class="viewer-avatar">${initial}</div><div style="color:#111;font-weight:600">${name}</div></div>`;
+  });
+    }
+    overlay.innerHTML = `<div class="viewer-card"><div style="background:#0a1930;border-radius:20px 20px 0 0"><div class="viewer-handle"></div><div class="viewer-header"><span>Viewed by ${viewers.length}</span><span class="viewer-close" id="viewerCloseBtn">✕</span></div></div><div class="viewer-list">${bodyHtml}</div></div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('viewerCloseBtn').onclick = () => closeAndResume(overlay);
+    overlay.onclick = (e) => { if (e.target === overlay) closeAndResume(overlay); };
+  } catch(err) { console.log('showViewers error', err); }
+}
 // Override close to allow next
 function closeStatusViewer(){
   if(statusTimer) clearTimeout(statusTimer);
@@ -379,38 +459,6 @@ async function deleteCurrentStatus(){
     closeStatusViewer();
     location.reload();
   }catch(e){ alert('Delete failed: '+e.message); }
-}
-
-async function showViewers(){
-  if(!window._currentStatus) return;
-  const modal = document.getElementById('viewersModal');
-  const list = document.getElementById('viewersList');
-  const titleCount = document.getElementById('viewersCountTitle');
-  
-  modal.style.display = 'flex';
-  list.innerHTML = '<p style="text-align:center; color:#8696a0; padding:20px;">Loading...</p>';
-
-  try{
-    const snap = await firebase.firestore().collection('statusViews').where('statusId','==', window._currentStatus.id).get();
-    titleCount.textContent = snap.size;
-    if(snap.empty){
-      list.innerHTML = '<p style="text-align:center; color:#8696a0; padding:20px;">No views yet</p>';
-    } else {
-      let html = '';
-      snap.forEach(doc=>{
-        const v = doc.data();
-        const name = v.viewerName || 'Someone';
-        const initial = name.charAt(0).toUpperCase();
-        html += `<div style="display:flex; align-items:center; padding:10px 0; border-bottom:1px solid #2a3942;">
-          <div style="width:40px; height:40px; border-radius:50%; background:#00a884; display:flex; align-items:center; justify-content:center; font-weight:bold; margin-right:12px;">${initial}</div>
-          <div><div style="font-weight:500;">${name}</div><div style="font-size:12px; color:#8696a0;">Viewed recently</div></div>
-        </div>`;
-      });
-      list.innerHTML = html;
-    }
-  }catch(e){
-    list.innerHTML = `<p style="text-align:center; color:#ff6b6b; padding:20px;">Error: ${e.message}</p>`;
-  }
 }
 
 function closeViewers(){
@@ -643,7 +691,7 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
   <img id="statusImg" style="display:none;width:100%;height:90vh;object-fit:contain" src="">
   <video id="statusVideo" style="display:none;width:100%;height:90vh" controls autoplay></video>
   <button onclick="closeStatusViewer()" style="position:absolute;top:16px;right:15px;color:#fff;background:none;border:none;font-size:28px;cursor:pointer;z-index:1002;">&times;</button>
-  <div id="vcount" onclick="showViewers()" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:white;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);padding:8px 16px;border-radius:20px;cursor:pointer;z-index:1002;display:none;font-size:14px;font-weight:500;align-items:center;gap:6px;border:1px solid rgba(255,255,255,0.15);">
+<div id="vcount" onclick="event.stopPropagation(); showViewers(window._currentStatus.id)" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:white;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);padding:8px 16px;border-radius:20px;cursor:pointer;z-index:1002;display:none;font-size:14px;font-weight:500;align-items:center;gap:6px;border:1px solid rgba(255,255,255,0.15);">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
     <span id="vnum">0</span>
   </div>
@@ -663,8 +711,7 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
 <script>
 
 function showPage(id){
-  ['chatsPage','updatesPage','callsPage','settingsPage','quotesPage'].forEach(p=>{
-    const el = document.getElementById(p);
+  ['chatsPage','updatesPage','callsPage','settingsPage','quotesPage'].forEach(p=>{    const el = document.getElementById(p);
     if(el) el.style.display='none';
   });
   const target = document.getElementById(id);
