@@ -378,9 +378,9 @@ async function openStatus(d){
       const db = firebase.firestore();
       const myName = localStorage.getItem('dank_username') || localStorage.getItem('dank_name') || 'Someone';
       const existing = await db.collection('statusViews')
-       .where('statusId', '==', d.id)
-       .where('viewerId', '==', myUid)
-       .limit(1).get();
+      .where('statusId', '==', d.id)
+      .where('viewerId', '==', myUid)
+      .limit(1).get();
       if(existing.empty){
         await db.collection('statusViews').add({
           statusId: d.id,
@@ -412,6 +412,43 @@ function openStatusList(list, index){
   currentStatusIndex = index;
   openStatus(currentStatusList[currentStatusIndex]);
 }
+
+// Called when clicking the "Replied to status" thumbnail in private chat
+window.openQuotedStatus = function(statusData){
+  const old = document.getElementById('quotedStatusViewer');
+  if(old) old.remove();
+
+  const mediaUrl = statusData.mediaUrl || statusData.url || statusData.img || statusData.image || '';
+  const isVideo = mediaUrl.match(/\.(mp4|webm|mov)/i) || statusData.type === 'video';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'quotedStatusViewer';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10002;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
+
+  overlay.innerHTML = `
+    <div style="position:absolute;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:center;z-index:2;">
+      <button id="qsClose" style="width:42px;height:42px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;font-size:20px;cursor:pointer;">✕</button>
+      <div style="display:flex;gap:10px;">
+        <button id="qsView" style="padding:10px 18px;border-radius:25px;border:none;background:#0000FF;color:#fff;font-weight:600;cursor:pointer;">View status</button>
+        <a id="qsDownload" href="${mediaUrl}" download target="_blank" style="padding:10px 18px;border-radius:25px;background:#1f2c34;color:#fff;text-decoration:none;font-weight:600;display:flex;align-items:center;">⬇ Download</a>
+      </div>
+    </div>
+    ${isVideo
+     ? `<video src="${mediaUrl}" controls autoplay playsinline style="max-width:100%;max-height:85vh;border-radius:12px;"></video>`
+      : `<img src="${mediaUrl}" style="max-width:100%;max-height:85vh;border-radius:12px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,0.5);">`
+    }
+  `;
+
+  document.body.appendChild(overlay);
+
+  overlay.querySelector('#qsClose').onclick = ()=> overlay.remove();
+  overlay.onclick = (e)=>{ if(e.target === overlay) overlay.remove(); };
+
+  overlay.querySelector('#qsView').onclick = ()=>{
+    overlay.remove();
+    if(window.openStatus) window.openStatus(statusData);
+  };
+};
 async function sendStatusReply(){
   try{
     const input = document.getElementById('statusReplyInput');
@@ -1394,11 +1431,13 @@ snap.forEach(d => {
   const isMe = m.senderId === myUid;
   const b = document.createElement('div');
   b.style.cssText = `max-width:75%;padding:10px 14px;border-radius:16px;${isMe?'align-self:flex-end;background:#0000FF;':'align-self:flex-start;background:#1f2c34;'}`;
-    if(m.isStatusReply && m.statusMediaUrl){
-  if(m.statusMediaType === 'video'){
-    b.innerHTML += `<video src="${m.statusMediaUrl}" style="max-width:200px;border-radius:10px;margin-bottom:6px;" muted></video>`;
+if(m.isStatusReply && m.statusMediaUrl){
+  const qData = { id: m.replyToStatusId || m.statusId, mediaUrl: m.statusMediaUrl, url: m.statusMediaUrl, type: m.statusMediaType || 'image' };
+  const qJson = JSON.stringify(qData).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+  if(m.statusMediaType === "video"){
+    b.innerHTML += `<video src="${m.statusMediaUrl}" style="max-width:200px;border-radius:10px;margin-bottom:6px;cursor:pointer;" onclick='openQuotedStatus(JSON.parse(this.getAttribute("data-q")))' data-q="${qJson}" muted></video>`;
   } else {
-    b.innerHTML += `<img src="${m.statusMediaUrl}" style="max-width:200px;border-radius:10px;margin-bottom:6px;cursor:pointer;" onclick="window.open('${m.statusMediaUrl}')">`;
+    b.innerHTML += `<img src="${m.statusMediaUrl}" style="max-width:200px;border-radius:10px;margin-bottom:6px;cursor:pointer;" onclick='openQuotedStatus(JSON.parse(this.getAttribute("data-q")))' data-q="${qJson}">`;
   }
   b.innerHTML += `<div style="font-size:11px;opacity:0.7;margin-bottom:4px;">Replied to status</div>`;
 }
