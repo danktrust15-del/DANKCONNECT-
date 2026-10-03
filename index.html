@@ -312,73 +312,97 @@ async function openStatus(d){
   viewer.style.display = 'block';
   window._currentStatus = d;
 
-  // Timer - 5s image, 15s video
-const DURATION = isVideo ? 15000 : 5000;
-let elapsed = 0;
-window._DURATION = DURATION;
-window._elapsed = 0;
-progress.style.width = '0%';  
-  progressInterval = setInterval(()=>{
-    elapsed += 50;
-    window._elapsed = elapsed;
-    const pct = Math.min((elapsed / DURATION) * 100, 100);
-    progress.style.width = pct + '%';
-    if(pct >= 100) clearInterval(progressInterval);
-  }, 50);
+  // Timer - 5s image, 15s video with pause support
+  const DURATION = isVideo? 15000 : 5000;
+  let elapsed = 0;
+  let paused = false;
+  window._DURATION = DURATION;
+  window._elapsed = 0;
+  progress.style.width = '0%';
 
-  statusTimer = setTimeout(()=>{ closeStatusViewer(); }, DURATION);
+  function startTimers(){
+    if(statusTimer) clearTimeout(statusTimer);
+    if(progressInterval) clearInterval(progressInterval);
+    const remaining = DURATION - elapsed;
+    progressInterval = setInterval(()=>{
+      if(paused) return;
+      elapsed += 50;
+      window._elapsed = elapsed;
+      const pct = Math.min((elapsed / DURATION) * 100, 100);
+      progress.style.width = pct + '%';
+      if(pct >= 100) clearInterval(progressInterval);
+    }, 50);
+    statusTimer = setTimeout(()=>{ closeStatusViewer(); }, remaining);
+  }
+  startTimers();
+
+  // Pause when reply bar tapped
+  const replyBar = document.getElementById('statusReplyBar');
+  const replyInput = replyBar? replyBar.querySelector('input') : null;
+  if(replyInput &&!replyInput.dataset.pauseBound){
+    replyInput.dataset.pauseBound = '1';
+    replyInput.addEventListener('focus', ()=>{
+      paused = true;
+      if(statusTimer) clearTimeout(statusTimer);
+      if(progressInterval) clearInterval(progressInterval);
+      try{ video.pause(); }catch(e){}
+    });
+    replyInput.addEventListener('blur', ()=>{
+      if(!paused) return;
+      paused = false;
+      try{ if(isVideo) video.play().catch(()=>{}); }catch(e){}
+      startTimers();
+    });
+  }
 
   const myUid = localStorage.getItem('dank_uid');
   const isMine = String(d.userId) === String(myUid);
 
-delBtn.style.display = isMine ? 'block' : 'none';
-vcount.style.display = isMine ? 'flex' : 'none';
-const replyBar = document.getElementById('statusReplyBar');
-const repliesPanel = document.getElementById('statusRepliesPanel');
-if(isMine){
-  replyBar.style.display = 'none';
-  document.getElementById('vcount').style.display = 'flex';
-  console.log('opening status', d);
-  const sid = d.id || window.currentStatusId;
-  console.log('loading replies for', sid);
-  loadStatusReplies(sid);
-} else {
-  replyBar.style.display = 'flex';
-  document.getElementById('vcount').style.display = 'none';
-  repliesPanel.style.display = 'none';
-}
-// Only count views from OTHER users, and only once per user
-if(!isMine){
-  try{
-    const db = firebase.firestore();
-    const myName = localStorage.getItem('dank_username') || localStorage.getItem('dank_name') || 'Someone';
-    // Check if this user already viewed this status
-    const existing = await db.collection('statusViews')
-      .where('statusId', '==', d.id)
-      .where('viewerId', '==', myUid)
-      .limit(1).get();
-    if(existing.empty){
-      await db.collection('statusViews').add({
-        statusId: d.id,
-        viewerId: myUid,
-        viewerName: myName,
-        viewedAt: firebase.firestore.FieldValue.serverTimestamp()
+  delBtn.style.display = isMine? 'block' : 'none';
+  vcount.style.display = isMine? 'flex' : 'none';
+  const repliesPanel = document.getElementById('statusRepliesPanel');
+  if(isMine){
+    replyBar.style.display = 'none';
+    document.getElementById('vcount').style.display = 'flex';
+    console.log('opening status', d);
+    const sid = d.id || window.currentStatusId;
+    console.log('loading replies for', sid);
+    loadStatusReplies(sid);
+  } else {
+    replyBar.style.display = 'flex';
+    document.getElementById('vcount').style.display = 'none';
+    repliesPanel.style.display = 'none';
+  }
+  if(!isMine){
+    try{
+      const db = firebase.firestore();
+      const myName = localStorage.getItem('dank_username') || localStorage.getItem('dank_name') || 'Someone';
+      const existing = await db.collection('statusViews')
+       .where('statusId', '==', d.id)
+       .where('viewerId', '==', myUid)
+       .limit(1).get();
+      if(existing.empty){
+        await db.collection('statusViews').add({
+          statusId: d.id,
+          viewerId: myUid,
+          viewerName: myName,
+          viewedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    }catch(e){ console.log("view save failed", e); }
+  }
+  if(isMine){
+    try{
+      const db = firebase.firestore();
+      const snap = await db.collection('statusViews').where('statusId','==', d.id).get();
+      const unique = new Set();
+      snap.forEach(doc => {
+        const vd = doc.data();
+        if(vd.viewerId) unique.add(vd.viewerId);
       });
-    }
-  }catch(e){ console.log("view save failed", e); }
-}
-if(isMine){
-  try{
-    const db = firebase.firestore();
-    const snap = await db.collection('statusViews').where('statusId','==', d.id).get();
-    const unique = new Set();
-    snap.forEach(doc => {
-      const vd = doc.data();
-      if(vd.viewerId) unique.add(vd.viewerId);
-    });
-    vnum.textContent = unique.size;
-  }catch(e){ vnum.textContent = '0'; }
-}
+      vnum.textContent = unique.size;
+    }catch(e){ vnum.textContent = '0'; }
+  }
 }
 let currentStatusList = [];
 let currentStatusIndex = 0;
