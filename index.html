@@ -281,7 +281,18 @@ firebase.initializeApp(firebaseConfig);
 let statusTimer = null;
 let progressInterval = null;
 
-async function openStatus(d){
+async function openStatus(d, passedList, passedIdx) {
+    let allForUser = [d];
+    try {
+  if (typeof statuses!== 'undefined' && Array.isArray(statuses)) {
+    const uid = d.uid || d.userId || d.user || d.name;
+    allForUser = statuses.filter(s => (s.uid || s.userId || s.user || s.name) === uid);
+    if (allForUser.length === 0) allForUser = [d];
+  }
+} catch(e){}
+window._currentUserStatuses = allForUser;
+window._currentStatusIndex = allForUser.indexOf(d);
+if (window._currentStatusIndex < 0) window._currentStatusIndex = 0;
   if(statusTimer) clearTimeout(statusTimer);
   if(progressInterval) clearInterval(progressInterval);
 
@@ -291,7 +302,6 @@ async function openStatus(d){
   const delBtn = document.getElementById('deleteStatus');
   const vcount = document.getElementById('vcount');
   const vnum = document.getElementById('vnum');
-  const progress = document.getElementById('statusProgress');
 
   const mediaUrl = d.mediaUrl || d.img || d.image || d.url || '';
   const isVideo = mediaUrl.match(/\.(mp4|webm|mov)/i) || d.type === 'video';
@@ -312,14 +322,29 @@ async function openStatus(d){
   viewer.style.display = 'block';
   window._currentStatus = d;
 
-  // Timer - 5s image, 15s video with pause support
-  const DURATION = isVideo? 15000 : 5000;
-  let elapsed = 0;
-  let paused = false;
-  window._DURATION = DURATION;
-  window._elapsed = 0;
-  progress.style.width = '0%';
+// Timer - 5s image, 15s video with pause support - WhatsApp segmented bars
+const DURATION = isVideo? 15000 : 5000;
 
+const container = document.getElementById('statusProgressContainer');
+container.innerHTML = '';
+const list = passedList || window._currentUserStatuses || [d];
+const idx = passedIdx?? window._currentStatusIndex?? 0;
+list.forEach((_, i) => {
+  const segBg = document.createElement('div');
+  segBg.style.cssText = 'flex:1;height:3px;background:rgba(255,255,255,0.35);border-radius:2px;overflow:hidden;';
+  const segFill = document.createElement('div');
+  segFill.id = 'seg_' + i;
+  segFill.style.cssText = 'height:100%;width:0%;background:#fff;transition:width 0.05s linear;';
+  if(i < idx) segFill.style.width = '100%';
+  segBg.appendChild(segFill);
+  container.appendChild(segBg);
+});
+
+const progress = document.getElementById('seg_' + idx);
+let elapsed = 0;
+let paused = false;
+window._DURATION = DURATION;
+window._elapsed = 0;
   function startTimers(){
     if(statusTimer) clearTimeout(statusTimer);
     if(progressInterval) clearInterval(progressInterval);
@@ -332,9 +357,9 @@ async function openStatus(d){
       progress.style.width = pct + '%';
       if(pct >= 100) clearInterval(progressInterval);
     }, 50);
-    statusTimer = setTimeout(()=>{ closeStatusViewer(); }, remaining);
-  }
-  startTimers();
+statusTimer = setTimeout(()=>{ if(idx < list.length-1){ openStatus(list[idx+1], list, idx+1); } else { closeStatusViewer(); } }, remaining); 
+}
+startTimers();
 
   // Pause when reply bar tapped
   const replyBar = document.getElementById('statusReplyBar');
@@ -373,46 +398,39 @@ async function openStatus(d){
     document.getElementById('vcount').style.display = 'none';
     repliesPanel.style.display = 'none';
   }
-  if(!isMine){
-    try{
-      const db = firebase.firestore();
-      const myName = localStorage.getItem('dank_username') || localStorage.getItem('dank_name') || 'Someone';
-      const existing = await db.collection('statusViews')
-      .where('statusId', '==', d.id)
-      .where('viewerId', '==', myUid)
-      .limit(1).get();
-      if(existing.empty){
-        await db.collection('statusViews').add({
-          statusId: d.id,
-          viewerId: myUid,
-          viewerName: myName,
-          viewedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-    }catch(e){ console.log("view save failed", e); }
-  }
-  if(isMine){
-    try{
-      const db = firebase.firestore();
-      const snap = await db.collection('statusViews').where('statusId','==', d.id).get();
-      const unique = new Set();
-      snap.forEach(doc => {
-        const vd = doc.data();
-        if(vd.viewerId) unique.add(vd.viewerId);
-      });
-      vnum.textContent = unique.size;
-    }catch(e){ vnum.textContent = '0'; }
-  }
+if(!isMine){
+try{
+const db = firebase.firestore();
+const myName = localStorage.getItem('dank_username') || localStorage.getItem('dank_name') || 'Someone';
+db.collection('statusViews').where('statusId','==',d.id).where('viewerId','==',myUid).limit(1).get().then((existing)=>{
+if(existing.empty){
+db.collection('statusViews').add({ statusId: d.id, viewerId: myUid, viewerName: myName, viewedAt: firebase.firestore.FieldValue.serverTimestamp() });
 }
+}).catch((e)=>{ console.log("view save failed", e); });
+}catch(e){ console.log("view save failed", e); }
+}
+if(isMine){
+try{
+const db = firebase.firestore();
+db.collection('statusViews').where('statusId','==', d.id).get().then((snap)=>{
+const unique = new Set();
+snap.forEach(doc => {
+const vd = doc.data();
+if(vd.viewerId) unique.add(vd.viewerId);
+});
+vnum.textContent = unique.size;
+}).catch((e)=>{ vnum.textContent = '0'; });
+}catch(e){ vnum.textContent = '0'; }
+}
+}      
 let currentStatusList = [];
 let currentStatusIndex = 0;
 
-function openStatusList(list, index){
-  currentStatusList = list.sort((a,b)=> (b.timestamp||0)-(a.timestamp||0));
-  currentStatusIndex = index;
-  openStatus(currentStatusList[currentStatusIndex]);
+function openStatusList(list, idx) {
+  window._currentUserStatuses = list;
+  window._currentStatusIndex = idx;
+  openStatus(list[idx], list, idx);
 }
-
 // Called when clicking the "Replied to status" thumbnail in private chat
 window.openQuotedStatus = function(statusData){
   const old = document.getElementById('quotedStatusViewer');
@@ -451,10 +469,11 @@ window.openQuotedStatus = function(statusData){
 };
 async function sendStatusReply(){
   try{
-    const input = document.getElementById('statusReplyInput');
-    const text = input.value.trim();
-    if(!text){ alert('Type something first'); return; }
-    if(!window._currentStatus){ alert('No status loaded'); return; }
+const input = document.getElementById('statusReplyInput');
+const text = input.value.trim();
+if(!text){ alert('Type something first'); return; }
+input.value = ''; // <-- ADD THIS LINE HERE
+if(!window._currentStatus){ alert('No status loaded'); return; }
 
     const d = window._currentStatus;
     const db = firebase.firestore();
@@ -505,7 +524,6 @@ async function sendStatusReply(){
     } catch(e){ console.error('DM send error', e); }
 
     input.value = '';
-    alert('Reply sent!');
   } catch(e){
     console.error(e);
     alert('Reply failed: ' + e.message);
@@ -857,7 +875,7 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
 <div id="admin-quotes-list"></div>
 </div>
 <div id="statusViewer" style="display:none;position:fixed;inset:0;background:#000;z-index:9999">
-  <div id="statusProgress" style="height:3px;background:#fff;width:0%;transition:width 0.05s linear;"></div>
+  <div id="statusProgressContainer" style="display:flex;gap:5px;padding:12px;position:absolute;top:0;left:0;right:0;z-index:1001;"></div>
   <img id="statusImg" style="display:none;width:100%;height:90vh;object-fit:contain" src="">
   <video id="statusVideo" style="display:none;width:100%;height:90vh" controls autoplay></video>
   <button onclick="closeStatusViewer()" style="position:absolute;top:16px;right:15px;color:#fff;background:none;border:none;font-size:28px;cursor:pointer;z-index:1002;">&times;</button>
