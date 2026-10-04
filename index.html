@@ -1587,6 +1587,7 @@ function sendPrivateMessage(){
     senderId: myUid,
     replyTo: replyToId || null,
     replyToText: replyToText || null,
+    replyToImage: window.replyToImage || null,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
   firebase.firestore().collection('chats').doc(activeChatId).update({
