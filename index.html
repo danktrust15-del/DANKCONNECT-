@@ -1301,19 +1301,25 @@ const pmContainer = div.querySelector('#privateMessages');
 const replyPreview = div.querySelector('#replyPreview');
 
 let touchTarget = null;
+let touchStartY = 0;
 pmContainer.addEventListener('touchstart', e => {
   touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
   touchTarget = e.target.closest('[data-msg-id]');
 }, {passive:true});
 pmContainer.addEventListener('touchmove', e => {
   if (!touchTarget) return;
-  const diff = e.touches[0].clientX - touchStartX;
+  const diffX = e.touches[0].clientX - touchStartX;
+  const diffY = e.touches[0].clientY - touchStartY;
+  if (Math.abs(diffX) > 10 && Math.abs(diffX) > Math.abs(diffY)) {
+    e.preventDefault();
+  }
+  const diff = diffX;
   if (diff > 0 && diff < 80) {
     touchTarget.style.transform = `translateX(${diff}px)`;
     touchTarget.style.transition = 'none';
   }
-}, {passive:true});
-
+}, {passive:false});
 pmContainer.addEventListener('touchend', e => {
   if (!touchTarget) return;
   const diff = e.changedTouches[0].clientX - touchStartX;
