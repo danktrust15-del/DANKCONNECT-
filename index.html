@@ -1305,17 +1305,39 @@ pmContainer.addEventListener('touchstart', e => {
   touchStartX = e.touches[0].clientX;
   touchTarget = e.target.closest('[data-msg-id]');
 }, {passive:true});
-pmContainer.addEventListener('touchend', e => {
-  const diff = e.changedTouches[0].clientX - touchStartX;
-  if(diff > 40 && touchTarget){
-window.replyToId = touchTarget.dataset.msgId;
-window.replyToText = touchTarget.dataset.msgText || touchTarget.innerText.substring(0,60);
-window.replyToImage = touchTarget.dataset.msgImage || '';
-replyPreview.innerHTML = '<b>Replying to:</b> '+(window.replyToImage ? '<img src="'+window.replyToImage+'" style="width:40px;height:40px;object-fit:cover;border-radius:4px;vertical-align:middle;">' : window.replyToText)+'<span onclick="cancelPrivateReply()" style="float:right;cursor:pointer;">x</span>';
-      replyPreview.style.display = 'block';
+pmContainer.addEventListener('touchmove', e => {
+  if (!touchTarget) return;
+  const diff = e.touches[0].clientX - touchStartX;
+  if (diff > 0 && diff < 80) {
+    touchTarget.style.transform = `translateX(${diff}px)`;
+    touchTarget.style.transition = 'none';
   }
 }, {passive:true});
-pmContainer.addEventListener('dblclick', e => {
+
+pmContainer.addEventListener('touchend', e => {
+  if (!touchTarget) return;
+  const diff = e.changedTouches[0].clientX - touchStartX;
+
+  // snap back
+  touchTarget.style.transition = 'transform 0.2s';
+  touchTarget.style.transform = 'translateX(0px)';
+  setTimeout(()=> {
+    if(touchTarget){
+      touchTarget.style.transition = '';
+    }
+  }, 200);
+
+  if(diff > 40 && touchTarget){
+    window.replyToId = touchTarget.dataset.msgId;
+    window.replyToText = touchTarget.dataset.msgText || touchTarget.innerText.substring(0,60);
+    window.replyToImage = touchTarget.dataset.msgImage || '';
+    replyPreview.innerHTML = '<b>Replying to:</b> '+(window.replyToImage? '<img src="'+window.replyToImage+'" style="width:40px;height:40px;object-fit:cover;border-radius:4px;vertical-align:middle;">' : window.replyToText)+'<span onclick="cancelPrivateReply()" style="float:right;cursor:pointer;">×</span>';
+replyPreview.style.display = 'block';
+    //... your replyPreview code (lines 1313-1315)
+  }
+  touchTarget = null;
+}, {passive:true});
+    pmContainer.addEventListener('dblclick', e => {
   const b = e.target.closest('[data-msg-id]');
   if(b){
 window.replyToId = b.dataset.msgId;
