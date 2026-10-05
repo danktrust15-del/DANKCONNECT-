@@ -1281,7 +1281,9 @@ div.innerHTML = `
 <div id="privateChatTitle" style="font-weight:700;flex:1;"></div>
 </div>
 <div id="privateMessages" class="scroll-mid" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;"></div>
-<button id="scrollBottomBtn" style="display:none;position:absolute;bottom:90px;right:16px;width:40px;height:40px;border-radius:50%;background:#1f2c34;color:#fff;border:none;font-size:20px;z-index:10;">↓</button>
+<button id="scrollBottomBtn" style="display:none;position:absolute;bottom:90px;right:16px;width:44px;height:44px;border-radius:50%;background:#1f2c34;color:#fff;border:none;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.4);align-items:center;justify-content:center;cursor:pointer;">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+<span id="scrollBottomBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:19px;background:#ffffff;color:#0000cc;font-size:12px;font-weight:700;align-items:center;justify-content:center;padding:0 5px;border:2px solid #0f172a;">0</span></button>
 <div id="replyPreview" style="display:none;padding:8px 12px;background:#1f2c34;border-left:3px solid #0000ff;color:#e9edef;font-size:13px;"></div>
 <div class="sticky-bottom" style="display:flex; align-items:flex-end; gap:8px; padding:8px 10px 18px; background:#0b141a; border-top:1px solid #1f2c34; width:100%;">
 <div style="flex:1; display:flex; align-items:flex-end; background:#1f2c34; border-radius:24px; padding:6px 6px 6px 14px;">
@@ -1301,13 +1303,31 @@ let touchStartX = 0;
 const pmContainer = div.querySelector('#privateMessages');
 const replyPreview = div.querySelector('#replyPreview');
 const scrollBtn = div.querySelector('#scrollBottomBtn');
-pmContainer.addEventListener('scroll', () => {
+const scrollBadge = div.querySelector('#scrollBottomBadge');
+window.unreadBelow = 0;
+      
+window.updateScrollBtn = function() {
   const nearBottom = pmContainer.scrollHeight - pmContainer.scrollTop - pmContainer.clientHeight < 100;
-  scrollBtn.style.display = nearBottom ? 'none' : 'block';
-});
-scrollBtn.addEventListener('click', () => {
+  if (nearBottom) {
+    scrollBtn.style.display = 'none';
+    window.unreadBelow = 0;
+    scrollBadge.style.display = 'none';
+  } else {
+    scrollBtn.style.display = 'flex';
+if (window.unreadBelow > 0) {
+  scrollBadge.style.display = 'flex';
+  scrollBadge.textContent = window.unreadBelow > 99 ? '99+' : window.unreadBelow;
+} else {
+  scrollBadge.style.display = 'none';
+  }
+ }
+}
+  pmContainer.addEventListener('scroll', window.updateScrollBtn);scrollBtn.addEventListener('click', () => {
   pmContainer.scrollTo({ top: pmContainer.scrollHeight, behavior: 'smooth' });
+  window.unreadBelow = 0;
+  scrollBadge.style.display = 'none';
 });
+
 let touchTarget = null;
 let touchStartY = 0;
 pmContainer.addEventListener('touchstart', e => {
@@ -1510,13 +1530,18 @@ function getPlayableAudioUrl(url) {
   return url;
 }
 function loadPrivateMessages(){
+    let lastMsgCount = 0;
+    let firstPmLoad = true;
   const box = document.getElementById('privateMessages');
   const myUid = localStorage.getItem('dank_uid');
   firebase.firestore().collection('chats').doc(activeChatId).collection('messages')
-    .orderBy('createdAt')
-    .onSnapshot(snap => {
-      box.innerHTML = '';
-snap.forEach(d => {
+.orderBy('createdAt')
+.onSnapshot(snap => {
+  const wasNearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 150;
+  const newCount = snap.size;
+
+  box.innerHTML = '';
+  snap.forEach(d => {
   const m = d.data();
     if (m.hiddenFor && m.hiddenFor.includes(myUid)) return;
   const msgId = d.id;
@@ -1602,7 +1627,20 @@ document.getElementById('msgEditBtn').onclick = () => {
 
   box.appendChild(b);
 });
-});        
+if (firstPmLoad) {
+    // first load: just jump to bottom, no badge
+    box.scrollTo({ top: box.scrollHeight });
+    firstPmLoad = false;
+  } else if (!wasNearBottom && newCount > lastMsgCount) {
+    unreadBelow += (newCount - lastMsgCount);
+    updateScrollBtn();
+  } else if (wasNearBottom) {
+    box.scrollTo({ top: box.scrollHeight });
+    updateScrollBtn();
+  }
+
+  lastMsgCount = newCount;
+});            
 }
 function sendPrivateMessage(){
   const inp = document.getElementById('privateMsgInput');
