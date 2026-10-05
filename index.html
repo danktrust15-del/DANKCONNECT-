@@ -1546,6 +1546,10 @@ function loadPrivateMessages(){
     if (m.hiddenFor && m.hiddenFor.includes(myUid)) return;
   const msgId = d.id;
   const isMe = m.senderId === myUid;
+  if (!isMe) {
+  if (!m.delivered) d.ref.update({ delivered: true });
+  if (!m.read) d.ref.update({ read: true });
+}
   const b = document.createElement('div');
   b.style.cssText = `max-width:75%;padding:10px 14px;border-radius:16px;${isMe?'align-self:flex-end;background:#0000FF;':'align-self:flex-start;background:#1f2c34;'}`;
   b.dataset.msgId = d.id;
@@ -1577,10 +1581,31 @@ const div = document.createElement('div');
 const td = m.createdAt && m.createdAt.toDate ? m.createdAt.toDate() : new Date();
 let h = td.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
 const min = String(td.getMinutes()).padStart(2,'0');
-const timeDiv = document.createElement('div');
-timeDiv.style.cssText = 'font-size:10px;opacity:0.7;text-align:right;margin-top:4px;line-height:1;';
-timeDiv.textContent = h + ':' + min + ' ' + ap;
-b.appendChild(timeDiv);
+const metaRow = document.createElement('div');
+metaRow.style.cssText = 'display:flex;justify-content:flex-end;align-items:center;gap:4px;margin-top:4px;line-height:1;';
+
+const timeSpan = document.createElement('span');
+timeSpan.style.cssText = 'font-size:10px;opacity:0.7;';
+timeSpan.textContent = h + ':' + min + ' ' + ap;
+metaRow.appendChild(timeSpan);
+
+if (isMe) {
+  const tickSpan = document.createElement('span');
+  tickSpan.style.cssText = 'font-size:12px;line-height:1;';
+  // Change this logic to match your DB fields
+if (m.read) {
+  tickSpan.textContent = '✓✓';
+  tickSpan.style.color = '#53bdeb'; // blue = read
+} else if (m.delivered) {
+  tickSpan.textContent = '✓✓';
+  tickSpan.style.color = 'rgba(255,255,255,0.7)'; // grey double = delivered
+} else {
+  tickSpan.textContent = '✓';
+  tickSpan.style.color = 'rgba(255,255,255,0.7)'; // grey single = sent
+}
+metaRow.appendChild(tickSpan);
+}
+b.appendChild(metaRow);
 }
     // Long-press menu
   let msgPressTimer = null;
@@ -1669,7 +1694,9 @@ function sendPrivateMessage(){
     replyTo: replyToId || null,
     replyToText: replyToText || null,
     replyToImage: window.replyToImage || null,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      delivered: false,
+      read: false
   });
   firebase.firestore().collection('chats').doc(activeChatId).update({
     lastMessage: text,
