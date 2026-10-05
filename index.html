@@ -156,7 +156,11 @@ background:#0A0A14;
 .viewer-list{overflow-y:auto;padding:8px 0;background:#fff}
 .viewer-row{padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f1f5f9}
 .viewer-avatar{width:36px;height:36px;border-radius:50%;background:#1900B3;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
-.viewer-handle{width:40px;height:4px;background:#cbd5e1;border-radius:99px;margin:8px auto}
+.viewer-handle{width:48px;height:4px;background:#cbd5e1;border-radius:99px;margin:8px auto}
+.tdot{width:8px;height:8px;background:#e9edef;border-radius:50%;display:inline-block;animation:tblink 1.2s infinite}
+.tdot:nth-child(2){animation-delay:0.2s}
+.tdot:nth-child(3){animation-delay:0.4s}
+@keyframes tblink{0%,80%,100%{opacity:0.3}40%{opacity:1}}
 </style>
 </head>
 <body>
@@ -1282,6 +1286,7 @@ div.innerHTML = `
 <div id="privateChatTitle" style="font-weight:700;flex:1;"></div>
 </div>
 <div id="privateMessages" class="scroll-mid" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;"></div>
+<div id="typingIndicator" style="display:none; padding:4px 16px;"><div style="display:inline-flex; gap:4px; background:#1f2c34; padding:10px 14px; border-radius:18px; width:fit-content;"><span class="tdot"></span><span class="tdot"></span></div></div>
 <button id="scrollBottomBtn" style="display:none;position:absolute;bottom:90px;right:16px;width:44px;height:44px;border-radius:50%;background:#1f2c34;color:#fff;border:none;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.4);align-items:center;justify-content:center;cursor:pointer;">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
 <span id="scrollBottomBadge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:19px;background:#ffffff;color:#0000cc;font-size:12px;font-weight:700;align-items:center;justify-content:center;padding:0 5px;border:2px solid #0f172a;">0</span></button>
@@ -1306,6 +1311,39 @@ const replyPreview = div.querySelector('#replyPreview');
 const scrollBtn = div.querySelector('#scrollBottomBtn');
 const scrollBadge = div.querySelector('#scrollBottomBadge');
 window.unreadBelow = 0;
+const pmInput = div.querySelector('#privateMsgInput');
+let typingTimeout;
+  pmInput.addEventListener('input', () => {
+  if(!activeChatId) return;
+  const myUid = localStorage.getItem('dank_uid');
+  firebase.firestore().collection('chats').doc(activeChatId).update({
+    [`typing_${myUid}`]: true,
+    typingAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(()=>{
+    firebase.firestore().collection('chats').doc(activeChatId).update({
+      [`typing_${myUid}`]: false
+    });
+  }, 2000);
+});
+
+// listen for other user typing
+firebase.firestore().collection('chats').doc(activeChatId).onSnapshot(doc=>{
+  const data = doc.data() || {};
+  const myUid = localStorage.getItem('dank_uid');
+  const otherTyping = Object.keys(data).some(k=>{
+    return k.startsWith('typing_') &&!k.includes(myUid) && data[k] === true;
+  });
+  const tInd = div.querySelector('#typingIndicator');
+  const pmCont = div.querySelector('#privateMessages');
+  if(otherTyping){
+    tInd.style.display = 'inline-flex';
+    pmCont.scrollTop = pmCont.scrollHeight;
+  } else {
+    tInd.style.display = 'none';
+  }
+});
       
 window.updateScrollBtn = function() {
   const nearBottom = pmContainer.scrollHeight - pmContainer.scrollTop - pmContainer.clientHeight < 100;
