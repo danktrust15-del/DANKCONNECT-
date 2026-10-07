@@ -2373,8 +2373,7 @@ function confirmCustomAdd(){
     status: 'pending',
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   }).then(()=>{
-    alert("Invite sent to " + newMember + " ✓");
-    closeCustomAdd();
+showBeautifulSuccess("Invite sent to " + newMember + " ✓");    closeCustomAdd();
   });
 }
 
@@ -2426,8 +2425,8 @@ function respondToInvite(inviteId, action){
       }).then(()=>{
         firebase.firestore().collection('groupInvites').doc(inviteId).update({status:'accepted'});
         if(modal) modal.remove();
-        alert("You joined " + invite.groupName + " ✓");
-      });
+document.getElementById('groupInviteModal')?.remove(); // close invite first
+showBeautifulSuccess("You joined " + groupName + " ✓");      });
     } else {
       firebase.firestore().collection('groupInvites').doc(inviteId).update({status:'declined'});
       if(modal) modal.remove();
@@ -2436,6 +2435,28 @@ function respondToInvite(inviteId, action){
 }
 
 setTimeout(listenForGroupInvites, 2000);
+function showBeautifulSuccess(text){
+  var old = document.getElementById('successModal');
+  if(old) old.remove();
+  var modal = document.createElement('div');
+  modal.id = 'successModal';
+  modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(10,37,64,0.55); backdrop-filter:blur(6px); z-index:1000000003; display:flex; justify-content:center; align-items:center; padding:20px;';
+  
+  var innerDiv = '<div style="background:linear-gradient(180deg, #ffffff 0%, #f0f7ff 100%); width:100%; max-width:320px; border-radius:22px; padding:28px 24px; text-align:center; box-shadow:0 25px 80px rgba(0,0,0,0.35);">'+
+    '<div style="width:72px; height:72px; background:linear-gradient(135deg, #00d68f 0%, #00b37a 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px auto;">'+
+      '<span style="font-size:32px; color:white;">✓</span>'+
+    '</div>'+
+    '<h3 style="color:#0a2540; margin:0 0 6px 0; font-size:20px; font-weight:800;">Success!</h3>'+
+    '<p style="color:#5a6b80; font-size:14px; margin:0 0 20px 0; font-weight:500;">' + text + '</p>'+
+    '<button id="successOkBtn" style="width:100%; background:linear-gradient(135deg, #0d6efd 0%, #3d9eff 100%); border:none; color:white; padding:12px; border-radius:12px; font-weight:700; cursor:pointer;">OK, Got it</button>'+
+  '</div>';
+
+  modal.innerHTML = innerDiv;
+  document.body.appendChild(modal);
+  document.getElementById('successOkBtn').onclick = function(){ modal.remove(); };
+  modal.onclick = function(e){ if(e.target===modal) modal.remove(); };
+  setTimeout(function(){ var m=document.getElementById('successModal'); if(m) m.remove(); }, 3000);
+}
 // --- ADMIN ACTIONS (PRO VERSION - NO BASKET) ---
 function addGroupMemberPrompt(){
   var old = document.getElementById('customAddModal');
@@ -2464,28 +2485,6 @@ function addGroupMemberPrompt(){
 function closeCustomAdd(){
   var m = document.getElementById('customAddModal');
   if(m) m.remove();
-}
-
-function confirmCustomAdd(){
-  var inp = document.getElementById('newMemberInput');
-  var newMember = inp.value.trim();
-  if(!newMember || newMember === '@'){ inp.style.border='1px solid #ff4757'; return; }
-  if(!newMember.startsWith('@')) newMember = '@'+newMember;
-
-  var membersEl = document.getElementById('gcMembers');
-  var membersText = membersEl.innerText.split('|')[0];
-  var members = membersText.split(',').map(m=>m.trim()).filter(m=>m);
-
-  if(members.map(m=>m.toLowerCase()).includes(newMember.toLowerCase())){
-    alert(newMember+" already in group!");
-    return;
-  }
-
-  members.push(newMember);
-  saveGroupMembers(members);
-  closeCustomAdd();
-  closeGroupMembers();
-  setTimeout(showGroupMembers, 300);
 }
 
 function removeGroupMember(username){
