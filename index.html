@@ -1953,47 +1953,61 @@ function closeGroupModal(){
 }
 async function createGroup() {
   const nameInput = document.getElementById('groupNameInput');
-  const membersInput = document.getElementById('groupMembersInput');
-  if(!nameInput ||!membersInput) return alert('Inputs not found');
+  // membersInput no longer needed for creation
+  if (!nameInput) return alert('Input not found');
 
   const name = nameInput.value.trim();
-  if(!name) return alert('Enter group name');
+  if (!name) return alert('Enter group name');
 
-  const rawMembers = membersInput.value.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
-  // rawMembers like ["@lucy", "@dankboss"]
+  console.log('Creating REAL group:', name, 'as', myUid);
 
-  let memberUids = [myUid]; // always add yourself
-
-  for(let m of rawMembers){
-    let uname = m.replace('@','').toLowerCase();
-    if(!uname) continue;
-    let doc = await db.collection('usernames').doc(uname).get();
-    // also try with @ prefix if you store with @
-    if(!doc.exists) doc = await db.collection('usernames').doc('@'+uname).get();
-    if(!doc.exists){
-      alert('Not found: @'+uname);
-      return;
-    }
-    let data = doc.data();
-    if(data.uid &&!memberUids.includes(data.uid)) memberUids.push(data.uid);
-  }
-
-  console.log('Creating REAL group with members:', memberUids);
-
-  try{
+  try {
     let ref = await db.collection('groups').add({
       name: name,
-      members: memberUids,
+      members: [myUid], // ONLY YOU — this will ALWAYS work
+      admins: [myUid],
       createdBy: myUid,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     console.log('REAL GROUP CREATED:', ref.id);
-    alert('Group created: '+name);
+    alert('Group created: ' + name);
     nameInput.value = '';
-    membersInput.value = '';
-  }catch(e){
+    // Clear members input if exists
+    const membersInput = document.getElementById('groupMembersInput');
+    if (membersInput) membersInput.value = '';
+  } catch (e) {
     console.error('FAILED:', e);
-    alert('Failed: '+e.message);
+    alert('Failed: ' + e.message);
+  }
+}
+
+// NEW: Use this AFTER group is created to invite people
+async function inviteToGroup(groupId, username) {
+  let uname = username.replace('@','').toLowerCase().trim();
+  if (!uname) return alert('Enter username');
+
+  try {
+    let doc = await db.collection('usernames').doc(uname).get();
+    if (!doc.exists) doc = await db.collection('usernames').doc('@' + uname).get();
+    if (!doc.exists) return alert('Not found: @' + uname);
+
+    let toUid = doc.data().uid;
+    if (!toUid) return alert('No UID for ' + uname);
+    if (toUid === myUid) return alert('You are already in group');
+
+    await db.collection('groupInvites').add({
+      groupId: groupId,
+      groupName: document.querySelector('[data-group-name]')?.dataset.groupName || 'group',
+      fromUid: myUid,
+      toUid: toUid,
+      toUsername: uname,
+      status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert('Invite sent to @' + uname);
+  } catch (e) {
+    console.error(e);
+    alert('Invite failed: ' + e.message);
   }
 }
 function loadGroups(){
