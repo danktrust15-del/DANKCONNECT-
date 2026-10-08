@@ -2589,5 +2589,44 @@ function openGroupModal(){var m=document.getElementById('myGroupModalTest'); if(
 function closeGroupModal(){var el=document.getElementById('myGroupModalTest'); if(el) el.style.display='none';}
 setTimeout(renderGroups, 800);
 </script>
+    <script>
+// --- FIX: Separate Groups and DMs ---
+document.addEventListener('DOMContentLoaded', ()=>{
+  const cl = document.getElementById('chatsList');
+  const gc = document.getElementById('myGroupsContainer');
+  if(!cl || !gc) return;
+
+  // 1. Move groups outside chatsList (if still inside)
+  if(gc.parentElement === cl){
+    cl.parentElement.insertBefore(gc, cl);
+  }
+
+  function showTab(name){
+    if(name.includes('Groups')){
+      gc.style.display='flex';
+      gc.style.flexDirection='column';
+      cl.style.display='none';
+    } else { // All & Unread = DMs only
+      gc.style.display='none';
+      cl.style.display='flex';
+      cl.style.flexDirection='column';
+      [...cl.children].forEach(c=>c.style.display='flex');
+    }
+  }
+
+  // 2. Hook the pills
+  document.querySelectorAll('button').forEach(btn=>{
+    const t = btn.textContent.trim();
+    if(t==='All' || t.startsWith('Unread') || t.startsWith('Groups')){
+      btn.addEventListener('click', ()=> setTimeout(()=>showTab(t), 20));
+    }
+  });
+
+  // 3. Set correct tab on load
+  const groupsBtn = [...document.querySelectorAll('button')].find(b=>b.textContent.includes('Groups'));
+  const isGroupsActive = groupsBtn && getComputedStyle(groupsBtn).backgroundColor.includes('255, 255, 255');
+  showTab(isGroupsActive ? 'Groups' : 'All');
+});
+</script>
 </body>
 </html>
