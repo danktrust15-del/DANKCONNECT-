@@ -1957,16 +1957,14 @@ async function createGroup() {
   const name = nameInput.value.trim();
   if (!name) return alert('Enter group name');
 
-  let myUidLocal = null;
-  try { if (auth && auth.currentUser) myUidLocal = auth.currentUser.uid; } catch(e){}
-  if (!myUidLocal) try { if (window.currentUser && window.currentUser.uid) myUidLocal = window.currentUser.uid; } catch(e){}
-  if (!myUidLocal) try { myUidLocal = window.myUid; } catch(e){}
-  if (!myUidLocal || typeof myUidLocal === 'object') {
-    try { myUidLocal = myUidLocal?.uid || myUidLocal?.id; } catch(e){}
+  let myUidLocal = localStorage.getItem('dank_uid');
+  if (!myUidLocal) {
+    try { myUidLocal = getCurrentUser(); } catch(e){}
   }
-  if (!myUidLocal) return alert('Not logged in - no UID found');
+  if (typeof myUidLocal === 'object') myUidLocal = myUidLocal.uid || myUidLocal.id;
+  if (!myUidLocal) return alert('No UID - login again');
 
-  console.log('Creating REAL group as:', myUidLocal);
+  console.log('Creating REAL group as dank_uid:', myUidLocal);
 
   try {
     let ref = await db.collection('groups').add({
@@ -1979,14 +1977,12 @@ async function createGroup() {
     console.log('REAL GROUP CREATED:', ref.id);
     alert('Group created: ' + name);
     nameInput.value = '';
-    const membersInput = document.getElementById('groupMembersInput');
-    if (membersInput) membersInput.value = '';
   } catch (e) {
     console.error('FAILED:', e);
     alert('Failed: ' + e.message);
   }
 }
-// NEW: Use this AFTER group is created to invite people
+    // NEW: Use this AFTER group is created to invite people
 async function inviteToGroup(groupId, username) {
   let uname = username.replace('@','').toLowerCase().trim();
   if (!uname) return alert('Enter username');
@@ -2018,32 +2014,25 @@ async function inviteToGroup(groupId, username) {
 function loadGroups(){
   try{
     if(typeof db === 'undefined') return;
-    let myUid = null;
-    if(window.currentUser && window.currentUser.uid) myUid = window.currentUser.uid;
-    if(!myUid && typeof auth!== 'undefined' && auth.currentUser) myUid = auth.currentUser.uid;
-    if(!myUid && typeof getCurrentUser==='function'){
-      const me = getCurrentUser();
-      myUid = me?.uid || me?.id;
+    let myUidLocal = localStorage.getItem('dank_uid');
+    if(!myUidLocal) {
+      try { myUidLocal = getCurrentUser(); } catch(e){}
+      if(typeof myUidLocal === 'object') myUidLocal = myUidLocal?.uid || myUidLocal?.id;
     }
-    if(typeof myUid === 'object') myUid = myUid.uid || myUid.id;
-    if(!myUid) return;
-
-    console.log("loadGroups as:", myUid);
-
-    db.collection('groups').where('members', 'array-contains', myUid).onSnapshot(snap=>{
+    if(!myUidLocal) return;
+    console.log("loadGroups as dank_uid:", myUidLocal);
+    db.collection('groups').where('members', 'array-contains', myUidLocal).onSnapshot(snap=>{
       window.allGroups = [];
       snap.forEach(doc=> window.allGroups.push({id:doc.id,...doc.data()}));
-
       if(typeof updateGroupCount === 'function') updateGroupCount(snap.size);
       const groupsBtn = document.getElementById('groupsTab');
       if(groupsBtn) groupsBtn.textContent = `Groups ${snap.size}`;
-      console.log("Found groups:", snap.size, window.allGroups);
-
+      console.log("Found REAL groups:", snap.size);
       if(groupsBtn && groupsBtn.style.background==='white' && typeof filterChats==='function'){
         filterChats('groups');
       }
     }, err=>{
-      console.error("loadGroups error - check Firestore Rules:", err);
+      console.error("loadGroups error:", err);
     });
   }catch(e){ console.log('loadGroups', e); }
 }
