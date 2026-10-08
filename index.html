@@ -2141,7 +2141,7 @@ function ensureGroupsContainer(){
   var c=document.getElementById('myGroupsContainer');
   if(c) return c;
   c=document.createElement('div'); c.id='myGroupsContainer';
-  c.style.cssText='display:flex; flex-direction:column;';
+  c.style.cssText='display:none; flex-direction:column;';
   var list=document.getElementById('chatsList');
   if(list) list.prepend(c); else document.body.appendChild(c);
   return c;
@@ -2216,41 +2216,50 @@ function sendGroupMessage(){
   renderGroupMessages();
 }
 
+function getPills(){
+  return [...document.querySelectorAll('button, div')].filter(b=>{
+    let t=b.textContent.trim();
+    return t==='All' || t.startsWith('Unread') || t.startsWith('Groups');
+  });
+}
 function renderGroups(){
   var saved=JSON.parse(localStorage.getItem('myGroups')||'[]');
   var container=ensureGroupsContainer();
-  var pills=document.querySelectorAll('button');
-  pills.forEach(function(b){
-    if(b.textContent.includes('Groups')){
-      b.textContent='Groups '+saved.length;
-      b.onclick=function(){
-        document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-        b.classList.add('active');
-        // SHOW ONLY GROUPS
-        var chats=document.querySelectorAll('.chat-row');
-        chats.forEach(c=>c.style.display='none');
-        container.style.display='flex';
-        renderGroups();
-      };
-    }
-    if(b.textContent.trim()==='All'){
-      b.onclick=function(){
-        document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-        b.classList.add('active');
-        // SHOW ALL
-        var chats=document.querySelectorAll('.chat-row');
-        chats.forEach(c=>c.style.display='flex');
-        container.style.display='flex';
-      };
-    }
-  });
   container.innerHTML='';
   saved.slice().reverse().forEach(function(g){
     var div=document.createElement('div');
     div.style.cssText='display:flex; align-items:center; gap:12px; padding:14px 16px; background:#15152a; margin:6px 12px; border-radius:12px; cursor:pointer; border:1px solid #2a2a4a;';
-    div.innerHTML='<div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#6c5ce7,#a29bfe); display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">'+g.name.charAt(0).toUpperCase()+'</div><div style="flex:1;"><div style="color:white; font-weight:600; font-size:15px;">'+g.name+'</div><div style="color:#9a9aab; font-size:12px;">'+(g.members||'@lucy')+'</div></div><div style="color:#6c5ce7; font-size:11px; font-weight:bold;">GROUP</div>';
-div.onclick=function(){ openRealGroup(g.name, g.members, g.createdBy, g.id); };
+    div.innerHTML='<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6C5Ce7,#a29bfe);display:flex;align-items:center;justify-content:center;color:white;font-weight:600">'+g.name.charAt(0).toUpperCase()+'</div><div style="flex:1"><div style="color:white;font-weight:600">'+g.name+'</div><div style="color:#9a9aab;font-size:12px">'+(g.members||'@lucy')+'</div></div><div style="color:#6C5Ce7;font-size:11px;font-weight:bold">GROUP</div>';
+    div.onclick=function(){ openRealGroup(g.name, g.members, g.createdBy, g.id); };
     container.appendChild(div);
+  });
+  getPills().forEach(function(b){ if(b.textContent.includes('Groups')) b.textContent='Groups '+saved.length; });
+  getPills().forEach(function(b){
+    var txt=b.textContent.trim();
+    if(txt==='All'){
+      b.onclick=function(){
+        getPills().forEach(p=>{p.style.background='#2a2a4a'; p.style.color='white';});
+        b.style.background='white'; b.style.color='black';
+        document.querySelectorAll('.chat-row').forEach(function(c){ if(!c.closest('#myGroupsContainer')) c.style.display='flex'; });
+        container.style.display='none';
+      };
+    }
+    if(txt.includes('Groups')){
+      b.onclick=function(){
+        getPills().forEach(p=>{p.style.background='#2a2a4a'; p.style.color='white';});
+        b.style.background='white'; b.style.color='black';
+        document.querySelectorAll('.chat-row').forEach(function(c){ if(!c.closest('#myGroupsContainer')) c.style.display='none'; });
+        container.style.display='flex';
+      };
+    }
+    if(txt.includes('Unread')){
+      b.onclick=function(){
+        getPills().forEach(p=>{p.style.background='#2a2a4a'; p.style.color='white';});
+        b.style.background='white'; b.style.color='black';
+        document.querySelectorAll('.chat-row').forEach(function(c){ if(!c.closest('#myGroupsContainer')) c.style.display='flex'; });
+        container.style.display='none';
+      };
+    }
   });
 }
 function createRealGroup(){
@@ -2563,25 +2572,6 @@ function confirmCustomRemove(username){
   closeCustomRemove();
   closeGroupMembers();
   setTimeout(showGroupMembers, 400);
-}
-// --- UPDATED GROUP FUNCTIONS ---
-function renderGroups(){
-  var container=ensureGroupsContainer();
-  var me=getCurrentUser();
-  if(groupsUnsub) groupsUnsub();
-  groupsUnsub = firebase.firestore().collection('groups').where('members','array-contains',me).onSnapshot(snap=>{
-    var pill=[...document.querySelectorAll('button')].find(b=>b.textContent.includes('Groups'));
-    if(pill) pill.textContent='Groups '+snap.size;
-    container.innerHTML='';
-    snap.forEach(doc=>{
-      var g=doc.data();
-      var div=document.createElement('div');
-      div.style.cssText='display:flex; align-items:center; gap:12px; padding:14px 16px; background:#15152a; margin:6px 12px; border-radius:12px; cursor:pointer; border:1px solid #2a2a4a;';
-      div.innerHTML='<div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#6c5ce7,#a29bfe); display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">'+g.name.charAt(0).toUpperCase()+'</div><div style="flex:1;"><div style="color:white; font-weight:600;">'+g.name+'</div><div style="color:#9a9aab; font-size:12px;">'+g.members.join(', ')+'</div></div><div style="color:#6c5ce7; font-size:11px; font-weight:bold;">GROUP</div>';
-      div.onclick=function(){ openRealGroup(g.name, g.members, g.createdBy, doc.id); };
-      container.appendChild(div);
-    });
-  });
 }
 
 function openRealGroup(name, members, creator, groupId){
