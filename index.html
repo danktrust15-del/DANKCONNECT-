@@ -1953,26 +1953,32 @@ function closeGroupModal(){
 }
 async function createGroup() {
   const nameInput = document.getElementById('groupNameInput');
-  // membersInput no longer needed for creation
   if (!nameInput) return alert('Input not found');
-
   const name = nameInput.value.trim();
   if (!name) return alert('Enter group name');
 
-  console.log('Creating REAL group:', name, 'as', myUid);
+  let myUidLocal = null;
+  try { if (auth && auth.currentUser) myUidLocal = auth.currentUser.uid; } catch(e){}
+  if (!myUidLocal) try { if (window.currentUser && window.currentUser.uid) myUidLocal = window.currentUser.uid; } catch(e){}
+  if (!myUidLocal) try { myUidLocal = window.myUid; } catch(e){}
+  if (!myUidLocal || typeof myUidLocal === 'object') {
+    try { myUidLocal = myUidLocal?.uid || myUidLocal?.id; } catch(e){}
+  }
+  if (!myUidLocal) return alert('Not logged in - no UID found');
+
+  console.log('Creating REAL group as:', myUidLocal);
 
   try {
     let ref = await db.collection('groups').add({
       name: name,
-      members: [myUid], // ONLY YOU — this will ALWAYS work
-      admins: [myUid],
-      createdBy: myUid,
+      members: [myUidLocal],
+      admins: [myUidLocal],
+      createdBy: myUidLocal,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     console.log('REAL GROUP CREATED:', ref.id);
     alert('Group created: ' + name);
     nameInput.value = '';
-    // Clear members input if exists
     const membersInput = document.getElementById('groupMembersInput');
     if (membersInput) membersInput.value = '';
   } catch (e) {
@@ -1980,7 +1986,6 @@ async function createGroup() {
     alert('Failed: ' + e.message);
   }
 }
-
 // NEW: Use this AFTER group is created to invite people
 async function inviteToGroup(groupId, username) {
   let uname = username.replace('@','').toLowerCase().trim();
