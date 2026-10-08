@@ -2462,21 +2462,36 @@ function respondToInvite(inviteId, action){
   firebase.firestore().collection('groupInvites').doc(inviteId).get().then(doc=>{
     if(!doc.exists) return;
     var invite = doc.data();
-    if(action==='accepted'){
+    if(action === 'accepted'){
+      var me = getCurrentUser();
+      var myUid = me?.uid || me?.id || auth?.currentUser?.uid || '';
+      var myUsername = me?.username || me?.displayName || '';
+      console.log('Joining as:', myUid, myUsername);
+
+      if(!myUid){ alert('Not logged in!'); return; }
+
       firebase.firestore().collection('groups').doc(invite.groupId).update({
-        members: firebase.firestore.FieldValue.arrayUnion(getCurrentUser())
+        members: firebase.firestore.FieldValue.arrayUnion(myUid, myUsername, '@'+myUsername.replace('@',''))
       }).then(()=>{
-        firebase.firestore().collection('groupInvites').doc(inviteId).update({status:'accepted'});
+        // Mark invite done
+        return firebase.firestore().collection('groupInvites').doc(inviteId).delete();
+      }).then(()=>{
         if(modal) modal.remove();
-document.getElementById('groupInviteModal')?.remove(); // close invite first
-showBeautifulSuccess("You joined " + groupName + " ✓");      });
+        alert('✅ Joined '+invite.groupName+'!');
+        if(typeof loadGroups === 'function') loadGroups();
+      }).catch(e=>{
+        console.error(e);
+        alert('Join failed: '+e.message);
+      });
+
     } else {
-      firebase.firestore().collection('groupInvites').doc(inviteId).update({status:'declined'});
-      if(modal) modal.remove();
+      // Declined
+      firebase.firestore().collection('groupInvites').doc(inviteId).delete().then(()=>{
+        if(modal) modal.remove();
+      });
     }
   });
 }
-
 setTimeout(listenForGroupInvites, 2000);
 function showBeautifulSuccess(text){
   var old = document.getElementById('successModal');
