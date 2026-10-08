@@ -1981,27 +1981,32 @@ function loadGroups(){
     let myUid = null;
     if(window.currentUser && window.currentUser.uid) myUid = window.currentUser.uid;
     if(!myUid && typeof auth !== 'undefined' && auth.currentUser) myUid = auth.currentUser.uid;
+    if(!myUid && typeof getCurrentUser==='function'){
+      const me = getCurrentUser();
+      myUid = me?.uid || me?.id;
+    }
+    if(typeof myUid === 'object') myUid = myUid.uid || myUid.id;
     if(!myUid) return;
+
     db.collection('groups').where('members', 'array-contains', myUid).onSnapshot(snap=>{
+      // 1. Save real groups
+      window.allGroups = [];
+      snap.forEach(doc=> window.allGroups.push({id:doc.id, ...doc.data()}));
+      
+      // 2. Update counter - Groups 1
       if(typeof updateGroupCount === 'function') updateGroupCount(snap.size);
-      document.querySelectorAll('[id^="group-"]').forEach(e=> e.remove());
-      const chatsList = document.getElementById('chatsList') || document.getElementById('chats');
-      if(!chatsList) return;
-      snap.forEach(doc=>{
-        const g = doc.data();
-        const div = document.createElement('div');
-        div.id = 'group-'+doc.id;
-        div.style.cssText = 'display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid #1a1a2e; cursor:pointer;';
-        div.innerHTML = '<div style="width:48px; height:48px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; color:white;">👥</div><div><div style="color:white; font-weight:600;">'+g.name+'</div><div style="color:#9a9aab; font-size:13px;">'+g.members.length+' members</div></div>';
-        div.onclick = ()=>{ alert('Group chat: '+g.name); };
-        chatsList.appendChild(div);
-      });
+      const groupsBtn = document.getElementById('groupsTab');
+      if(groupsBtn) groupsBtn.textContent = `Groups ${snap.size}`;
+
+      // 3. DO NOT auto-add to All - only re-render if Groups tab is open
+      if(groupsBtn && groupsBtn.style.background==='white' && typeof filterChats==='function'){
+        filterChats('groups');
+      }
     });
   }catch(e){ console.log('loadGroups', e); }
 }
-setTimeout(()=>{ try{ loadGroups(); }catch(e){} }, 2000);
-// auto start groups
-  // FILTER LOGIC
+setTimeout(()=>{ try{ loadGroups(); }catch(e){} }, 1000);
+    // FILTER LOGIC
 function filterChats(type){
   const all = document.getElementById('allTab');
   const unread = document.getElementById('unreadTab');
@@ -2009,13 +2014,42 @@ function filterChats(type){
   [all, unread, groups].forEach(b=>{ if(b){ b.style.background='#232336'; b.style.color='#9a9aab'; }});
   const active = document.getElementById(type+'Tab');
   if(active){ active.style.background='white'; active.style.color='black'; }
-  if(type==='groups'){ loadGroups(); }
+
+  const chatsList = document.getElementById('chatsList') || document.getElementById('chats');
+  if(!chatsList) return;
+
+  if(type==='all'){
+    // DMs only - your existing loadChats already does this perfectly
+    if(typeof loadChats==='function') loadChats();
+  } 
+  else if(type==='groups'){
+    // REAL groups from Firestore
+    chatsList.innerHTML = '';
+    const groupsData = window.allGroups || [];
+    if(groupsData.length===0){
+      chatsList.innerHTML = '<div style="padding:30px; text-align:center; color:#9a9aab;">No groups yet<br><span style="font-size:12px;">Create one from homepage</span></div>';
+      return;
+    }
+    groupsData.forEach(g=>{
+      const div = document.createElement('div');
+      div.id = 'group-'+g.id;
+      div.style.cssText = 'display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #1a1a2e; cursor:pointer; background:#0b141a; border-radius:12px; margin:6px 8px;';
+      div.innerHTML = `<div style="width:48px; height:48px; border-radius:50%; background:#7c5cff; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">${(g.name||'G')[0].toUpperCase()}</div><div style="flex:1;"><div style="color:white; font-weight:600;">${g.name}</div><div style="color:#9a9aab; font-size:13px;">${g.members?.length || 1} members • ${g.createdBy ? '@'+g.createdBy : 'Group'}</div></div><div style="background:#7c5cff22; color:#7c5cff; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">GROUP</div>`;
+      div.onclick = ()=>{
+        if(typeof openGroupChat==='function') openGroupChat(g.id, g);
+        else alert('Group chat: '+g.name+' - add openGroupChat function');
+      };
+      chatsList.appendChild(div);
+    });
+  }
 }
 
 function updateGroupCount(n){
   const el = document.getElementById('groupCount');
   if(el) el.textContent = n;
-}  
+  const groupsTab = document.getElementById('groupsTab');
+  if(groupsTab) groupsTab.textContent = `Groups ${n}`;
+}
 </script>
 <div id="shopPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#0b141a; z-index:9999; flex-direction:column;">
   <div style="background:#0000FF; padding:16px; display:flex; align-items:center; gap:12px;">
