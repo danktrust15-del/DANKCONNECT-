@@ -1985,7 +1985,7 @@ function filterChats(type){
       const div = document.createElement('div');
       div.id = 'group-'+g.id;
       div.style.cssText = 'display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #1a1a2e; cursor:pointer; background:#0b141a; border-radius:12px; margin:6px 8px;';
-      div.innerHTML = `<div style="width:48px; height:48px; border-radius:50%; background:#7c5cff; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">${(g.name||'G')[0].toUpperCase()}</div><div style="flex:1;"><div style="color:white; font-weight:600;">${g.name}</div><div style="color:#9a9aab; font-size:13px;">${g.members?.length || 1} members</div></div><div style="background:#7c5cff22; color:#7c5cff; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">GROUP</div>`;
+      div.innerHTML = `<div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#0000FF 0%,#5B8CFF 100%); display:flex; align-items:center; justify-content:center; color:white; font-weight:900; font-size:20px; border:1px solid #FFFFFF55;">${(g.name||'G')[0].toUpperCase()}</div><div style="flex:1;"><div style="color:white; font-weight:600;">${g.name}</div><div style="color:#9a9aab; font-size:13px;">${g.members?.length || 1} members</div></div><div style="background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; padding:5px 12px; border-radius:20px; font-size:11px; font-weight:800; border:1px solid #FFFFFF88;">GROUP</div>`;
       div.onclick = ()=>{ openRealGroup(g.name, g.members, g.createdBy, g.id, g.memberUsernames, g.createdByUsername, g.admins); };
       chatsList.appendChild(div);
     });
@@ -2042,63 +2042,191 @@ function updateGroupCount(n){
 </div>
 
 <script>
-// --- GROUP VIEW + CHAT - FIXED ADMIN LOGIC ---
+// --- GROUP VIEW + CHAT - WHATSAPP PRO BUBBLES WITH AVATAR + TIME + BLUE TICKS ---
 function ensureGroupChatView(){
   var v=document.getElementById('groupChatView'); if(v) return v;
   v=document.createElement('div'); v.id='groupChatView';
   v.style.cssText='display:none; position:fixed; inset:0; z-index:9999999; background:#0b0b1e; flex-direction:column;';
-  v.innerHTML=`<div style="display:flex; align-items:center; gap:12px; padding:14px; background:#1a1a3a; border-bottom:1px solid #2a2a4a;">
+  v.innerHTML=`
+  <div style="display:flex; align-items:center; gap:12px; padding:14px; background:#1a1a3a; border-bottom:1px solid #2a2a4a;">
     <button onclick="closeGroupChat()" style="width:36px; height:36px; border-radius:50%; border:none; background:#2a2a4a; color:white;">←</button>
-    <div id="gcAvatar" style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#6c5ce7,#a29bfe); display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;" onclick="showGroupMembers()">L</div>
+    <div id="gcAvatar" style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:900;" onclick="showGroupMembers()">L</div>
     <div style="flex:1;" onclick="showGroupMembers()"><div id="gcName" style="color:white; font-weight:700;">Group</div><div id="gcMembers" style="color:#9a9aab; font-size:12px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">members</div></div>
-    <div onclick="showGroupMembers()" style="color:#6c5ce7; font-size:22px; padding:5px 10px; cursor:pointer;">⋮</div></div>
-  <div id="gcMessages" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;"></div>
-  <div style="display:flex; gap:10px; padding:12px; background:#1a1a3a;"><input id="gcInput" placeholder="Type a message..." style="flex:1; padding:12px 16px; border-radius:24px; border:1px solid #2a2a4a; background:#0f0f2a; color:white; outline:none;" onkeydown="if(event.key==='Enter') sendGroupMessage()"><button onclick="sendGroupMessage()" style="width:44px; height:44px; border-radius:50%; border:none; background:#6c5ce7; color:white;">➤</button></div>`;
+    <div onclick="showGroupMembers()" style="color:#6c5ce7; font-size:22px; padding:5px 10px; cursor:pointer;">⋮</div>
+  </div>
+  <div id="gcMessages" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:6px; background:#0b141a;"></div>
+  <div id="gcNormalBar" style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:#1f2c34;">
+    <button onclick="document.getElementById('gcMediaInput').click()" style="width:42px; height:42px; border-radius:50%; border:none; background:transparent; color:#8696a0; display:flex; align-items:center; justify-content:center;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+    </button>
+    <input id="gcMediaInput" type="file" style="display:none;" accept="image/*,video/*,.pdf,.doc,.docx,.zip" onchange="sendGroupMedia(this)">
+    <div style="flex:1; background:#2a3942; border-radius:24px; display:flex; align-items:center; padding:6px 14px;">
+      <input id="gcInput" placeholder="Type a message" style="flex:1; background:transparent; border:none; color:white; outline:none; font-size:15px;" onkeydown="if(event.key==='Enter') sendGroupMessage()" oninput="toggleMicSend()">
+    </div>
+    <button id="gcMicBtn" onclick="startVoiceNote()" style="width:46px; height:46px; border-radius:50%; border:none; background:#0000FF; color:white; display:flex; align-items:center; justify-content:center;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="23" x2="16" y2="23" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <button id="gcSendBtn" onclick="sendGroupMessage()" style="display:none; width:46px; height:46px; border-radius:50%; border:none; background:#0000FF; color:white; align-items:center; justify-content:center;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+  <div id="gcRecordingBar" style="display:none; align-items:center; gap:12px; padding:10px 12px; background:#1f2c34;">
+    <button onclick="cancelVoiceNote()" style="width:36px; height:36px; border-radius:50%; border:none; background:#ff4757; color:white;">✕</button>
+    <div style="flex:1; display:flex; align-items:center; gap:10px;">
+      <div style="width:10px; height:10px; background:#ff4757; border-radius:50%; animation:pulse 1s infinite;"></div>
+      <div id="gcTimer" style="color:white; font-weight:600; font-size:15px;">0:00</div>
+      <div id="gcWave" style="flex:1; display:flex; align-items:center; gap:3px; height:24px;"></div>
+    </div>
+    <button onclick="stopAndSendVoice()" style="width:46px; height:46px; border-radius:50%; border:none; background:#00a884; color:white; display:flex; align-items:center; justify-content:center;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+  <style>@keyframes pulse{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}}</style>
+  `;
   document.body.appendChild(v); return v;
 }
-var currentGroupName=null; var currentGroupUids=[]; var currentGroupUsernames=[];
+var currentGroupName=null; var currentGroupUids=[]; var currentGroupUsernames=[]; var groupMsgUnsub=null;
+var gcRecorder=null; var gcAudioChunks=[]; var gcTimerInt=null; var gcSeconds=0;
+
+function toggleMicSend(){
+  let inp=document.getElementById('gcInput');
+  let mic=document.getElementById('gcMicBtn');
+  let send=document.getElementById('gcSendBtn');
+  if(!inp||!mic||!send) return;
+  if(inp.value.trim().length>0){ mic.style.display='none'; send.style.display='flex'; }
+  else { mic.style.display='flex'; send.style.display='none'; }
+}
 
 async function openRealGroup(name, members, creator, groupId, memberUsernames, creatorUsername, admins){
-  currentGroupName=name;
-  window.currentGroupId = groupId || name;
-  window.currentGroupCreator = creator;
-  window.currentGroupAdmins = admins || [creator];
-  window.currentGroupCreatorUsername = creatorUsername;
+  currentGroupName=name; window.currentGroupId = groupId || name;
+  window.currentGroupCreator = creator; window.currentGroupAdmins = admins || [creator]; window.currentGroupCreatorUsername = creatorUsername;
   var v=ensureGroupChatView(); v.style.display='flex';
   document.getElementById('gcName').textContent=name;
   document.getElementById('gcAvatar').textContent=name.charAt(0).toUpperCase();
-  document.getElementById('gcMembers').textContent='Loading fresh...';
+  document.getElementById('gcMembers').textContent='Loading...';
+  let box = document.getElementById('gcMessages');
+  box.innerHTML='<div style="text-align:center; color:#555; padding:20px;">Loading messages...</div>';
 
-  // FIX: fetch fresh doc so DankBoss + Lucy both appear
   try{
     if(groupId){
       let fresh = await db.collection('groups').doc(groupId).get();
       if(fresh.exists){
-        let gd = fresh.data();
-        members = gd.members || members;
-        memberUsernames = gd.memberUsernames || memberUsernames;
-        creator = gd.createdBy || creator;
-        creatorUsername = gd.createdByUsername || creatorUsername;
-        admins = gd.admins || admins;
-        window.currentGroupCreator = creator;
-        window.currentGroupAdmins = admins;
-        window.currentGroupCreatorUsername = creatorUsername;
+        let gd = fresh.data(); members = gd.members || members; memberUsernames = gd.memberUsernames || memberUsernames;
+        creator = gd.createdBy || creator; creatorUsername = gd.createdByUsername || creatorUsername; admins = gd.admins || admins;
+        window.currentGroupCreator = creator; window.currentGroupAdmins = admins; window.currentGroupCreatorUsername = creatorUsername;
       }
     }
-  }catch(e){ console.log('fresh fetch error',e); }
-
-  currentGroupUids = members || [];
-  // if memberUsernames length mismatch, resolve from UIDs
-  let usernames = memberUsernames;
-  if(!usernames || usernames.length!== currentGroupUids.length){
-    usernames = await resolveUsernames(currentGroupUids);
-  }
+  }catch(e){}
+  currentGroupUids = members || []; let usernames = memberUsernames;
+  if(!usernames || usernames.length!== currentGroupUids.length){ usernames = await resolveUsernames(currentGroupUids); }
   currentGroupUsernames = usernames;
-  let me = getCurrentUser();
-  document.getElementById('gcMembers').textContent = usernames.join(', ') + ' | You: ' + me;
-}
+  document.getElementById('gcMembers').textContent = usernames.join(', ') + ' | You: ' + getCurrentUser();
 
-function closeGroupChat(){ var v=document.getElementById('groupChatView'); if(v) v.style.display='none'; currentGroupName=null; }
+  if(groupMsgUnsub) groupMsgUnsub();
+
+  // FIXED: NO orderBy - fixes stuck Loading
+  groupMsgUnsub = db.collection('groupMessages').where('groupId','==',window.currentGroupId).onSnapshot(snap=>{
+    box.innerHTML='';
+    if(snap.empty){ box.innerHTML='<div style="text-align:center; color:#6a6a8a; margin-top:40px;">No messages yet. Say hi</div>'; return; }
+
+    let list=[];
+    snap.forEach(doc=> list.push({id:doc.id,...doc.data()}));
+    list.sort((a,b)=> (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+
+    list.forEach(m=>{
+      let me = getCurrentUser();
+      let isMe = m.senderUsername===me || m.senderUid===getMyUid();
+      let sender = m.senderUsername||'@user';
+      let initial = sender.replace('@','').charAt(0).toUpperCase();
+      let time = m.createdAt?.toDate? m.createdAt.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : 'now';
+
+      let ticks = isMe? `<span style="display:inline-flex; margin-left:4px;"><svg width="16" height="11" viewBox="0 0 16 11"><path d="M1 5 L4 8 L7 3" fill="none" stroke="#53bdeb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5 L9 8 L14 3" fill="none" stroke="#53bdeb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>` : '';
+
+      let row = document.createElement('div');
+      row.style.cssText = isMe? 'display:flex; justify-content:flex-end; margin:6px 0;' : 'display:flex; gap:8px; align-items:flex-end; margin:6px 0;';
+
+      if(isMe){
+        row.innerHTML = `
+          <div style="max-width:75%; background:#005c4b; color:white; padding:6px 8px 4px 10px; border-radius:12px 12px 0 12px;">
+            <div style="font-size:14.5px; line-height:19px; word-break:break-word;">${(m.text||'').replace(/</g,'&lt;')}</div>
+            <div style="display:flex; justify-content:flex-end; align-items:center; gap:2px; margin-top:4px;">
+              <span style="font-size:10.5px; color:#9be8c0;">${time}</span>${ticks}
+            </div>
+          </div>`;
+      } else {
+        let colors = ['#53bdeb','#ff7f50','#9b59b6','#2ecc71','#e74c3c','#f1c40f'];
+        let colorIndex = sender.charCodeAt(1)%colors.length;
+        let nameColor = colors[colorIndex];
+        row.innerHTML = `
+          <div style="width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:12px; flex-shrink:0;">${initial}</div>
+          <div style="max-width:70%; background:#202c33; color:white; padding:6px 8px 4px 10px; border-radius:12px 12px 12px 0;">
+            <div style="font-size:12.5px; font-weight:700; color:${nameColor}; margin-bottom:2px;">${sender}</div>
+            <div style="font-size:14.5px; line-height:19px; word-break:break-word;">${(m.text||'').replace(/</g,'&lt;')}</div>
+            <div style="text-align:right; margin-top:4px;"><span style="font-size:10.5px; color:#8696a0;">${time}</span></div>
+          </div>`;
+      }
+      box.appendChild(row);
+    });
+    box.scrollTop = box.scrollHeight;
+  });
+}
+function closeGroupChat(){ if(groupMsgUnsub){ try{groupMsgUnsub();}catch(e){} groupMsgUnsub=null; } cancelVoiceNote(); var v=document.getElementById('groupChatView'); if(v) v.style.display='none'; currentGroupName=null; }
+
+async function sendGroupMessage(){
+  let inp = document.getElementById('gcInput'); if(!inp) return; let text = inp.value.trim(); if(!text) return;
+  try{
+    await db.collection('groupMessages').add({ groupId: window.currentGroupId, groupName: currentGroupName, senderUid: getMyUid(), senderUsername: getCurrentUser(), text: text, type: 'text', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    inp.value=''; toggleMicSend();
+  }catch(e){ alert('Send failed: '+e.message); }
+}
+async function sendGroupMedia(inputEl){
+  let file = inputEl.files && inputEl.files[0]; if(!file) return;
+  try{
+    let type='file'; if(file.type.startsWith('image/')) type='image'; else if(file.type.startsWith('video/')) type='video'; else if(file.type.startsWith('audio/')) type='audio';
+    let ref=firebase.storage().ref().child(`groupMedia/${window.currentGroupId}/${Date.now()}_${file.name}`);
+    let snap=await ref.put(file); let url=await snap.ref.getDownloadURL();
+    await db.collection('groupMessages').add({ groupId: window.currentGroupId, groupName: currentGroupName, senderUid: getMyUid(), senderUsername: getCurrentUser(), text:'', type:type, mediaUrl:url, fileName:file.name, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }catch(e){ alert('Upload failed: '+e.message); } finally{ inputEl.value=''; }
+}
+async function startVoiceNote(){
+  try{
+    let stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    gcRecorder = new MediaRecorder(stream); gcAudioChunks=[]; gcSeconds=0;
+    gcRecorder.ondataavailable = e=>{ if(e.data.size>0) gcAudioChunks.push(e.data); };
+    gcRecorder.onstop = ()=>{ clearInterval(gcTimerInt); stream.getTracks().forEach(t=>t.stop()); };
+    gcRecorder.start();
+    document.getElementById('gcNormalBar').style.display='none';
+    document.getElementById('gcRecordingBar').style.display='flex';
+    document.getElementById('gcTimer').textContent='0:00';
+    gcTimerInt=setInterval(()=>{
+      gcSeconds++; let m=Math.floor(gcSeconds/60); let s=gcSeconds%60;
+      document.getElementById('gcTimer').textContent=m+':'+(s<10?'0'+s:s);
+      let wave=document.getElementById('gcWave');
+      if(wave){ wave.innerHTML=''; for(let i=0;i<18;i++){ let h=6+Math.random()*18; wave.innerHTML+=`<div style="width:3px; height:${h}px; background:#00a884; border-radius:2px;"></div>`; } }
+    },100);
+  }catch(e){ alert('Mic denied: '+e.message); }
+}
+function cancelVoiceNote(){
+  if(gcRecorder && gcRecorder.state!=='inactive'){ gcRecorder.onstop=null; gcRecorder.stop(); }
+  clearInterval(gcTimerInt); gcSeconds=0;
+  document.getElementById('gcRecordingBar').style.display='none';
+  document.getElementById('gcNormalBar').style.display='flex';
+  gcAudioChunks=[];
+}
+async function stopAndSendVoice(){
+  if(!gcRecorder) return;
+  let blobPromise = new Promise(res=>{ gcRecorder.onstop = ()=>{ res(new Blob(gcAudioChunks,{type:'audio/webm'})); }; if(gcRecorder.state!=='inactive') gcRecorder.stop(); });
+  let blob = await blobPromise; clearInterval(gcTimerInt);
+  document.getElementById('gcRecordingBar').style.display='none'; document.getElementById('gcNormalBar').style.display='flex';
+  if(blob.size<800){ gcAudioChunks=[]; return; }
+  try{
+    let ref=firebase.storage().ref().child(`groupMedia/${window.currentGroupId}/voice_${Date.now()}.webm`);
+    let snap=await ref.put(blob); let url=await snap.ref.getDownloadURL();
+    let dur = Math.floor(gcSeconds/60)+':'+(gcSeconds%60<10?'0'+(gcSeconds%60):gcSeconds%60);
+    await db.collection('groupMessages').add({ groupId: window.currentGroupId, groupName: currentGroupName, senderUid: getMyUid(), senderUsername: getCurrentUser(), text:'', type:'voice', mediaUrl:url, duration:dur, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }catch(e){ alert('Voice upload failed: '+e.message); }
+  gcAudioChunks=[]; gcSeconds=0;
+}
 
 function showGroupMembers(){
   var nameEl = document.getElementById('gcName'); if(!nameEl) return;
@@ -2106,54 +2234,46 @@ function showGroupMembers(){
   var members = currentGroupUsernames || [];
   var uids = currentGroupUids || [];
   var me = getCurrentUser(); var meLower = me.toLowerCase();
-
-  // FIXED: Admin is ONLY creator / admins array, not i==0
   var creatorUid = window.currentGroupCreator || '';
   var creatorUsername = (window.currentGroupCreatorUsername || '').toLowerCase();
   var adminUids = window.currentGroupAdmins || [creatorUid];
-
-  // Build list with admin flag properly
   let combined = members.map((m,i)=>({
     username: m,
     uid: uids[i] || m,
     isAdmin: (uids[i] && (uids[i]===creatorUid || adminUids.includes(uids[i]))) || m.toLowerCase()===creatorUsername,
     isMe: m.toLowerCase()===meLower
   }));
-  // Sort admin first
   combined.sort((a,b)=> (b.isAdmin - a.isAdmin));
-
   var amIAdmin = combined.some(c=> c.isMe && c.isAdmin) || meLower===creatorUsername;
-
   var existing = document.getElementById('groupMembersModal'); if(existing) existing.remove();
   var modal = document.createElement('div'); modal.id='groupMembersModal';
   modal.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000000000; display:flex; justify-content:center; align-items:center; padding:20px;';
-
   var listHtml = combined.map((c)=>{
     let initial = c.username.replace('@','').charAt(0).toUpperCase();
-    let adminBadge = c.isAdmin? `<span style="background:linear-gradient(135deg,#f6d365,#fda085); color:#000; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:800; margin-left:6px;">Admin</span>` : '';
+    let bg = c.isAdmin? 'linear-gradient(135deg,#0000FF,#5B8CFF)' : 'linear-gradient(135deg,#1a1aff,#5B8CFF)';
+    let adminBadge = c.isAdmin? `<span style="background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; padding:3px 9px; border-radius:10px; font-size:10px; font-weight:800; margin-left:6px; border:1px solid #FFFFFF88;">Admin</span>` : '';
     let btns = '';
     if(!c.isMe) btns += `<button onclick="chatWithMember('${c.username}')" style="background:#0a84ff22; border:1px solid #0a84ff44; color:#0a84ff; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; margin-right:6px;">Chat</button>`;
     if(amIAdmin &&!c.isAdmin &&!c.isMe) btns += `<button onclick="removeGroupMember('${c.username}','${c.uid}')" style="background:rgba(255,71,87,0.12); border:1px solid rgba(255,71,87,0.25); color:#ff4757; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600;">Remove</button>`;
-    return `<div style="display:flex; align-items:center; padding:12px; border-bottom:1px solid #2a2a40;"><div style="width:40px; height:40px; border-radius:50%; background:${c.isAdmin?'linear-gradient(135deg,#f6d365,#fda085)':'#6c5ce7'}; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; margin-right:12px;">${initial}</div><div style="flex:1;"><div style="color:white; font-weight:600; display:flex; align-items:center; flex-wrap:wrap;">${c.username} ${c.isAdmin?'👑':''} ${adminBadge} <span style="margin-left:6px; color:#9a9aab; font-weight:400;">${c.isMe?'(You)':''}</span></div></div><div style="display:flex;">${btns}</div></div>`;
+    return `<div style="display:flex; align-items:center; padding:12px; border-bottom:1px solid #2a2a40;"><div style="width:40px; height:40px; border-radius:50%; background:${bg}; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; margin-right:12px; border:1px solid #FFFFFF55;">${initial}</div><div style="flex:1;"><div style="color:white; font-weight:600; display:flex; align-items:center; flex-wrap:wrap;">${c.username} ${adminBadge} <span style="margin-left:6px; color:#9a9aab; font-weight:400;">${c.isMe?'(You)':''}</span></div></div><div style="display:flex;">${btns}</div></div>`;
   }).join('');
-
-  modal.innerHTML=`<div style="background:#1e1e2f; width:100%; max-width:380px; border-radius:20px; padding:0; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+  modal.innerHTML=`<div style="background:#1e1e2f; width:100%; max-width:380px; border-radius:20px; padding:0; max-height:85vh; overflow-y:auto;">
     <div style="position:sticky; top:0; background:#1e1e2f; padding:20px; border-bottom:1px solid #2a2a40; display:flex; justify-content:space-between; align-items:center; border-radius:20px 20px 0 0;">
       <h3 style="margin:0; color:white;">${groupName} - ${combined.length} members</h3>
-      <span onclick="closeGroupMembers()" style="font-size:28px; color:#aaa; cursor:pointer; line-height:1;">&times;</span>
+      <span onclick="closeGroupMembers()" style="font-size:28px; color:#aaa; cursor:pointer;">&times;</span>
     </div>
-    <div style="padding:0 0 10px 0;">${listHtml || '<div style="padding:20px; color:#aaa; text-align:center;">No members</div>'}</div>
+    <div style="padding:0 0 10px 0;">${listHtml}</div>
     <div style="padding:12px 20px 20px 20px; display:flex; flex-direction:column; gap:10px; border-top:1px solid #2a2a40; background:#1a1a2a; border-radius:0 0 20px 20px;">
-      ${amIAdmin?`<button onclick="addGroupMemberPrompt()" style="width:100%; background:#6c5ce7; border:none; color:white; padding:14px; border-radius:12px; font-weight:bold; font-size:15px;">+ Add Members</button>`:''}
-      <button onclick="exitGroup()" style="width:100%; background:#2a2a40; border:1px solid #ff475722; color:#ff6b81; padding:14px; border-radius:12px; font-weight:600;">🚪 Exit Group</button>
-      <button onclick="reportGroup()" style="width:100%; background:transparent; border:none; color:#6a6a8a; padding:10px; font-size:13px;">⚠️ Report Group</button>
+      ${amIAdmin?`<button onclick="addGroupMemberPrompt()" style="width:100%; background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; border:none; padding:14px; border-radius:12px; font-weight:800; font-size:15px; border:1px solid #FFFFFF55;">+ Add Members</button>`:''}
+      <button onclick="exitGroup()" style="width:100%; background:#2a2a40; border:1px solid #ff475722; color:#ff6b81; padding:14px; border-radius:12px; font-weight:600;">Exit Group</button>
+      <button onclick="reportGroup()" style="width:100%; background:transparent; border:none; color:#6a6a8a; padding:10px; font-size:13px;">Report Group</button>
     </div>
   </div>`;
   modal.addEventListener('click', function(e){ if(e.target===this) closeGroupMembers(); });
   document.body.appendChild(modal);
 }
 function closeGroupMembers(){ var m=document.getElementById('groupMembersModal'); if(m) m.remove(); }
-function chatWithMember(username){ closeGroupMembers(); closeGroupChat(); let clean = username.replace('@',''); if(typeof openChat==='function'){ openChat(clean); } else { alert('Chat with '+username); } }
+function chatWithMember(username){ closeGroupMembers(); closeGroupChat(); let clean = username.replace('@',''); if(typeof openChat==='function'){ openChat(clean); } }
 function removeGroupMember(username, uid){
   if(!confirm('Remove '+username+' from group?')) return;
   let gid = window.currentGroupId;
@@ -2175,13 +2295,12 @@ function reportGroup(){
   let reason = prompt('Report '+currentGroupName+' - reason?'); if(!reason) return;
   db.collection('groupReports').add({ groupId: window.currentGroupId, groupName: currentGroupName, reporter: getCurrentUser(), reason: reason, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(()=>{ closeGroupMembers(); alert('Reported'); });
 }
-function addGroupMemberPrompt(){ var old = document.getElementById('customAddModal'); if(old) old.remove(); var modal = document.createElement('div'); modal.id='customAddModal'; modal.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000000001; display:flex; justify-content:center; align-items:center;'; modal.innerHTML=`<div style="background:#1e1e2f; width:85%; max-width:350px; border-radius:16px; padding:25px;"><h3 style="color:white; margin-top:0;">Add Member</h3><input id="newMemberInput" type="text" value="@" placeholder="@username" style="width:100%; background:#2a2a40; border:1px solid #3a3a50; color:white; padding:12px; border-radius:10px; outline:none; box-sizing:border-box;"><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="closeCustomAdd()" style="flex:1; background:#2a2a40; color:#aaa; padding:12px; border-radius:10px; border:none;">Cancel</button><button onclick="confirmCustomAdd()" style="flex:1; background:#6c5ce7; color:white; padding:12px; border-radius:10px; border:none; font-weight:bold;">Add</button></div></div>`; document.body.appendChild(modal); }
+function addGroupMemberPrompt(){ var old = document.getElementById('customAddModal'); if(old) old.remove(); var modal = document.createElement('div'); modal.id='customAddModal'; modal.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000000001; display:flex; justify-content:center; align-items:center;'; modal.innerHTML=`<div style="background:#1e1e2f; width:85%; max-width:350px; border-radius:16px; padding:25px;"><h3 style="color:white; margin-top:0;">Add Member</h3><input id="newMemberInput" type="text" value="@" placeholder="@username" style="width:100%; background:#2a2a40; border:1px solid #3a3a50; color:white; padding:12px; border-radius:10px; outline:none; box-sizing:border-box;"><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="closeCustomAdd()" style="flex:1; background:#2a2a40; color:#aaa; padding:12px; border-radius:10px; border:none;">Cancel</button><button onclick="confirmCustomAdd()" style="flex:1; background:#0000FF; color:white; padding:12px; border-radius:10px; border:none; font-weight:bold;">Add</button></div></div>`; document.body.appendChild(modal); }
 function closeCustomAdd(){ var m=document.getElementById('customAddModal'); if(m) m.remove(); }
 function confirmCustomAdd(){ var inp = document.getElementById('newMemberInput'); var newMember = inp.value.trim(); if(!newMember || newMember === '@') return; if(!newMember.startsWith('@')) newMember = '@'+newMember; firebase.firestore().collection('groupInvites').add({ groupId: window.currentGroupId, groupName: currentGroupName, from: getCurrentUser(), to: newMember.toLowerCase(), status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() }).then(()=>{ alert("Invite sent to " + newMember + " ✓"); closeCustomAdd(); }); }
 function listenForGroupInvites(){ var me = getCurrentUser(); if(!me) return; firebase.firestore().collection('groupInvites').where('to','==', me.toLowerCase()).where('status','==','pending').onSnapshot(snap=>{ snap.docChanges().forEach(change=>{ if(change.type==='added'){ showInvitePrompt(change.doc.id, change.doc.data()); } }); }); }
-function showInvitePrompt(inviteId, invite){ if(document.getElementById('inviteModal-'+inviteId)) return; var modal = document.createElement('div'); modal.id='inviteModal-'+inviteId; modal.style.cssText='position:fixed; inset:0; background:rgba(10,37,64,0.82); z-index:1000000002; display:flex; justify-content:center; align-items:center; padding:20px;'; modal.innerHTML=`<div style="background:#fff; width:100%; max-width:360px; border-radius:24px; padding:28px 24px; text-align:center;"><h2 style="color:#0a2540; margin:0 0 8px;">You're Invited!</h2><p style="color:#555;"><b>${invite.from}</b> invited you to join</p><p style="font-size:22px; font-weight:800; color:#0a2540;">${invite.groupName}</p><div style="display:flex; gap:12px; margin-top:20px;"><button onclick="respondToInvite('${inviteId}','declined')" style="flex:1; background:white; border:1.5px solid #d0d9e6; padding:14px; border-radius:14px; font-weight:600;">Decline</button><button onclick="respondToInvite('${inviteId}','accepted')" style="flex:1; background:#0d6efd; color:white; padding:14px; border-radius:14px; border:none; font-weight:800;">Join</button></div></div>`; document.body.appendChild(modal); }
+function showInvitePrompt(inviteId, invite){ if(document.getElementById('inviteModal-'+inviteId)) return; var modal = document.createElement('div'); modal.id='inviteModal-'+inviteId; modal.style.cssText='position:fixed; inset:0; background:rgba(10,37,64,0.82); z-index:1000000002; display:flex; justify-content:center; align-items:center; padding:20px;'; modal.innerHTML=`<div style="background:#fff; width:100%; max-width:360px; border-radius:24px; padding:28px 24px; text-align:center;"><h2 style="color:#0a2540; margin:0 0 8px;">You're Invited!</h2><p style="color:#555;"><b>${invite.from}</b> invited you to join</p><p style="font-size:22px; font-weight:800; color:#0a2540;">${invite.groupName}</p><div style="display:flex; gap:12px; margin-top:20px;"><button onclick="respondToInvite('${inviteId}','declined')" style="flex:1; background:white; border:1.5px solid #d0d9e6; padding:14px; border-radius:14px; font-weight:600;">Decline</button><button onclick="respondToInvite('${inviteId}','accepted')" style="flex:1; background:#0000FF; color:white; padding:14px; border-radius:14px; border:none; font-weight:800;">Join</button></div></div>`; document.body.appendChild(modal); }
 function respondToInvite(inviteId, action){ var modal = document.getElementById('inviteModal-'+inviteId); firebase.firestore().collection('groupInvites').doc(inviteId).get().then(doc=>{ if(!doc.exists) return; var invite = doc.data(); if(action==='accepted'){ var myUid = getMyUid(); var me = getCurrentUser(); if(!myUid) return alert('Not logged in!'); firebase.firestore().collection('groups').doc(invite.groupId).update({ members: firebase.firestore.FieldValue.arrayUnion(myUid), memberUsernames: firebase.firestore.FieldValue.arrayUnion(me) }).then(()=>{ return firebase.firestore().collection('groupInvites').doc(inviteId).delete(); }).then(()=>{ if(modal) modal.remove(); loadGroups(); }); } else { firebase.firestore().collection('groupInvites').doc(inviteId).delete().then(()=>{ if(modal) modal.remove(); }); } }); }
-function showBeautifulSuccess(text){ var old = document.getElementById('successModal'); if(old) old.remove(); var modal = document.createElement('div'); modal.id='successModal'; modal.style.cssText='position:fixed; inset:0; background:rgba(10,37,64,0.55); z-index:1000000003; display:flex; justify-content:center; align-items:center; padding:20px;'; modal.innerHTML='<div style="background:#fff; width:100%; max-width:320px; border-radius:22px; padding:28px 24px; text-align:center;"><div style="width:72px; height:72px; background:#00d68f; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px auto; color:white; font-size:36px;">✓</div><p style="color:#0a2540; font-weight:600;">'+text+'</p><button onclick="document.getElementById(\'successModal\').remove()" style="width:100%; background:#0d6efd; color:white; padding:12px; border-radius:12px; border:none; margin-top:12px;">OK</button></div>'; document.body.appendChild(modal); setTimeout(()=>{ var m=document.getElementById('successModal'); if(m) m.remove(); }, 3000); }
 setTimeout(listenForGroupInvites, 2000);
 document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(()=>{ loadGroups(); }, 1000); });
 </script>
