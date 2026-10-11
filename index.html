@@ -2057,17 +2057,13 @@ function loadGroups(){
       if(typeof updateGroupCount === 'function') updateGroupCount(snap.size);
       const groupsBtn = document.getElementById('groupsTab');
       if(groupsBtn){
+        groupsBtn.style.position='relative';
+        let countSpan = document.getElementById('groupCount');
+        if(countSpan) countSpan.textContent = snap.size;
         let dot = document.getElementById('groupBlueDot');
         let wasVisible = dot && dot.style.display!=='none';
-        groupsBtn.textContent = `Groups (${snap.size})`;
-        groupsBtn.style.position='relative';
-        if(wasVisible){
-          if(!dot){
-            dot=document.createElement('span'); dot.id='groupBlueDot';
-            dot.style.cssText='position:absolute;top:2px;right:4px;width:12px;height:12px;background:#0000FF;border-radius:50%;border:2px solid white;z-index:5;display:block;animation:blueBlink 1.1s infinite;';
-          }
-          dot.style.display='block';
-          groupsBtn.appendChild(dot);
+        if(wasVisible && dot){
+          setTimeout(()=>{ let btn=document.getElementById('groupsTab'); if(btn){ btn.appendChild(dot); dot.style.display='block'; } },20);
         }
       }
       setTimeout(()=>{ listenForUnreadGroups(); listenForGroupCardCounts(); }, 600);
@@ -2112,27 +2108,16 @@ function filterChats(type){
 function updateGroupCount(n){
   const allTab = document.getElementById('allTab');
   if(allTab) allTab.textContent = "DM's";
-
-  const groupsTab = document.getElementById('groupsTab'); 
+  const groupsTab = document.getElementById('groupsTab');
   if(groupsTab){
     groupsTab.style.position='relative';
     let dot = document.getElementById('groupBlueDot');
     let wasVisible = dot && dot.style.display!=='none';
-    
-    // FIXED: don't wipe button, update only span
     let countSpan = document.getElementById('groupCount');
-    if(countSpan){
-      countSpan.textContent = n;
-    } else {
-      // fallback if span no dey
-      groupsTab.innerHTML = `Groups <span id="groupCount">${n}</span>`;
-    }
-
+    if(countSpan){ countSpan.textContent = n; }
+    else { groupsTab.innerHTML = `Groups <span id="groupCount">${n}</span>`; }
     if(wasVisible && dot){
-      setTimeout(()=>{ 
-        let btn=document.getElementById('groupsTab'); 
-        if(btn){ btn.appendChild(dot); dot.style.display='block'; } 
-      },20);
+      setTimeout(()=>{ let btn=document.getElementById('groupsTab'); if(btn){ btn.appendChild(dot); dot.style.display='block'; } },20);
     }
   }
 }
@@ -2185,7 +2170,13 @@ function updateGroupCount(n){
 
 <script>
 function ensureGroupChatView(){
-  var v=document.getElementById('groupChatView'); if(v) return v;
+  var v=document.getElementById('groupChatView');
+  // FORCE RECREATE if old version without typing indicator
+  if(v &&!document.getElementById('groupTypingIndicator')){
+    v.remove();
+    v=null;
+  }
+  if(v) return v;
   v=document.createElement('div'); v.id='groupChatView';
   v.style.cssText='display:none; position:fixed; inset:0; z-index:9999999; background:#0b0b1e; flex-direction:column;';
   v.innerHTML=`
@@ -2196,6 +2187,15 @@ function ensureGroupChatView(){
     <div onclick="showGroupMembers()" style="color:#6c5ce7; font-size:22px; padding:5px 10px; cursor:pointer;">⋮</div>
   </div>
   <div id="gcMessages" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:6px; background:#0b141a;"></div>
+  <!-- TYPING INDICATOR - TINY 3PX -->
+  <div id="groupTypingIndicator" style="display:none; padding:5px 16px 8px 16px; color:#9a9aab; font-size:11px; font-style:italic; font-weight:400; align-items:center; gap:8px; background:#0b141a;">
+    <span style="display:flex; gap:2px; align-items:center; background:#1a1a2e; padding:6px 9px; border-radius:12px;">
+      <span style="width:3px; height:3px; background:#5B8CFF; border-radius:50%; animation: typingDot 1s infinite;"></span>
+      <span style="width:3px; height:3px; background:#5B8CFF; border-radius:50%; animation: typingDot 1s infinite 0.2s;"></span>
+      <span style="width:3px; height:3px; background:#5B8CFF; border-radius:50%; animation: typingDot 1s infinite 0.4s;"></span>
+    </span>
+    <span id="groupTypingText">typing...</span>
+  </div>
   <div id="gcReplyPreview" style="display:none; background:#1f2c34; padding:10px 14px; border-left:4px solid #0000FF; flex-direction:column;">
     <div style="display:flex; justify-content:space-between;"><span id="gcReplyName" style="color:#5B8CFF; font-weight:700; font-size:12px;">Replying to @user</span><span onclick="cancelReply()" style="color:#aaa; cursor:pointer;">✕</span></div>
     <div id="gcReplyText" style="color:#8696a0; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">message</div>
@@ -2206,7 +2206,7 @@ function ensureGroupChatView(){
     </button>
     <input id="gcMediaInput" type="file" style="display:none;" accept="image/*,video/*,.pdf,.doc,.docx,.zip" onchange="sendGroupMedia(this)">
     <div style="flex:1; background:#2a3942; border-radius:24px; display:flex; align-items:center; padding:6px 14px;">
-      <input id="gcInput" placeholder="Type a message" style="flex:1; background:transparent; border:none; color:white; outline:none; font-size:15px;" onkeydown="if(event.key==='Enter') sendGroupMessage()" oninput="toggleMicSend()">
+      <input id="gcInput" placeholder="Type a message" style="flex:1; background:transparent; border:none; color:white; outline:none; font-size:15px;" onkeydown="if(event.key==='Enter') sendGroupMessage()" oninput="toggleMicSend(); handleGroupTypingInput();">
     </div>
     <button id="gcMicBtn" onclick="startVoiceNote()" style="width:46px; height:46px; border-radius:50%; border:none; background:#0000FF; color:white; display:flex; align-items:center; justify-content:center;">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="23" x2="16" y2="23" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
@@ -2226,13 +2226,69 @@ function ensureGroupChatView(){
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
     </button>
   </div>
-  <style>@keyframes pulse{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}}</style>
+  <style>@keyframes pulse{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}} @keyframes typingDot{0%,60%,100%{opacity:0.3}30%{opacity:1}}</style>
   `;
   document.body.appendChild(v); return v;
 }
 var currentGroupName=null; var currentGroupUids=[]; var currentGroupUsernames=[]; var groupMsgUnsub=null;
 var gcRecorder=null; var gcAudioChunks=[]; var gcTimerInt=null; var gcSeconds=0;
 var replyToMsg=null;
+
+// === TYPING SYSTEM V2 - SUB-COLLECTION FIXED ===
+var groupTypingTimeout=null;
+var currentGroupIdForTyping=null;
+var groupTypingUnsub=null;
+
+function listenForGroupTyping(groupId){
+  currentGroupIdForTyping = groupId;
+  if(groupTypingUnsub){ try{groupTypingUnsub();}catch(e){} groupTypingUnsub=null; }
+  try{
+    groupTypingUnsub = db.collection('groups').doc(groupId).collection('typing').onSnapshot(snap=>{
+      const indicator = document.getElementById('groupTypingIndicator');
+      const textEl = document.getElementById('groupTypingText');
+      if(!indicator||!textEl) return;
+      const now = Date.now();
+      const me = getCurrentUser().toLowerCase();
+      let typingUsers = [];
+      snap.forEach(doc=>{
+        let d = doc.data();
+        let uname = doc.id;
+        if(uname.toLowerCase()!==me && (now - (d.time||0) < 4000)){
+          typingUsers.push(uname);
+        }
+      });
+      if(typingUsers.length>0){
+        if(typingUsers.length===1) textEl.textContent = typingUsers[0] + ' is typing...';
+        else if(typingUsers.length===2) textEl.textContent = typingUsers[0] + ' and ' + typingUsers[1] + ' are typing...';
+        else textEl.textContent = typingUsers.length + ' people are typing...';
+        indicator.style.display='flex';
+        let box = document.getElementById('gcMessages');
+        if(box) box.scrollTop = box.scrollHeight;
+      } else {
+        indicator.style.display='none';
+      }
+    });
+  }catch(e){ console.log(e); }
+}
+function handleGroupTypingInput(){
+  if(!currentGroupIdForTyping) return;
+  const me = getCurrentUser();
+  try{
+    db.collection('groups').doc(currentGroupIdForTyping).collection('typing').doc(me).set({ time: Date.now() });
+  }catch(e){}
+  if(groupTypingTimeout) clearTimeout(groupTypingTimeout);
+  groupTypingTimeout = setTimeout(()=>{
+    try{ db.collection('groups').doc(currentGroupIdForTyping).collection('typing').doc(me).delete(); }catch(e){}
+  }, 3000);
+}
+function stopGroupTyping(){
+  if(!currentGroupIdForTyping) return;
+  const me = getCurrentUser();
+  try{ db.collection('groups').doc(currentGroupIdForTyping).collection('typing').doc(me).delete(); }catch(e){}
+  const ind = document.getElementById('groupTypingIndicator');
+  if(ind) ind.style.display='none';
+}
+
 function toggleMicSend(){
   let inp=document.getElementById('gcInput');
   let mic=document.getElementById('gcMicBtn');
@@ -2360,9 +2416,17 @@ async function openRealGroup(name, members, creator, groupId, memberUsernames, c
     });
     box.scrollTop = box.scrollHeight;
   });
+  listenForGroupTyping(window.currentGroupId);
 }
-function closeGroupChat(){ if(groupMsgUnsub){ try{groupMsgUnsub();}catch(e){} groupMsgUnsub=null; } var v=document.getElementById('groupChatView'); if(v) v.style.display='none'; currentGroupName=null; cancelReply(); setTimeout(listenForGroupCardCounts, 300); }
+function closeGroupChat(){
+  stopGroupTyping();
+  if(groupTypingUnsub){ try{groupTypingUnsub();}catch(e){} groupTypingUnsub=null; }
+  if(groupMsgUnsub){ try{groupMsgUnsub();}catch(e){} groupMsgUnsub=null; }
+  var v=document.getElementById('groupChatView'); if(v) v.style.display='none';
+  currentGroupName=null; cancelReply(); setTimeout(listenForGroupCardCounts, 300);
+}
 async function sendGroupMessage(){
+  stopGroupTyping();
   let inp = document.getElementById('gcInput'); if(!inp) return; let text = inp.value.trim(); if(!text) return;
   try{
     let payload = { groupId: window.currentGroupId, groupName: currentGroupName, senderUid: getMyUid(), senderUsername: getCurrentUser(), text: text, type: 'text', createdAt: firebase.firestore.FieldValue.serverTimestamp() };
