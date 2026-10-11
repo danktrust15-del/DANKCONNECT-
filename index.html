@@ -217,9 +217,9 @@ background:#0A0A14;
   <span style="font-size:15px;">Search real users</span>
 </div>
 </div>
-    <!-- FILTER TABS - All / Unread / Groups -->
+<!-- FILTER TABS - DM's / Unread / Groups -->
 <div style="display:flex; gap:8px; padding:12px 16px; overflow-x:auto; align-items:center; background:#0a0a14;">
-  <button id="allTab" onclick="filterChats('all')" style="background:white; color:black; border:none; padding:8px 16px; border-radius:20px; font-weight:600; cursor:pointer; white-space:nowrap;">All</button>
+  <button id="allTab" onclick="filterChats('all')" style="background:white; color:black; border:none; padding:8px 16px; border-radius:20px; font-weight:600; cursor:pointer; white-space:nowrap;">DM's</button>
   <button id="unreadTab" onclick="filterChats('unread')" style="background:#232336; color:#9a9aab; border:none; padding:8px 16px; border-radius:20px; font-weight:500; cursor:pointer; white-space:nowrap;">Unread 0</button>
   <button id="groupsTab" onclick="filterChats('groups')" style="background:#232336; color:#9a9aab; border:none; padding:8px 16px; border-radius:20px; font-weight:500; cursor:pointer; white-space:nowrap;">Groups <span id="groupCount">0</span></button>
 <button id="addGroupBtn" onclick="openGroupModal()" style="background:#232336; color:#9a9aab; border:none; width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
@@ -236,7 +236,7 @@ background:#0A0A14;
   </div>
 </div>
   <!-- END HEADER -->
-  <!-- Archived -->
+    <!-- Archived -->
   <div style="display:flex; align-items:center; gap:20px; padding:12px 24px; color:#8696a0; cursor:pointer;">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8696a0" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
     <span style="font-size:15px;">Archived</span>
@@ -1952,7 +1952,7 @@ async function inviteToGroup(groupId, username) {
   } catch (e) { alert('Invite failed: ' + e.message); }
 }
 
-// === BLUE DOT BLINKING - NO INDEX ===
+// === BLUE DOT + BADGE LOGIC - FIXED ===
 function showGroupDot(){
   let btn=document.getElementById('groupsTab'); if(!btn) return;
   btn.style.position='relative';
@@ -1970,23 +1970,30 @@ function showGroupDot(){
   }
   dot.style.display='block';
 }
-function hideGroupDot(){
+function hideGroupTabDotOnly(){
   let dot=document.getElementById('groupBlueDot'); if(dot) dot.style.display='none';
+}
+function hideGroupDot(){
+  hideGroupTabDotOnly();
+}
+function markGroupSeen(groupId){
   try{
     let seen=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}');
-    let now=Date.now();
-    (window.allGroups||[]).forEach(g=> seen[g.id]=now);
+    seen[groupId]=Date.now();
     localStorage.setItem('dank_groups_seen',JSON.stringify(seen));
-    localStorage.setItem('dank_groups_last_open', String(now));
+    updateGroupCardBadge(groupId, 0);
   }catch(e){}
 }
+
 window.groupUnreadUnsubs = window.groupUnreadUnsubs || [];
+window.groupCardUnsubs = window.groupCardUnsubs || [];
+window.groupUnreadCounts = window.groupUnreadCounts || {};
+
 function listenForUnreadGroups(){
   try{
     window.groupUnreadUnsubs.forEach(u=>{ try{u()}catch(e){} });
     window.groupUnreadUnsubs=[];
-    let myUid = getMyUid();
-    let me = getCurrentUser();
+    let myUid = getMyUid(); let me = getCurrentUser();
     let groups = window.allGroups||[];
     if(!groups.length) return;
     groups.forEach(g=>{
@@ -2003,6 +2010,40 @@ function listenForUnreadGroups(){
         });
       });
       window.groupUnreadUnsubs.push(unsub);
+    });
+  }catch(e){}
+}
+function updateGroupCardBadge(groupId, count){
+  let badge = document.getElementById('badge-'+groupId);
+  if(!badge) return;
+  if(count > 0){
+    badge.textContent = count > 99? '99+' : count;
+    badge.style.display='flex';
+  } else {
+    badge.style.display='none';
+  }
+}
+function listenForGroupCardCounts(){
+  try{
+    window.groupCardUnsubs.forEach(u=>{ try{u()}catch(e){} });
+    window.groupCardUnsubs=[];
+    let myUid = getMyUid(); let me = getCurrentUser();
+    (window.allGroups||[]).forEach(g=>{
+      let unsub = db.collection('groupMessages').where('groupId','==',g.id).onSnapshot(snap=>{
+        let seenMap={}; try{ seenMap=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}'); }catch(e){}
+        let lastSeen = seenMap[g.id] || 0;
+        let count=0;
+        snap.forEach(doc=>{
+          let d=doc.data(); if(!d) return;
+          if(d.senderUid===myUid || d.senderUsername===me) return;
+          let t = d.createdAt?.toMillis? d.createdAt.toMillis() : 0;
+          if(t===0){ count++; } else if(t > lastSeen){ count++; }
+        });
+        window.groupUnreadCounts[g.id]=count;
+        updateGroupCardBadge(g.id, count);
+        if(count>0 && window.currentGroupId!==g.id) showGroupDot();
+      });
+      window.groupCardUnsubs.push(unsub);
     });
   }catch(e){}
 }
@@ -2029,7 +2070,7 @@ function loadGroups(){
           groupsBtn.appendChild(dot);
         }
       }
-      setTimeout(listenForUnreadGroups, 600);
+      setTimeout(()=>{ listenForUnreadGroups(); listenForGroupCardCounts(); }, 600);
     });
   }catch(e){}
 }
@@ -2045,7 +2086,7 @@ function filterChats(type){
   if(type==='all'){
     if(window.loadChats) window.loadChats(); else if(window.loadMyChats) window.loadMyChats();
   } else if(type==='groups'){
-    hideGroupDot();
+    hideGroupTabDotOnly();
     chatsList.innerHTML = '';
     const groupsData = window.allGroups || [];
     if(groupsData.length===0){
@@ -2056,10 +2097,16 @@ function filterChats(type){
       const div = document.createElement('div');
       div.id = 'group-'+g.id;
       div.style.cssText = 'display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #1a1a2e; cursor:pointer; background:#0b141a; border-radius:12px; margin:6px 8px;';
-      div.innerHTML = `<div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#0000FF 0%,#5B8CFF 100%); display:flex; align-items:center; justify-content:center; color:white; font-weight:900; font-size:20px; border:1px solid #FFFFFF55;">${(g.name||'G')[0].toUpperCase()}</div><div style="flex:1;"><div style="color:white; font-weight:600;">${g.name}</div><div style="color:#9a9aab; font-size:13px;">${g.members?.length || 1} members</div></div><div style="background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; padding:5px 12px; border-radius:20px; font-size:11px; font-weight:800; border:1px solid #FFFFFF88;">GROUP</div>`;
-      div.onclick = ()=>{ openRealGroup(g.name, g.members, g.createdBy, g.id, g.memberUsernames, g.createdByUsername, g.admins); };
+      let existingCount = window.groupUnreadCounts[g.id] || 0;
+      let badgeDisplay = existingCount>0? 'flex' : 'none';
+      let badgeText = existingCount>99? '99+' : existingCount;
+      div.innerHTML = `<div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#0000FF 0%,#5B8CFF 100%); display:flex; align-items:center; justify-content:center; color:white; font-weight:900; font-size:20px; border:1px solid #FFFFFF55;">${(g.name||'G')[0].toUpperCase()}</div><div style="flex:1;"><div style="color:white; font-weight:600;">${g.name}</div><div style="color:#9a9aab; font-size:13px;">${g.members?.length || 1} members</div></div><div id="pill-${g.id}" style="position:relative; background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; padding:5px 12px; border-radius:20px; font-size:11px; font-weight:800; border:1px solid #FFFFFF88;">GROUP<span id="badge-${g.id}" style="display:${badgeDisplay}; position:absolute; top:-9px; right:-9px; min-width:22px; height:22px; background:white; color:#00008B; border-radius:50%; font-size:12px; font-weight:900; align-items:center; justify-content:center; padding:0 4px; border:2px solid #0000FF; box-shadow:0 2px 8px rgba(0,0,0,0.4);">${badgeText}</span></div>`;
+      div.onclick = ()=>{
+        openRealGroup(g.name, g.members, g.createdBy, g.id, g.memberUsernames, g.createdByUsername, g.admins);
+      };
       chatsList.appendChild(div);
     });
+    setTimeout(listenForGroupCardCounts, 300);
   }
 }
 function updateGroupCount(n){
@@ -2178,6 +2225,75 @@ function toggleMicSend(){
   if(inp.value.trim().length>0){ mic.style.display='none'; send.style.display='flex'; }
   else { mic.style.display='flex'; send.style.display='none'; }
 }
+function setReply(m){
+  replyToMsg = m;
+  let p=document.getElementById('gcReplyPreview');
+  if(p){ p.style.display='flex'; }
+  let n=document.getElementById('gcReplyName');
+  if(n){ n.textContent='Replying to '+m.senderUsername; }
+  let t=document.getElementById('gcReplyText');
+  if(t){ t.textContent=m.text||''; }
+  let inp=document.getElementById('gcInput');
+  if(inp) inp.focus();
+}
+function cancelReply(){ replyToMsg=null; let p=document.getElementById('gcReplyPreview'); if(p) p.style.display='none'; }
+function attachBubbleEvents(row, m){
+  let startX=0, startY=0, longPressTimer=null, moved=false;
+  let lastTap=0;
+  row.addEventListener('touchstart', e=>{
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY; moved=false;
+    let currentTime = new Date().getTime();
+    let tapLength = currentTime - lastTap;
+    if(tapLength < 500 && tapLength > 0){
+      setReply(m);
+      e.preventDefault();
+    }
+    lastTap = currentTime;
+    longPressTimer = setTimeout(()=>{ if(!moved) showMsgOptions(m); }, 600);
+  }, {passive:false});
+  row.addEventListener('touchmove', e=>{
+    let dx = e.touches[0].clientX - startX;
+    let dy = e.touches[0].clientY - startY;
+    if(Math.abs(dx)>10 || Math.abs(dy)>10) moved=true;
+    if(Math.abs(dx)>15) clearTimeout(longPressTimer);
+    if(dx>60 && Math.abs(dy)<40){
+      row.style.transform=`translateX(${Math.min(dx,80)}px)`;
+      row.style.transition='none';
+      if(dx>65){ setReply(m); row.style.transform='translateX(0)'; clearTimeout(longPressTimer); }
+    }
+  }, {passive:true});
+  row.addEventListener('touchend', ()=>{
+    clearTimeout(longPressTimer);
+    row.style.transform='translateX(0)'; row.style.transition='transform 0.2s ease';
+  });
+  row.addEventListener('dblclick', ()=>{ setReply(m); });
+  row.addEventListener('mousedown', e=>{ startX=e.clientX; longPressTimer=setTimeout(()=>showMsgOptions(m), 700); });
+  row.addEventListener('mouseup', ()=>{ clearTimeout(longPressTimer); });
+  row.addEventListener('mouseleave', ()=>{ clearTimeout(longPressTimer); });
+  row.addEventListener('contextmenu', e=>{ e.preventDefault(); showMsgOptions(m); });
+}
+function showMsgOptions(m){
+  let old=document.getElementById('gcMsgOptions'); if(old) old.remove();
+  let me = getCurrentUser(); let isMe = m.senderUsername===me || m.senderUid===getMyUid();
+  let modal=document.createElement('div'); modal.id='gcMsgOptions';
+  modal.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000000005; display:flex; justify-content:center; align-items:flex-end; padding:16px;';
+  modal.innerHTML=`<div style="background:#1e1e2f; width:100%; max-width:380px; border-radius:20px 20px 0 0; overflow:hidden; border:1px solid #2a2a4a;">
+    <div style="padding:16px; text-align:center; color:#9a9aab; font-size:13px; border-bottom:1px solid #2a2a40;">${m.senderUsername} • ${m.text?m.text.substring(0,40):''}</div>
+    <div onclick="doReplyFromOptions()" style="padding:16px; color:white; display:flex; gap:12px; cursor:pointer; border-bottom:1px solid #2a2a40;"><span>↩️</span> Reply</div>
+    <div onclick="copyMsg()" style="padding:16px; color:white; display:flex; gap:12px; cursor:pointer; border-bottom:1px solid #2a2a40;"><span>📋</span> Copy</div>
+    ${isMe?`<div onclick="editMsg()" style="padding:16px; color:white; display:flex; gap:12px; cursor:pointer; border-bottom:1px solid #2a2a40;"><span>✏️</span> Edit</div><div onclick="deleteMsg()" style="padding:16px; color:#ff4757; display:flex; gap:12px; cursor:pointer;"><span>🗑️</span> Delete</div>`:''}
+    <div onclick="closeMsgOptions()" style="padding:16px; text-align:center; color:#aaa; background:#2a2a40; margin-top:8px; border-radius:12px;">Cancel</div>
+  </div>`;
+  modal.addEventListener('click', e=>{ if(e.target===modal) closeMsgOptions(); });
+  document.body.appendChild(modal);
+  modal._data = m;
+}
+function closeMsgOptions(){ let el=document.getElementById('gcMsgOptions'); if(el) el.remove(); }
+function doReplyFromOptions(){ let modal=document.getElementById('gcMsgOptions'); let m=modal?modal._data:null; closeMsgOptions(); if(m) setReply(m); }
+function copyMsg(){ let modal=document.getElementById('gcMsgOptions'); let m=modal?modal._data:null; if(m&&m.text){ navigator.clipboard.writeText(m.text).then(()=>alert('Copied')); } closeMsgOptions(); }
+function editMsg(){ let modal=document.getElementById('gcMsgOptions'); let m=modal?modal._data:null; closeMsgOptions(); if(!m) return; let newText=prompt('Edit message:', m.text); if(newText===null) return; db.collection('groupMessages').doc(m.id).update({text:newText.trim(), edited:true}).catch(e=>alert(e.message)); }
+function deleteMsg(){ let modal=document.getElementById('gcMsgOptions'); let m=modal?modal._data:null; closeMsgOptions(); if(!m) return; if(!confirm('Delete this message?')) return; db.collection('groupMessages').doc(m.id).delete().catch(e=>alert(e.message)); }
+
 async function openRealGroup(name, members, creator, groupId, memberUsernames, creatorUsername, admins){
   currentGroupName=name; window.currentGroupId = groupId || name;
   window.currentGroupCreator = creator; window.currentGroupAdmins = admins || [creator]; window.currentGroupCreatorUsername = creatorUsername;
@@ -2201,7 +2317,10 @@ async function openRealGroup(name, members, creator, groupId, memberUsernames, c
   if(!usernames || usernames.length!== currentGroupUids.length){ usernames = await resolveUsernames(currentGroupUids); }
   currentGroupUsernames = usernames;
   document.getElementById('gcMembers').textContent = usernames.join(', ') + ' | You: ' + getCurrentUser();
-  try{ let seen=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}'); seen[groupId]=Date.now(); localStorage.setItem('dank_groups_seen',JSON.stringify(seen)); hideGroupDot(); }catch(e){}
+  try{
+    markGroupSeen(groupId);
+    hideGroupTabDotOnly();
+  }catch(e){}
   if(groupMsgUnsub) groupMsgUnsub();
   groupMsgUnsub = db.collection('groupMessages').where('groupId','==',window.currentGroupId).onSnapshot(snap=>{
     box.innerHTML=''; if(snap.empty){ box.innerHTML='<div style="text-align:center; color:#6a6a8a; margin-top:40px;">No messages yet. Say hi</div>'; return; }
@@ -2212,27 +2331,33 @@ async function openRealGroup(name, members, creator, groupId, memberUsernames, c
       let sender = m.senderUsername||'@user'; let initial = sender.replace('@','').charAt(0).toUpperCase();
       let time = m.createdAt?.toDate? m.createdAt.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : 'now';
       let ticks = isMe? `<span style="display:inline-flex; margin-left:4px;"><svg width="16" height="11" viewBox="0 0 16 11"><path d="M1 5 L4 8 L7 3" fill="none" stroke="#53bdeb" stroke-width="1.5"/><path d="M6 5 L9 8 L14 3" fill="none" stroke="#53bdeb" stroke-width="1.5"/></svg></span>` : '';
-      let replyHtml = m.replyTo? `<div style="background:${isMe?'#001a8a':'#111b21'}; border-left:3px solid #5B8CFF; padding:4px 8px; border-radius:6px; margin-bottom:6px;"><div style="color:#5B8CFF; font-size:11px; font-weight:700;">${m.replyTo.sender}</div><div style="color:#8696a0; font-size:12px;">${(m.replyTo.text||'').replace(/</g,'&lt;')}</div></div>` : '';
+      let replyHtml = m.replyTo? `<div style="background:${isMe?'#001a8a':'#111b21'}; border-left:3px solid #5B8CFF; padding:4px 8px; border-radius:6px; margin-bottom:6px;"><div style="color:#5B8CFF; font-size:11px; font-weight:700;">${m.replyTo.sender}</div><div style="color:#8696a0; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">${(m.replyTo.text||'').replace(/</g,'&lt;')}</div></div>` : '';
       let row = document.createElement('div'); row.className='gc-msg-row'; row.dataset.id=m.id;
-      row.style.cssText = isMe? 'display:flex; justify-content:flex-end; margin:6px 0;' : 'display:flex; gap:8px; align-items:flex-end; margin:6px 0;';
-      if(isMe){ row.innerHTML = `<div style="max-width:75%; background:#0000FF; color:white; padding:6px 8px 4px 10px; border-radius:12px 12px 0 12px;">${replyHtml}<div>${(m.text||'').replace(/</g,'&lt;')}</div><div style="text-align:right; font-size:10px; color:#c7d2ff;">${time}${ticks}</div></div>`; }
-      else { row.innerHTML = `<div style="width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:12px;">${initial}</div><div style="max-width:70%; background:#202c33; color:white; padding:6px 8px 4px 10px; border-radius:12px 12px 12px 0;"><div style="font-size:12px; color:#5B8CFF; font-weight:700;">${sender}</div>${replyHtml}<div>${(m.text||'').replace(/</g,'&lt;')}</div><div style="text-align:right; font-size:10px; color:#8696a0;">${time}</div></div>`; }
+      row.style.cssText = isMe? 'display:flex; justify-content:flex-end; margin:6px 0; position:relative; touch-action:pan-y;' : 'display:flex; gap:8px; align-items:flex-end; margin:6px 0; position:relative; touch-action:pan-y;';
+      if(isMe){
+        row.innerHTML = `<div class="gc-bubble" style="max-width:75%; background:#0000FF; color:white; padding:6px 8px 4px 10px; border-radius:12px 12px 0 12px;">${replyHtml}<div style="font-size:14.5px; line-height:19px; word-break:break-word;">${(m.text||'').replace(/</g,'&lt;')}</div><div style="display:flex; justify-content:flex-end; align-items:center; gap:2px; margin-top:4px;"><span style="font-size:10.5px; color:#c7d2ff;">${time}</span>${ticks}</div></div>`;
+      } else {
+        row.innerHTML = `<div style="width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:12px; flex-shrink:0;">${initial}</div><div class="gc-bubble" style="max-width:70%; background:#202c33; color:white; padding:6px 8px 4px 10px; border-radius:12px 12px 12px 0;"><div style="font-size:12.5px; font-weight:700; color:#5B8CFF; margin-bottom:2px;">${sender}</div>${replyHtml}<div style="font-size:14.5px; line-height:19px; word-break:break-word;">${(m.text||'').replace(/</g,'&lt;')}</div><div style="text-align:right; margin-top:4px;"><span style="font-size:10.5px; color:#8696a0;">${time}</span></div></div>`;
+      }
+      attachBubbleEvents(row, m);
       box.appendChild(row);
     });
     box.scrollTop = box.scrollHeight;
   });
 }
-function closeGroupChat(){ if(groupMsgUnsub){ try{groupMsgUnsub();}catch(e){} groupMsgUnsub=null; } var v=document.getElementById('groupChatView'); if(v) v.style.display='none'; currentGroupName=null; }
+function closeGroupChat(){ if(groupMsgUnsub){ try{groupMsgUnsub();}catch(e){} groupMsgUnsub=null; } var v=document.getElementById('groupChatView'); if(v) v.style.display='none'; currentGroupName=null; cancelReply(); setTimeout(listenForGroupCardCounts, 300); }
 async function sendGroupMessage(){
   let inp = document.getElementById('gcInput'); if(!inp) return; let text = inp.value.trim(); if(!text) return;
   try{
     let payload = { groupId: window.currentGroupId, groupName: currentGroupName, senderUid: getMyUid(), senderUsername: getCurrentUser(), text: text, type: 'text', createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+    if(replyToMsg){ payload.replyTo = {id:replyToMsg.id, sender:replyToMsg.senderUsername, text:replyToMsg.text}; }
     await db.collection('groupMessages').add(payload);
-    inp.value='';
+    inp.value=''; toggleMicSend(); cancelReply();
   }catch(e){ alert('Send failed: '+e.message); }
 }
-function showGroupMembers(){}
+function showGroupMembers(){ var nameEl = document.getElementById('gcName'); if(!nameEl) return; var groupName = nameEl.innerText || currentGroupName || 'Group'; var members = currentGroupUsernames || []; var uids = currentGroupUids || []; var me = getCurrentUser(); var meLower = me.toLowerCase(); var creatorUid = window.currentGroupCreator || ''; var creatorUsername = (window.currentGroupCreatorUsername || '').toLowerCase(); var adminUids = window.currentGroupAdmins || [creatorUid]; let combined = members.map((m,i)=>({ username: m, uid: uids[i] || m, isAdmin: (uids[i] && (uids[i]===creatorUid || adminUids.includes(uids[i]))) || m.toLowerCase()===creatorUsername, isMe: m.toLowerCase()===meLower })); combined.sort((a,b)=> (b.isAdmin - a.isAdmin)); var amIAdmin = combined.some(c=> c.isMe && c.isAdmin) || meLower===creatorUsername; var existing = document.getElementById('groupMembersModal'); if(existing) existing.remove(); var modal = document.createElement('div'); modal.id='groupMembersModal'; modal.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000000000; display:flex; justify-content:center; align-items:center; padding:20px;'; var listHtml = combined.map((c)=>{ let initial = c.username.replace('@','').charAt(0).toUpperCase(); let bg = c.isAdmin? 'linear-gradient(135deg,#0000FF,#5B8CFF)' : 'linear-gradient(135deg,#1a1aff,#5B8CFF)'; let adminBadge = c.isAdmin? `<span style="background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; padding:3px 9px; border-radius:10px; font-size:10px; font-weight:800; margin-left:6px; border:1px solid #FFFFFF88;">Admin</span>` : ''; let btns = ''; if(!c.isMe) btns += `<button onclick="chatWithMember('${c.username}')" style="background:#0a84ff22; border:1px solid #0a84ff44; color:#0a84ff; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; margin-right:6px;">Chat</button>`; if(amIAdmin &&!c.isAdmin &&!c.isMe) btns += `<button onclick="removeGroupMember('${c.username}','${c.uid}')" style="background:rgba(255,71,87,0.12); border:1px solid rgba(255,71,87,0.25); color:#ff4757; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600;">Remove</button>`; return `<div style="display:flex; align-items:center; padding:12px; border-bottom:1px solid #2a2a40;"><div style="width:40px; height:40px; border-radius:50%; background:${bg}; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; margin-right:12px; border:1px solid #FFFFFF55;">${initial}</div><div style="flex:1;"><div style="color:white; font-weight:600; display:flex; align-items:center; flex-wrap:wrap;">${c.username} ${adminBadge} <span style="margin-left:6px; color:#9a9aab; font-weight:400;">${c.isMe?'(You)':''}</span></div></div><div style="display:flex;">${btns}</div></div>`; }).join(''); modal.innerHTML=`<div style="background:#1e1e2f; width:100%; max-width:380px; border-radius:20px; padding:0; max-height:85vh; overflow-y:auto;"><div style="position:sticky; top:0; background:#1e1e2f; padding:20px; border-bottom:1px solid #2a2a40; display:flex; justify-content:space-between; align-items:center; border-radius:20px 20px 0 0;"><h3 style="margin:0; color:white;">${groupName} - ${combined.length} members</h3><span onclick="closeGroupMembers()" style="font-size:28px; color:#aaa; cursor:pointer;">&times;</span></div><div style="padding:0 0 10px 0;">${listHtml}</div><div style="padding:12px 20px 20px 20px; display:flex; flex-direction:column; gap:10px; border-top:1px solid #2a2a40; background:#1a1a2a; border-radius:0 0 20px 20px;">${amIAdmin?`<button onclick="addGroupMemberPrompt()" style="width:100%; background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; border:none; padding:14px; border-radius:12px; font-weight:800; font-size:15px; border:1px solid #FFFFFF55;">+ Add Members</button>`:''}<button onclick="exitGroup()" style="width:100%; background:#2a2a40; border:1px solid #ff475722; color:#ff6b81; padding:14px; border-radius:12px; font-weight:600;">Exit Group</button></div></div>`; modal.addEventListener('click', function(e){ if(e.target===this) closeGroupMembers(); }); document.body.appendChild(modal); }
 function closeGroupMembers(){ var m=document.getElementById('groupMembersModal'); if(m) m.remove(); }
+function chatWithMember(username){ closeGroupMembers(); closeGroupChat(); let clean = username.replace('@',''); if(typeof openChat==='function'){ openChat(clean); } }
 function listenForGroupInvites(){ var me = getCurrentUser(); if(!me) return; firebase.firestore().collection('groupInvites').where('to','==', me.toLowerCase()).where('status','==','pending').onSnapshot(snap=>{ snap.docChanges().forEach(change=>{ if(change.type==='added'){ showInvitePrompt(change.doc.id, change.doc.data()); } }); }); }
 function showInvitePrompt(inviteId, invite){ if(document.getElementById('inviteModal-'+inviteId)) return; var modal = document.createElement('div'); modal.id='inviteModal-'+inviteId; modal.style.cssText='position:fixed; inset:0; background:rgba(10,37,64,0.82); z-index:1000000002; display:flex; justify-content:center; align-items:center; padding:20px;'; modal.innerHTML=`<div style="background:#fff; width:100%; max-width:360px; border-radius:24px; padding:28px 24px; text-align:center;"><h2 style="color:#0a2540; margin:0 0 8px;">You're Invited!</h2><p style="color:#555;"><b>${invite.from}</b> invited you to join</p><p style="font-size:22px; font-weight:800; color:#0a2540;">${invite.groupName}</p><div style="display:flex; gap:12px; margin-top:20px;"><button onclick="respondToInvite('${inviteId}','declined')" style="flex:1; background:white; border:1.5px solid #d0d9e6; padding:14px; border-radius:14px; font-weight:600;">Decline</button><button onclick="respondToInvite('${inviteId}','accepted')" style="flex:1; background:#0000FF; color:white; padding:14px; border-radius:14px; border:none; font-weight:800;">Join</button></div></div>`; document.body.appendChild(modal); }
 function respondToInvite(inviteId, action){ var modal = document.getElementById('inviteModal-'+inviteId); firebase.firestore().collection('groupInvites').doc(inviteId).get().then(doc=>{ if(!doc.exists) return; var invite = doc.data(); if(action==='accepted'){ var myUid = getMyUid(); var me = getCurrentUser(); if(!myUid) return alert('Not logged in!'); firebase.firestore().collection('groups').doc(invite.groupId).update({ members: firebase.firestore.FieldValue.arrayUnion(myUid), memberUsernames: firebase.firestore.FieldValue.arrayUnion(me) }).then(()=>{ return firebase.firestore().collection('groupInvites').doc(inviteId).delete(); }).then(()=>{ if(modal) modal.remove(); loadGroups(); }); } else { firebase.firestore().collection('groupInvites').doc(inviteId).delete().then(()=>{ if(modal) modal.remove(); }); } }); }
