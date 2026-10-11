@@ -2110,13 +2110,29 @@ function filterChats(type){
   }
 }
 function updateGroupCount(n){
-  const groupsTab = document.getElementById('groupsTab'); if(groupsTab){
+  const allTab = document.getElementById('allTab');
+  if(allTab) allTab.textContent = "DM's";
+
+  const groupsTab = document.getElementById('groupsTab'); 
+  if(groupsTab){
+    groupsTab.style.position='relative';
     let dot = document.getElementById('groupBlueDot');
     let wasVisible = dot && dot.style.display!=='none';
-    groupsTab.textContent = `Groups (${n})`;
-    groupsTab.style.position='relative';
+    
+    // FIXED: don't wipe button, update only span
+    let countSpan = document.getElementById('groupCount');
+    if(countSpan){
+      countSpan.textContent = n;
+    } else {
+      // fallback if span no dey
+      groupsTab.innerHTML = `Groups <span id="groupCount">${n}</span>`;
+    }
+
     if(wasVisible && dot){
-      setTimeout(()=>{ let btn=document.getElementById('groupsTab'); if(btn){ btn.appendChild(dot); dot.style.display='block'; } },20);
+      setTimeout(()=>{ 
+        let btn=document.getElementById('groupsTab'); 
+        if(btn){ btn.appendChild(dot); dot.style.display='block'; } 
+      },20);
     }
   }
 }
