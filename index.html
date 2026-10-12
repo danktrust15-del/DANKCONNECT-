@@ -941,10 +941,26 @@ function showPage(id){
     target.style.color='white';
   }
 
-  // FIX B: hide bottom nav when inside quotesPage, show otherwise
+  // FIX B: hide bottom nav when inside quotesPage, show otherwise + highlight active tab
   const bottomNav = document.getElementById('bottomNav');
   if(bottomNav){
     bottomNav.style.display = (id === 'quotesPage' || id === 'quotes-admin') ? 'none' : 'flex';
+    
+    // FIX C: highlight active tab (Updates white when on updatesPage)
+    const activeName = id.replace('Page','').toLowerCase(); // chats, updates, calls, settings
+    bottomNav.querySelectorAll('div').forEach(tab=>{
+      const txt = tab.textContent.trim().toLowerCase();
+      const isActive = txt === activeName || (activeName==='chats' && txt==='chats') || (activeName==='updates' && txt==='updates') || (activeName==='calls' && txt==='calls') || (activeName==='settings' && txt==='settings') || (activeName==='communities' && txt==='communities');
+      if(isActive){
+        tab.style.color='white';
+        tab.style.fontWeight='bold';
+        tab.style.opacity='1';
+      } else {
+        tab.style.color='#7A8DB0';
+        tab.style.fontWeight='normal';
+        tab.style.opacity='0.8';
+      }
+    });
   }
 }
 function saveQuoteToFirebase(){
