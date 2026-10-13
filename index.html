@@ -1328,6 +1328,10 @@ function openChatProfile(uid){
   console.log('Open profile for:', uid);
   if(window.showTab) window.showTab('profile');
 }
+// ADD THESE TWO AT VERY TOP OF YOUR FILE (outside all functions) — only once
+let typingUnsub = null;
+let messagesUnsub = null;
+
 function openChat(chatId, otherName = 'Chat'){
   activeChatId = chatId;
   activeChatName = otherName;
@@ -1384,21 +1388,7 @@ let typingTimeout;
     });
   }, 2000);
 });
-firebase.firestore().collection('chats').doc(activeChatId).onSnapshot(doc=>{
-  const data = doc.data() || {};
-  const myUid = localStorage.getItem('dank_uid');
-  const otherTyping = Object.keys(data).some(k=>{
-    return k.startsWith('typing_') &&!k.includes(myUid) && data[k] === true;
-  });
-  const tInd = div.querySelector('#typingIndicator');
-  const pmCont = div.querySelector('#privateMessages');
-  if(otherTyping){
-    tInd.style.display = 'inline-flex';
-    pmCont.scrollTop = pmCont.scrollHeight;
-  } else {
-    tInd.style.display = 'none';
-  }
-});
+
 window.updateScrollBtn = function() {
   const nearBottom = pmContainer.scrollHeight - pmContainer.scrollTop - pmContainer.clientHeight < 100;
   if (nearBottom) {
@@ -1584,8 +1574,11 @@ async function sendVoiceNote(){
   }
 }
 }
+
+  // FIXED: Show chat view
   document.getElementById('privateChatView').style.display = 'flex';
   document.getElementById('privateChatTitle').textContent = activeChatName;
+
   // AVATAR FIX + CLICKABLE FIX
   const avatarEl = document.getElementById('privateChatAvatar');
   const titleEl = document.getElementById('privateChatTitle');
@@ -1596,8 +1589,7 @@ async function sendVoiceNote(){
         const myUid = localStorage.getItem('dank_uid');
         let otherUid = (cData.participants||[]).find(id=>id!==myUid) || cData.otherUid || null;
         if(otherUid){
-          window.currentChatOtherUid = otherUid; // save for click
-          // Make clickable
+          window.currentChatOtherUid = otherUid;
           avatarEl.onclick = () => openChatProfile(otherUid);
           if(titleEl) titleEl.onclick = () => openChatProfile(otherUid);
           db.collection('users').doc(otherUid).get().then(uDoc=>{
@@ -1611,12 +1603,40 @@ async function sendVoiceNote(){
       }
     }).catch(()=>{});
   }
+
+  // FIXED: Stop old listeners before starting new ones (STOPS FLICKER)
+  if(typingUnsub){ typingUnsub(); typingUnsub = null; }
+  if(messagesUnsub){ messagesUnsub(); messagesUnsub = null; }
+
+  // FIXED: Typing listener now outside and properly unsubscribed
+  typingUnsub = firebase.firestore().collection('chats').doc(activeChatId).onSnapshot(doc=>{
+    const data = doc.data() || {};
+    const myUid = localStorage.getItem('dank_uid');
+    const otherTyping = Object.keys(data).some(k=>{
+      return k.startsWith('typing_') &&!k.includes(myUid) && data[k] === true;
+    });
+    const tInd = document.getElementById('typingIndicator');
+    const pmCont = document.getElementById('privateMessages');
+    if(!tInd ||!pmCont) return;
+    if(otherTyping){
+      tInd.style.display = 'inline-flex';
+      pmCont.scrollTop = pmCont.scrollHeight;
+    } else {
+      tInd.style.display = 'none';
+    }
+  });
+
   loadPrivateMessages();
 }
+
 function closePrivateChat(){
-  document.getElementById('privateChatView').style.display = 'none';
+  const v = document.getElementById('privateChatView');
+  if(v) v.style.display = 'none';
+  if(typingUnsub){ typingUnsub(); typingUnsub = null; }
+  if(messagesUnsub){ messagesUnsub(); messagesUnsub = null; }
   activeChatId = null;
 }
+
 function getPlayableAudioUrl(url) {
   if (!url) return url;
   if (url.includes('/video/upload/f_mp3/')) return url;
@@ -1627,12 +1647,13 @@ function getPlayableAudioUrl(url) {
   }
   return url;
 }
+
 function loadPrivateMessages(){
     let lastMsgCount = 0;
     let firstPmLoad = true;
   const box = document.getElementById('privateMessages');
   const myUid = localStorage.getItem('dank_uid');
-  firebase.firestore().collection('chats').doc(activeChatId).collection('messages')
+  messagesUnsub = firebase.firestore().collection('chats').doc(activeChatId).collection('messages')
 .orderBy('createdAt')
 .onSnapshot(snap => {
   const wasNearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 150;
@@ -1794,19 +1815,17 @@ function sendPrivateMessage(){
   inp.value = '';
   cancelPrivateReply();
 }
+
 function loadMyChats(){
-    const myUid = localStorage.getItem('dank_uid');
+  const myUid = localStorage.getItem('dank_uid');
   const list = document.getElementById('chatsList');
   if(!list) return;
 
-  // FIX 1: Kill old listener - prevents glitching when DMs grow
   if(window.chatsUnsub) window.chatsUnsub();
 
-  // FIX 2: Save listener so we can kill it next time
   window.chatsUnsub = firebase.firestore().collection('chats')
-.where('participants','array-contains', myUid)
-.onSnapshot(async snap => {
-      list.innerHTML = '';
+ .where('participants','array-contains', myUid)
+ .onSnapshot(async snap => {
       if(snap.empty){
         list.innerHTML = '<div style="text-align:center;color:#888;margin-top:40px;">No chats yet<br>Tap + to start one</div>';
         return;
@@ -1819,7 +1838,6 @@ function loadMyChats(){
         return bTime - aTime;
       });
 
-      // FIX 3: Remove duplicate chats with same user - keep only latest
       let uniqueChats = [];
       let seenUids = new Set();
       for(let c of chats){
@@ -1831,9 +1849,11 @@ function loadMyChats(){
       }
       chats = uniqueChats;
 
-      // PRELOAD all DM photos at once
       let otherUids = chats.map(c=> c.participants.find(u=> u!==myUid)).filter(Boolean);
       await Promise.all(otherUids.map(uid=> resolveUserPhoto(uid)));
+
+      // FIXED: Build offline in fragment — no blank flash when someone types
+      const fragment = document.createDocumentFragment();
 
       chats.forEach(chat => {
         const chatId = chat.id;
@@ -1886,8 +1906,11 @@ function loadMyChats(){
         item.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
         item.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); });
         item.addEventListener('contextmenu', (e) => { e.preventDefault(); askDelete(); });
-        list.appendChild(item);
+        fragment.appendChild(item);
       });
+
+      list.innerHTML = '';
+      list.appendChild(fragment);
     });
 }
 // FIX #4 - alias so filterChats works
@@ -1949,7 +1972,7 @@ async function loadStatuses() {
   });
 }
 loadStatuses();
-
+    
 // === CONFIG - OPTIONAL CLOUDINARY (fill if you want cloudinary) ===
 const CLOUDINARY_CLOUD_NAME = ""; // e.g. "dxxxxxx"
 const CLOUDINARY_UPLOAD_PRESET = ""; // e.g. "dank_unsigned"
