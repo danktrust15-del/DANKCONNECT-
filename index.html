@@ -1312,7 +1312,7 @@ await chatRef.set({
   closeAddUser();
 openChat(chatId, otherUsername);
 }
-    let activeChatId = null;
+let activeChatId = null;
 let activeChatName = '';
 let mediaRecorder;
 let audioChunks = [];
@@ -1329,6 +1329,7 @@ function openChat(chatId, otherName = 'Chat'){
 div.innerHTML = `
 <div style="background:#0000FF;padding:14px 16px;display:flex;align-items:center;gap:12px;">
 <div onclick="closePrivateChat()" style="cursor:pointer;font-size:24px;">></div>
+<img id="privateChatAvatar" src="https://via.placeholder.com/36/ffffff/0000FF?text=@" style="width:36px;height:36px;border-radius:50%;object-fit:cover;background:white;border:2px solid white;">
 <div id="privateChatTitle" style="font-weight:700;flex:1;"></div>
 </div>
 <div id="privateMessages" class="scroll-mid" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;"></div>
@@ -1373,8 +1374,6 @@ let typingTimeout;
     });
   }, 2000);
 });
-
-// listen for other user typing
 firebase.firestore().collection('chats').doc(activeChatId).onSnapshot(doc=>{
   const data = doc.data() || {};
   const myUid = localStorage.getItem('dank_uid');
@@ -1390,7 +1389,6 @@ firebase.firestore().collection('chats').doc(activeChatId).onSnapshot(doc=>{
     tInd.style.display = 'none';
   }
 });
-      
 window.updateScrollBtn = function() {
   const nearBottom = pmContainer.scrollHeight - pmContainer.scrollTop - pmContainer.clientHeight < 100;
   if (nearBottom) {
@@ -1401,7 +1399,7 @@ window.updateScrollBtn = function() {
     scrollBtn.style.display = 'flex';
 if (window.unreadBelow > 0) {
   scrollBadge.style.display = 'flex';
-  scrollBadge.textContent = window.unreadBelow > 99 ? '99+' : window.unreadBelow;
+  scrollBadge.textContent = window.unreadBelow > 99? '99+' : window.unreadBelow;
 } else {
   scrollBadge.style.display = 'none';
   }
@@ -1412,7 +1410,6 @@ if (window.unreadBelow > 0) {
   window.unreadBelow = 0;
   scrollBadge.style.display = 'none';
 });
-
 let touchTarget = null;
 let touchStartY = 0;
 pmContainer.addEventListener('touchstart', e => {
@@ -1436,8 +1433,6 @@ pmContainer.addEventListener('touchmove', e => {
 pmContainer.addEventListener('touchend', e => {
   if (!touchTarget) return;
   const diff = e.changedTouches[0].clientX - touchStartX;
-
-  // snap back
   touchTarget.style.transition = 'transform 0.2s';
   touchTarget.style.transform = 'translateX(0px)';
   setTimeout(()=> {
@@ -1445,14 +1440,12 @@ pmContainer.addEventListener('touchend', e => {
       touchTarget.style.transition = '';
     }
   }, 200);
-
   if(diff > 40 && touchTarget){
     window.replyToId = touchTarget.dataset.msgId;
     window.replyToText = touchTarget.dataset.msgText || touchTarget.innerText.substring(0,60);
     window.replyToImage = touchTarget.dataset.msgImage || '';
     replyPreview.innerHTML = '<b>Replying to:</b> '+(window.replyToImage? '<img src="'+window.replyToImage+'" style="width:40px;height:40px;object-fit:cover;border-radius:4px;vertical-align:middle;">' : window.replyToText)+'<span onclick="cancelPrivateReply()" style="float:right;cursor:pointer;">×</span>';
 replyPreview.style.display = 'block';
-    //... your replyPreview code (lines 1313-1315)
   }
   touchTarget = null;
 }, {passive:true});
@@ -1462,7 +1455,7 @@ replyPreview.style.display = 'block';
 window.replyToId = b.dataset.msgId;
 window.replyToText = b.dataset.msgText || b.innerText.substring(0,60);
 window.replyToImage = b.dataset.msgImage || '';
-replyPreview.innerHTML = '<b>Replying to:</b> '+(window.replyToImage ? '<img src="'+window.replyToImage+'" style="width:40px;height:40px;object-fit:cover;border-radius:4px;vertical-align:middle;">' : window.replyToText)+'<span onclick="cancelPrivateReply()" style="float:right;cursor:pointer;">x</span>';
+replyPreview.innerHTML = '<b>Replying to:</b> '+(window.replyToImage? '<img src="'+window.replyToImage+'" style="width:40px;height:40px;object-fit:cover;border-radius:4px;vertical-align:middle;">' : window.replyToText)+'<span onclick="cancelPrivateReply()" style="float:right;cursor:pointer;">x</span>';
     replyPreview.style.display = 'block';
   }
 });
@@ -1472,19 +1465,16 @@ window.cancelPrivateReply = () => {
   window.replyToImage = null;
   replyPreview.style.display = 'none';
 };
-      // mic <-> send switch + autogrow
 const ta = document.getElementById('privateMsgInput');
 const btn = document.getElementById('privateSendBtn');
 const micSVG = '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2H3v2a9 9 0 0 0 8 8.94V22h2v-1.06A9 9 0 0 0 21 12v-2h-2z"/></svg>';
     const sendSVG = `<svg width="22" height="22" viewBox="0 0 24 24" fill="#1901AF"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>`;
-
 ta.addEventListener('input', () => {
   ta.style.height = 'auto';
   ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
   const hasText = ta.value.trim().length > 0;
-  btn.innerHTML = hasText ? sendSVG : micSVG;
+  btn.innerHTML = hasText? sendSVG : micSVG;
 });
-let mediaRecorder, audioChunks = [], isRecording = false, recTimeout;
 var CLOUD_NAME = "aqx4n0dz";
 var PRESET = "dankconnect_unsigned";
 document.getElementById('mediaBtn').onclick = () => document.getElementById('mediaInput').click();
@@ -1499,8 +1489,8 @@ document.getElementById('mediaInput').addEventListener('change', async (e) => {
 if(data.secure_url){
   const myUid = localStorage.getItem('dank_uid');
   const isImage = data.resource_type === 'image';
-  const msgType = isImage ? 'image' : 'video';
-  const label = isImage ? '📷 Photo' : '🎥 Video';
+  const msgType = isImage? 'image' : 'video';
+  const label = isImage? '📷 Photo' : '🎥 Video';
   await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').add({
     senderId: myUid,
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1517,13 +1507,11 @@ if(data.secure_url){
   }
 });
 const stopIcon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
-
 btn.onclick = () => {
   const hasText = ta.value.trim().length > 0;
   if (hasText) { sendPrivateMessage(); return; }
   if (isRecording) stopRecording(); else startRecording();
 };
-
 async function startRecording() {
   try {
 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1545,30 +1533,24 @@ mediaRecorder._mimeType = mimeType;
     recTimeout = setTimeout(() => { if(isRecording) stopRecording(); }, 120000);
   } catch(err) { alert('Mic permission needed'); }
 }
-
 function stopRecording() {
   clearTimeout(recTimeout);
   isRecording = false;
   btn.innerHTML = micSVG;
   btn.style.background = '#00a884';
   ta.placeholder = 'Message';
-  if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  if(mediaRecorder && mediaRecorder.state!== 'inactive') mediaRecorder.stop();
   if(mediaRecorder && mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t=>t.stop());
 }
-
 async function sendVoiceNote(){
-  console.log('sendVoiceNote called', audioChunks.length, activeChatId);
  const mime = mediaRecorder._mimeType || 'audio/mp4';
  const blob = new Blob(audioChunks, { type: mime });
   audioChunks = [];
-  
   const myUid = localStorage.getItem('dank_uid');
-  if(!activeChatId || !myUid) return;
-
+  if(!activeChatId ||!myUid) return;
   const formData = new FormData();
   formData.append('file', blob);
   formData.append('upload_preset', 'voice_notes2');
-
   try {
   const res = await fetch('https://api.cloudinary.com/v1_1/aqx4n0dz/video/upload', {
       method: 'POST',
@@ -1576,19 +1558,16 @@ async function sendVoiceNote(){
     });
     const data = await res.json();
     if(!data.secure_url) throw new Error('upload failed');
-
     await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').add({
       audioUrl: data.secure_url,
       type: 'voice',
       senderId: myUid,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-
     firebase.firestore().collection('chats').doc(activeChatId).update({
       lastMessage: '🎤 Voice note',
       lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-
   } catch(e){
     console.error(e);
     alert('Voice upload failed');
@@ -1597,9 +1576,28 @@ async function sendVoiceNote(){
 }
   document.getElementById('privateChatView').style.display = 'flex';
   document.getElementById('privateChatTitle').textContent = activeChatName;
+  // AVATAR FIX
+  const avatarEl = document.getElementById('privateChatAvatar');
+  if(avatarEl){
+    db.collection('chats').doc(chatId).get().then(chatDoc=>{
+      if(chatDoc.exists){
+        const cData = chatDoc.data();
+        const myUid = localStorage.getItem('dank_uid');
+        let otherUid = (cData.participants||[]).find(id=>id!==myUid) || cData.otherUid || null;
+        if(otherUid){
+          db.collection('users').doc(otherUid).get().then(uDoc=>{
+            if(uDoc.exists && uDoc.data().photoURL){
+              avatarEl.src = uDoc.data().photoURL;
+            } else if(uDoc.exists && uDoc.data().avatar){
+              avatarEl.src = uDoc.data().avatar;
+            }
+          });
+        }
+      }
+    }).catch(()=>{});
+  }
   loadPrivateMessages();
 }
-
 function closePrivateChat(){
   document.getElementById('privateChatView').style.display = 'none';
   activeChatId = null;
@@ -1624,7 +1622,6 @@ function loadPrivateMessages(){
 .onSnapshot(snap => {
   const wasNearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 150;
   const newCount = snap.size;
-
   box.innerHTML = '';
   snap.forEach(d => {
   const m = d.data();
@@ -1668,12 +1665,10 @@ let h = td.getHours(); const ap = h >= 12? 'PM' : 'AM'; h = h % 12 || 12;
 const min = String(td.getMinutes()).padStart(2,'0');
 const metaRow = document.createElement('div');
 metaRow.style.cssText = 'display:flex;justify-content:flex-end;align-items:center;gap:4px;margin-top:4px;line-height:1;';
-
 const timeSpan = document.createElement('span');
 timeSpan.style.cssText = 'font-size:10px;opacity:0.7;';
 timeSpan.textContent = h + ':' + min + ' ' + ap;
 metaRow.appendChild(timeSpan);
-
 if (isMe) {
   const tickSpan = document.createElement('span');
   tickSpan.style.cssText = 'font-size:14px;font-weight:700;letter-spacing:-1px;line-height:1;margin-left:4px;';
@@ -1785,7 +1780,7 @@ function sendPrivateMessage(){
   cancelPrivateReply();
 }
 function loadMyChats(){
-  const myUid = localStorage.getItem('dank_uid');
+    const myUid = localStorage.getItem('dank_uid');
   const list = document.getElementById('chatsList');
   if(!list) return;
   firebase.firestore().collection('chats')
@@ -2450,5 +2445,5 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 setTimeout(()=>{ try{ loadMyTopAvatar(); }catch(e){} }, 1500);
 </script>
-</b0dy>
+</body>
 </html>
