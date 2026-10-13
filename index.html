@@ -340,9 +340,7 @@ if (window._currentStatusIndex < 0) window._currentStatusIndex = 0;
   viewer.style.display = 'block';
   window._currentStatus = d;
 
-// Timer - 5s image, 15s video with pause support - WhatsApp segmented bars
 const DURATION = isVideo? 15000 : 5000;
-
 const container = document.getElementById('statusProgressContainer');
 container.innerHTML = '';
 const list = passedList || window._currentUserStatuses || [d];
@@ -375,11 +373,10 @@ window._elapsed = 0;
       progress.style.width = pct + '%';
       if(pct >= 100) clearInterval(progressInterval);
     }, 50);
-statusTimer = setTimeout(()=>{ if(idx < list.length-1){ openStatus(list[idx+1], list, idx+1); } else { closeStatusViewer(); } }, remaining); 
+statusTimer = setTimeout(()=>{ if(idx < list.length-1){ openStatus(list[idx+1], list, idx+1); } else { closeStatusViewer(); } }, remaining);
 }
 startTimers();
 
-  // Pause when reply bar tapped
   const replyBar = document.getElementById('statusReplyBar');
   const replyInput = replyBar? replyBar.querySelector('input') : null;
   if(replyInput &&!replyInput.dataset.pauseBound){
@@ -407,25 +404,27 @@ startTimers();
   if(isMine){
     replyBar.style.display = 'none';
     document.getElementById('vcount').style.display = 'flex';
-    console.log('opening status', d);
     const sid = d.id || window.currentStatusId;
-    console.log('loading replies for', sid);
     loadStatusReplies(sid);
   } else {
     replyBar.style.display = 'flex';
     document.getElementById('vcount').style.display = 'none';
     repliesPanel.style.display = 'none';
   }
+
 if(!isMine){
-try{
-const db = firebase.firestore();
-const myName = localStorage.getItem('dank_username') || localStorage.getItem('dank_name') || 'Someone';
-db.collection('statusViews').where('statusId','==',d.id).where('viewerId','==',myUid).limit(1).get().then((existing)=>{
-if(existing.empty){
-db.collection('statusViews').add({ statusId: d.id, viewerId: myUid, viewerName: myName, viewedAt: firebase.firestore.FieldValue.serverTimestamp() });
-}
-}).catch((e)=>{ console.log("view save failed", e); });
-}catch(e){ console.log("view save failed", e); }
+  window._viewedCache = window._viewedCache || new Set();
+  window._viewedCache.add(d.id);
+  try{
+    const key = 'dank_viewed_' + myUid;
+    const arr = JSON.parse(localStorage.getItem(key) || '[]');
+    if(!arr.includes(d.id)){ arr.push(d.id); localStorage.setItem(key, JSON.stringify(arr)); }
+  }catch(e){}
+  try{
+    const db = firebase.firestore();
+    const myName = localStorage.getItem('dank_username') || localStorage.getItem('dank_name') || 'Someone';
+    db.collection('statusViews').add({ statusId: d.id, viewerId: myUid, viewerName: myName, viewedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }catch(e){ console.log("view save failed", e); }
 }
 if(isMine){
 try{
@@ -440,27 +439,26 @@ vnum.textContent = unique.size;
 }).catch((e)=>{ vnum.textContent = '0'; });
 }catch(e){ vnum.textContent = '0'; }
 }
-}      
+}
 let currentStatusList = [];
 let currentStatusIndex = 0;
 
 function openStatusList(list, idx) {
+  currentStatusList = list;
+  currentStatusIndex = idx;
   window._currentUserStatuses = list;
   window._currentStatusIndex = idx;
   openStatus(list[idx], list, idx);
 }
-// Called when clicking the "Replied to status" thumbnail in private chat
+
 window.openQuotedStatus = function(statusData){
   const old = document.getElementById('quotedStatusViewer');
   if(old) old.remove();
-
   const mediaUrl = statusData.mediaUrl || statusData.url || statusData.img || statusData.image || '';
   const isVideo = mediaUrl.match(/\.(mp4|webm|mov)/i) || statusData.type === 'video';
-
   const overlay = document.createElement('div');
   overlay.id = 'quotedStatusViewer';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10002;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
-
   overlay.innerHTML = `
     <div style="position:absolute;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:center;z-index:2;">
       <button id="qsClose" style="width:42px;height:42px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;font-size:20px;cursor:pointer;">✕</button>
@@ -470,35 +468,30 @@ window.openQuotedStatus = function(statusData){
       </div>
     </div>
     ${isVideo
-     ? `<video src="${mediaUrl}" controls autoplay playsinline style="max-width:100%;max-height:85vh;border-radius:12px;"></video>`
+? `<video src="${mediaUrl}" controls autoplay playsinline style="max-width:100%;max-height:85vh;border-radius:12px;"></video>`
       : `<img src="${mediaUrl}" style="max-width:100%;max-height:85vh;border-radius:12px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,0.5);">`
     }
   `;
-
   document.body.appendChild(overlay);
-
   overlay.querySelector('#qsClose').onclick = ()=> overlay.remove();
   overlay.onclick = (e)=>{ if(e.target === overlay) overlay.remove(); };
-
   overlay.querySelector('#qsView').onclick = ()=>{
     overlay.remove();
     if(window.openStatus) window.openStatus(statusData);
   };
 };
+
 async function sendStatusReply(){
   try{
 const input = document.getElementById('statusReplyInput');
 const text = input.value.trim();
 if(!text){ alert('Type something first'); return; }
-input.value = ''; // <-- ADD THIS LINE HERE
+input.value = '';
 if(!window._currentStatus){ alert('No status loaded'); return; }
-
     const d = window._currentStatus;
     const db = firebase.firestore();
     const myUid = localStorage.getItem('dank_uid');
     const senderName = localStorage.getItem('dank_username') || 'Someone';
-
-    // 1. Your existing panel
     await db.collection('statusReplies').add({
       statusId: d.id,
       statusOwnerId: d.userId,
@@ -508,14 +501,11 @@ if(!window._currentStatus){ alert('No status loaded'); return; }
       senderName: senderName,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-
-    // 2. ALSO send to private 1-1 chat
     try{
       const participants = [myUid, d.userId].sort();
       const chatId = participants.join('_');
       const chatRef = db.collection('chats').doc(chatId);
       const chatSnap = await chatRef.get();
-
       if(!chatSnap.exists){
         await chatRef.set({
           participants: participants,
@@ -529,7 +519,6 @@ if(!window._currentStatus){ alert('No status loaded'); return; }
           lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       }
-
       await chatRef.collection('messages').add({
   senderId: myUid,
   text: text,
@@ -540,36 +529,28 @@ if(!window._currentStatus){ alert('No status loaded'); return; }
   createdAt: firebase.firestore.FieldValue.serverTimestamp()
 });
     } catch(e){ console.error('DM send error', e); }
-
     input.value = '';
   } catch(e){
     console.error(e);
     alert('Reply failed: ' + e.message);
   }
 }
+
 async function loadStatusReplies(statusId){
   const panel = document.getElementById('statusRepliesPanel');
   const list = document.getElementById('statusRepliesList');
   const db = firebase.firestore();
-  
   try {
-    const snap = await db.collection('statusReplies')
-      .where('statusId','==',statusId)
-      .get();
-    
-    console.log('Replies found:', snap.size);
-    
+    const snap = await db.collection('statusReplies').where('statusId','==',statusId).get();
     if(snap.empty){
       panel.style.display = 'none';
       return;
     }
-    
     panel.style.display = 'block';
     list.innerHTML = '';
     let docs = [];
     snap.forEach(doc=> docs.push(doc.data()));
     docs.sort((a,b)=> (b.createdAt?.toMillis?.()||0) - (a.createdAt?.toMillis?.()||0));
-    
     docs.forEach(r=>{
       const div = document.createElement('div');
       div.style.cssText = 'color:white;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:13px;';
@@ -580,13 +561,13 @@ async function loadStatusReplies(statusId){
     console.error('load replies error', e);
   }
 }
+
 async function showViewers(statusId) {
   if (window.event) window.event.stopPropagation();
-  if (typeof progressInterval !== 'undefined' && progressInterval) clearInterval(progressInterval);
-  if (typeof statusTimer !== 'undefined' && statusTimer) clearTimeout(statusTimer);
+  if (typeof progressInterval!== 'undefined' && progressInterval) clearInterval(progressInterval);
+  if (typeof statusTimer!== 'undefined' && statusTimer) clearTimeout(statusTimer);
   try { document.getElementById('statusVideo').pause(); } catch(e){}
   window._isPaused = true;
-
   const closeAndResume = (overlay) => {
     if (overlay) overlay.remove();
     if (!window._isPaused) return;
@@ -595,19 +576,18 @@ async function showViewers(statusId) {
     const video = document.getElementById('statusVideo');
     const DURATION = window._DURATION || 5000;
     let elapsed = window._elapsed || 0;
-    const isVideo = video && video.style.display !== 'none';
+    const isVideo = video && video.style.display!== 'none';
     if (isVideo) { try { video.play().catch(()=>{}); } catch(e){} }
     progressInterval = setInterval(()=>{
       elapsed += 50;
       window._elapsed = elapsed;
       const pct = Math.min((elapsed / DURATION) * 100, 100);
-      progress.style.width = pct + '%';
+      if(progress) progress.style.width = pct + '%';
       if (pct >= 100) clearInterval(progressInterval);
     }, 50);
     const remaining = Math.max(DURATION - elapsed, 500);
     statusTimer = setTimeout(()=>{ closeStatusViewer(); }, remaining);
   };
-
   try {
     const db = firebase.firestore();
     const snap = await db.collection('statusViews').where('statusId', '==', statusId).get();
@@ -638,15 +618,16 @@ viewers.forEach(v => {
     overlay.onclick = (e) => { if (e.target === overlay) closeAndResume(overlay); };
   } catch(err) { console.log('showViewers error', err); }
 }
-// Override close to allow next
+
 function closeStatusViewer(){
   if(statusTimer) clearTimeout(statusTimer);
   if(progressInterval) clearInterval(progressInterval);
   document.getElementById('statusViewer').style.display='none';
-  document.getElementById('statusRepliesPanel').style.display = 'none';  const video=document.getElementById('statusVideo');
+  const rp = document.getElementById('statusRepliesPanel');
+  if(rp) rp.style.display = 'none';
+  const video=document.getElementById('statusVideo');
   if(video){ try{video.pause();}catch(e){} video.src=''; }
-
-  // Auto go to next status in list if exists
+  if(typeof loadStatuses === 'function') loadStatuses();
   if(currentStatusList.length > 1 && currentStatusIndex < currentStatusList.length - 1){
     currentStatusIndex++;
     setTimeout(()=> openStatusList(currentStatusList, currentStatusIndex), 200);
@@ -662,14 +643,101 @@ async function deleteCurrentStatus(){
   try{
     await firebase.firestore().collection('statuses').doc(window._currentStatus.id).delete();
     closeStatusViewer();
-    location.reload();
+    loadStatuses();
   }catch(e){ alert('Delete failed: '+e.message); }
 }
 
 function closeViewers(){
-  document.getElementById('viewersModal').style.display = 'none';
+  const m = document.getElementById('viewersModal');
+  if(m) m.style.display = 'none';
 }
 
+async function loadStatuses() {
+  const db = firebase.firestore();
+  const now = Date.now();
+  const myUid = localStorage.getItem('dank_uid');
+  const allowedIds = new Set();
+  try {
+    const chatsSnap = await db.collection('chats').where('participants', 'array-contains', myUid).get();
+    chatsSnap.forEach(doc => { const parts = doc.data().participants || []; parts.forEach(id => { if (id!== myUid) allowedIds.add(id); }); });
+  } catch(e) {}
+
+  const snap = await db.collection('statuses').where('expiresAt', '>', now).get();
+
+  let viewedIds = new Set(window._viewedCache || []);
+  try {
+    const key = 'dank_viewed_' + myUid;
+    const localArr = JSON.parse(localStorage.getItem(key) || '[]');
+    localArr.forEach(id => viewedIds.add(id));
+  } catch(e){}
+  try {
+    const vSnap = await db.collection('statusViews').where('viewerId','==',myUid).get();
+    vSnap.forEach(d => { if(d.data().statusId) viewedIds.add(d.data().statusId); });
+  } catch(e) {}
+
+  const byUser = {};
+  snap.forEach(doc => {
+    const d = doc.data();
+    if (d.userId!== myUid &&!allowedIds.has(d.userId)) return;
+    if (!byUser[d.userId]) byUser[d.userId] = [];
+    byUser[d.userId].push({id: doc.id,...d});
+  });
+
+  const container = document.getElementById('statusRings');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const myItems = byUser[myUid] || [];
+  myItems.sort((a,b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+  const myDiv = document.createElement('div');
+  myDiv.style.textAlign = 'center';
+  myDiv.style.cursor = 'pointer';
+  if (myItems.length > 0) {
+    const first = myItems[0];
+    myDiv.innerHTML = `<div style="position:relative;width:64px;height:64px;margin:0 auto;"><div style="width:64px;height:64px;border-radius:50%;border:3px solid #0000FF;padding:2px"><img src="${first.mediaUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div><div onclick="event.stopPropagation(); addStatus()" style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:#1E90FF;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid #0b141a;cursor:pointer;">+</div></div><div style="font-size:12px;margin-top:6px;color:white">My Status</div>`;
+    myDiv.onclick = () => openStatusList(myItems, 0);
+  } else {
+    myDiv.innerHTML = `<div style="width:64px;height:64px;border-radius:50%;border:2px dashed #1E90FF;display:flex;align-items:center;justify-content:center;font-size:28px;color:#1E90FF;background:#0F2447;">+</div><div style="font-size:12px;margin-top:6px;color:white">My Status</div>`;
+    myDiv.onclick = () => addStatus();
+  }
+  container.appendChild(myDiv);
+
+  Object.keys(byUser).forEach(uid => {
+    if (uid === myUid) return;
+    const items = byUser[uid];
+    if(!items.length) return;
+    const first = items[0];
+    const hasUnviewed = items.some(s =>!viewedIds.has(s.id));
+    const ringColor = hasUnviewed? '#1E90FF' : '#5a6b7a';
+    const div = document.createElement('div');
+    div.style.textAlign = 'center';
+    div.style.cursor = 'pointer';
+    div.innerHTML = `<div style="width:64px;height:64px;border-radius:50%;border:3px solid ${ringColor};padding:2px"><img src="${first.mediaUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div><div style="font-size:12px;margin-top:6px;color:white">${first.username}</div>`;
+    div.onclick = () => openStatusList(items, 0);
+    container.appendChild(div);
+  });
+}
+
+const statusInputEl = document.getElementById('statusInput');
+if (statusInputEl) {
+  statusInputEl.onchange = async function() {
+    const file = this.files[0]; if(!file) return;
+    const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', 'dank_status');
+    const res = await fetch('https://api.cloudinary.com/v1_1/aqx4n0dz/auto/upload', {method:'POST', body:fd});
+    const data = await res.json();
+    const db = firebase.firestore();
+    await db.collection('statuses').add({
+      userId: localStorage.getItem('dank_uid'),
+      username: localStorage.getItem('dank_username') || 'Me',
+      mediaUrl: data.secure_url,
+      type: data.resource_type === 'image'? 'image' : 'video',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      expiresAt: Date.now() + 24*60*60*1000
+    });
+    loadStatuses();
+  };
+}
+loadStatuses();
 </script>
     <!-- Bottom nav -->
 <div id="bottomNav" class="sticky-bottom" style="display:flex; flex-direction:row; justify-content:space-around; align-items:center; padding:10px 0 20px; background:#0b141a; border-top:1px solid #1f2c34; width:100%;">
