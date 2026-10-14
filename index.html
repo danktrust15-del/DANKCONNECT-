@@ -1400,10 +1400,51 @@ function openChatProfile(uid){
 let typingUnsub = null;
 let messagesUnsub = null;
 
+function formatChatTime(ts, fallbackLocal){
+  if(!ts && fallbackLocal){
+    const d = new Date(fallbackLocal);
+    let h = d.getHours(); const ap = h >= 12? 'PM' : 'AM'; h = h % 12 || 12;
+    const m = String(d.getMinutes()).padStart(2,'0');
+    return h + ':' + m + ' ' + ap;
+  }
+  if(!ts) return "now";
+  let d;
+  try{
+    d = ts.toDate? ts.toDate() : new Date(ts);
+  }catch(e){
+    if(fallbackLocal) return formatChatTime(null, fallbackLocal);
+    return "now";
+  }
+  if(isNaN(d.getTime())){
+    if(fallbackLocal){
+      const dd = new Date(fallbackLocal);
+      let h = dd.getHours(); const ap = h >= 12? 'PM' : 'AM'; h = h % 12 || 12;
+      const m = String(dd.getMinutes()).padStart(2,'0');
+      return h + ':' + m + ' ' + ap;
+    }
+    return "now";
+  }
+  const now = new Date();
+  const diffMs = now - d;
+  if(Math.abs(diffMs) < 60000) {
+    let h = now.getHours(); const ap = h >= 12? 'PM' : 'AM'; h = h % 12 || 12;
+    const m = String(now.getMinutes()).padStart(2,'0');
+    return h + ':' + m + ' ' + ap;
+  }
+  const diff = Math.floor(diffMs / 86400000);
+  if(diff === 0){
+    let h = d.getHours(); const ap = h >= 12? 'PM' : 'AM'; h = h % 12 || 12;
+    const m = String(d.getMinutes()).padStart(2,'0');
+    return h + ':' + m + ' ' + ap;
+  }
+  if(diff === 1) return "Yesterday";
+  if(diff < 7) return d.toLocaleDateString([], {weekday:'short'});
+  return d.toLocaleDateString([], {day:'2-digit', month:'short'});
+}
+
 function openChat(chatId, otherName = 'Chat'){
   activeChatId = chatId;
   activeChatName = otherName;
-
   if(!document.getElementById('privateChatView')){
     const div = document.createElement('div');
     div.id = 'privateChatView';
@@ -1456,7 +1497,6 @@ let typingTimeout;
     });
   }, 2000);
 });
-
 window.updateScrollBtn = function() {
   const nearBottom = pmContainer.scrollHeight - pmContainer.scrollTop - pmContainer.clientHeight < 100;
   if (nearBottom) {
@@ -1568,7 +1608,8 @@ if(data.secure_url){
   });
   firebase.firestore().collection('chats').doc(activeChatId).update({
     lastMessage: label,
-    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+    lastMessageLocal: Date.now()
   });
 } else {
     alert("Upload failed");
@@ -1634,7 +1675,8 @@ async function sendVoiceNote(){
     });
     firebase.firestore().collection('chats').doc(activeChatId).update({
       lastMessage: '🎤 Voice note',
-      lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+      lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastMessageLocal: Date.now()
     });
   } catch(e){
     console.error(e);
@@ -1642,10 +1684,8 @@ async function sendVoiceNote(){
   }
 }
 }
-
   document.getElementById('privateChatView').style.display = 'flex';
   document.getElementById('privateChatTitle').textContent = activeChatName;
-
   const avatarEl = document.getElementById('privateChatAvatar');
   const titleEl = document.getElementById('privateChatTitle');
   if(avatarEl){
@@ -1669,16 +1709,24 @@ async function sendVoiceNote(){
       }
     }).catch(()=>{});
   }
-
   if(typingUnsub){ typingUnsub(); typingUnsub = null; }
   if(messagesUnsub){ messagesUnsub(); messagesUnsub = null; }
-
   typingUnsub = firebase.firestore().collection('chats').doc(activeChatId).onSnapshot(doc=>{
     const data = doc.data() || {};
     const myUid = localStorage.getItem('dank_uid');
-    const otherTyping = Object.keys(data).some(k=>{
-      return k.startsWith('typing_') &&!k.includes(myUid) && data[k] === true;
-    });
+    const otherUid = (data.participants||[]).find(id=> id!==myUid);
+    let otherTyping = false;
+    if(otherUid && data['typing_'+otherUid]===true){
+      let typingAtMs = 0;
+      if(data.typingAt){
+        typingAtMs = data.typingAt.toMillis? data.typingAt.toMillis() : data.typingAt;
+      }
+      const age = Date.now() - typingAtMs;
+      if(typingAtMs===0 || age < 5000) otherTyping = true;
+      else {
+        firebase.firestore().collection('chats').doc(activeChatId).update({['typing_'+otherUid]: false}).catch(()=>{});
+      }
+    }
     const tInd = document.getElementById('typingIndicator');
     const pmCont = document.getElementById('privateMessages');
     if(!tInd ||!pmCont) return;
@@ -1689,10 +1737,8 @@ async function sendVoiceNote(){
       tInd.style.display = 'none';
     }
   });
-
   loadPrivateMessages();
 }
-
 function closePrivateChat(){
   const v = document.getElementById('privateChatView');
   if(v) v.style.display = 'none';
@@ -1700,7 +1746,6 @@ function closePrivateChat(){
   if(messagesUnsub){ messagesUnsub(); messagesUnsub = null; }
   activeChatId = null;
 }
-
 function getPlayableAudioUrl(url) {
   if (!url) return url;
   if (url.includes('/video/upload/f_mp3/')) return url;
@@ -1711,7 +1756,6 @@ function getPlayableAudioUrl(url) {
   }
   return url;
 }
-
 function loadPrivateMessages(){
     let lastMsgCount = 0;
     let firstPmLoad = true;
@@ -1874,7 +1918,8 @@ function sendPrivateMessage(){
   });
   firebase.firestore().collection('chats').doc(activeChatId).update({
     lastMessage: text,
-    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
+    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+    lastMessageLocal: Date.now()
   });
   inp.value = '';
   cancelPrivateReply();
@@ -1885,6 +1930,7 @@ function loadMyChats(){
   const list = document.getElementById('chatsList');
   if(!list) return;
   if(window.chatsUnsub) window.chatsUnsub();
+  window.lastChatsData = window.lastChatsData || {};
   window.chatsUnsub = firebase.firestore().collection('chats')
 .where('participants','array-contains', myUid)
 .onSnapshot(async snap => {
@@ -1895,8 +1941,8 @@ function loadMyChats(){
       let chats = [];
       snap.forEach(doc => chats.push({id: doc.id,...doc.data()}));
       chats.sort((a,b) => {
-        const aTime = a.lastMessageAt? a.lastMessageAt.toMillis() : 0;
-        const bTime = b.lastMessageAt? b.lastMessageAt.toMillis() : 0;
+        const aTime = a.lastMessageAt? a.lastMessageAt.toMillis() : (a.lastMessageLocal||0);
+        const bTime = b.lastMessageAt? b.lastMessageAt.toMillis() : (b.lastMessageLocal||0);
         return bTime - aTime;
       });
       let uniqueChats = [];
@@ -1911,6 +1957,44 @@ function loadMyChats(){
       chats = uniqueChats;
       let otherUids = chats.map(c=> c.participants.find(u=> u!==myUid)).filter(Boolean);
       await Promise.all(otherUids.map(uid=> resolveUserPhoto(uid)));
+
+      let onlyTypingChanged = true;
+      let newDataSig = {};
+      chats.forEach(c=>{
+        newDataSig[c.id] = (c.lastMessage||'') + '|' + (c.lastMessageAt? c.lastMessageAt.toMillis():c.lastMessageLocal||0);
+        if(window.lastChatsData[c.id]!== newDataSig[c.id]) onlyTypingChanged = false;
+      });
+      if(Object.keys(newDataSig).length!== Object.keys(window.lastChatsData).length) onlyTypingChanged = false;
+      if(onlyTypingChanged && document.getElementById('chat_item_'+chats[0].id)){
+        chats.forEach(chat=>{
+          const otherUid = chat.participants.find(u=> u!==myUid);
+          let otherTyping = false;
+          if(otherUid && chat['typing_'+otherUid]===true){
+            let typingAtMs = 0;
+            if(chat.typingAt){
+              typingAtMs = chat.typingAt.toMillis? chat.typingAt.toMillis() : chat.typingAt;
+            }
+            const age = Date.now() - typingAtMs;
+            if(typingAtMs===0 || age < 5000) otherTyping = true;
+          }
+          const lastEl = document.getElementById('last_'+chat.id);
+          if(lastEl && otherTyping){
+            if(!lastEl.dataset.original) lastEl.dataset.original = chat.lastMessage||'';
+            lastEl.innerHTML = '<i style="color:#7a8bff;">typing...</i>';
+          } else if(lastEl && otherTyping===false){
+            if(lastEl.dataset.original){
+              lastEl.textContent = lastEl.dataset.original;
+              delete lastEl.dataset.original;
+            } else {
+              lastEl.textContent = chat.lastMessage||'';
+            }
+          }
+        });
+        return;
+      }
+      window.lastChatsData = newDataSig;
+
+      list.innerHTML = '';
       const fragment = document.createDocumentFragment();
       chats.forEach(chat => {
         const chatId = chat.id;
@@ -1918,24 +2002,87 @@ function loadMyChats(){
         const otherName = (chat.usernames && chat.usernames[otherUid]) || (chat.names && chat.names[otherUid]) || 'Chat';
         const otherPhoto = window.userPhotoCache[otherUid] || null;
         const avatarHtml = otherPhoto? `<img src="${otherPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : otherName.charAt(0).toUpperCase();
+        const timeText = formatChatTime(chat.lastMessageAt, chat.lastMessageLocal);
+        const otherUidForTyping = otherUid;
+        let otherTyping = false;
+        if(otherUidForTyping && chat['typing_'+otherUidForTyping]===true){
+          let typingAtMs = 0;
+          if(chat.typingAt){
+            typingAtMs = chat.typingAt.toMillis? chat.typingAt.toMillis() : chat.typingAt;
+          }
+          const age = Date.now() - typingAtMs;
+          if(typingAtMs===0 || age < 5000) otherTyping = true;
+          else {
+            firebase.firestore().collection('chats').doc(chatId).update({['typing_'+otherUidForTyping]: false}).catch(()=>{});
+          }
+        }
+        const previewText = otherTyping? '<i style="color:#7a8bff;">typing...</i>' : (chat.lastMessage||'').replace(/</g,'&lt;');
         const item = document.createElement('div');
+        item.id = 'chat_item_' + chatId;
         item.style.cssText = 'padding:14px 12px;border-bottom:1px solid #1f2c34;cursor:pointer;display:flex;align-items:center;gap:12px;';
-        item.innerHTML = `<div style="width:48px;height:48px;border-radius:50%;background:#1900B3;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;overflow:hidden;">${avatarHtml}</div><div style="flex:1;"><div style="font-weight:600;color:white;">${otherName}</div><div style="color:#888;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${chat.lastMessage || ''}</div></div>`;
-        item.onclick = () => openChat(chatId, otherName);
-        let pressTimer = null;
-        window.customDeleteChoice = function(){
-          return new Promise(resolve => {
-            const overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999999;';
-            overlay.innerHTML = `<div style="background:#1f1f1f;color:#fff;border-radius:12px;padding:20px;width:300px;text-align:center;"><div style="font-weight:600;margin-bottom:16px;">Delete this message?</div><div id="delEveryone" style="padding:12px;background:#ff4444;border-radius:8px;margin-bottom:8px;cursor:pointer;">Delete for everyone</div><div id="delMe" style="padding:12px;background:#333;border-radius:8px;margin-bottom:8px;cursor:pointer;">Delete for me</div><div id="delCancel" style="padding:12px;color:#aaa;cursor:pointer;">Cancel</div></div>`;
-            document.body.appendChild(overlay);
-            const close = (val) => { overlay.remove(); resolve(val); };
-            overlay.onclick = (e) => { if(e.target===overlay) close(null); };
-            overlay.querySelector('#delCancel').onclick = () => close(null);
-            overlay.querySelector('#delMe').onclick = () => close('me');
-            overlay.querySelector('#delEveryone').onclick = () => close('everyone');
-          });
+        item.innerHTML = `
+          <div style="width:48px;height:48px;border-radius:50%;background:#1900B3;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;overflow:hidden;flex-shrink:0;">${avatarHtml}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+              <div style="font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="name_${chatId}">${otherName}</div>
+              <div style="color:#8696a0;font-size:11px;flex-shrink:0;" id="time_${chatId}">${timeText}</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:2px;">
+              <div style="color:#888;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" id="last_${chatId}">${previewText}</div>
+              <div id="badge_${chatId}"></div>
+            </div>
+          </div>
+        `;
+        item.onclick = () => {
+          openChat(chatId, otherName);
+          const badgeEl = document.getElementById('badge_'+chatId);
+          if(badgeEl) badgeEl.innerHTML = '';
+          const nameEl = document.getElementById('name_'+chatId);
+          if(nameEl) nameEl.style.fontWeight = '600';
         };
+        fragment.appendChild(item);
+      });
+      list.appendChild(fragment);
+
+      chats.forEach(async (chat) => {
+        const chatId = chat.id;
+        let unreadCount = 0;
+        try{
+          const snapMsg = await firebase.firestore().collection('chats').doc(chatId).collection('messages').get();
+          snapMsg.forEach(d=>{
+            const md = d.data();
+            if(md.senderId!== myUid && md.read===false &&!(md.hiddenFor && md.hiddenFor.includes(myUid))){
+              unreadCount++;
+            }
+          });
+        }catch(e){}
+        if(unreadCount > 0){
+          const badgeEl = document.getElementById('badge_'+chatId);
+          const timeEl = document.getElementById('time_'+chatId);
+          const nameEl = document.getElementById('name_'+chatId);
+          const lastEl = document.getElementById('last_'+chatId);
+          if(badgeEl){
+            badgeEl.innerHTML = `<div style="background:#1900B3;color:white;min-width:22px;height:22px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;padding:0 6px;">${unreadCount>99?'99+':unreadCount}</div>`;
+          }
+          if(timeEl){
+            timeEl.style.color = '#7a8bff';
+            timeEl.style.fontWeight = '700';
+          }
+          if(nameEl) nameEl.style.fontWeight = '800';
+          if(lastEl &&!lastEl.innerHTML.includes('typing')){
+            lastEl.style.color = 'white';
+            lastEl.style.fontWeight = '600';
+          }
+        }
+      });
+
+      chats.forEach(chat=>{
+        const chatId = chat.id;
+        const otherUid = chat.participants.find(u => u!== myUid);
+        const otherName = (chat.usernames && chat.usernames[otherUid]) || (chat.names && chat.names[otherUid]) || 'Chat';
+        const el = document.getElementById('chat_item_'+chatId);
+        if(!el) return;
+        let pressTimer = null;
         function customConfirm(message) {
           return new Promise((resolve) => {
             const old = document.getElementById('customConfirmOverlay'); if (old) old.remove();
@@ -1959,14 +2106,11 @@ function loadMyChats(){
             await batch.commit(); await chatRef.delete();
           } catch(e) { alert('Delete failed: ' + e.message); }
         };
-        item.addEventListener('touchstart', () => { pressTimer = setTimeout(askDelete, 600); });
-        item.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
-        item.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); });
-        item.addEventListener('contextmenu', (e) => { e.preventDefault(); askDelete(); });
-        fragment.appendChild(item);
+        el.addEventListener('touchstart', () => { pressTimer = setTimeout(askDelete, 600); });
+        el.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
+        el.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); });
+        el.addEventListener('contextmenu', (e) => { e.preventDefault(); askDelete(); });
       });
-      list.innerHTML = '';
-      list.appendChild(fragment);
     });
 }
 var loadChats = loadMyChats;
