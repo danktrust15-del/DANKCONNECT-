@@ -224,16 +224,17 @@ background:#0A0A14;
       <span style="font-size:15px;">Search real users</span>
     </div>
 </div>
-    <!-- FILTER TABS - DM's / Unread / Groups -->
+<!-- FILTER TABS - DM's / Unread / Groups -->
 <div style="display:flex; gap:8px; padding:12px 16px; overflow-x:auto; align-items:center; background:#0a0a14;">
   <button id="allTab" onclick="filterChats('all')" style="background:white; color:black; border:none; padding:8px 16px; border-radius:20px; font-weight:600; cursor:pointer; white-space:nowrap;">DM's</button>
   <button id="unreadTab" onclick="filterChats('unread')" style="background:#232336; color:#9a9aab; border:none; padding:8px 16px; border-radius:20px; font-weight:500; cursor:pointer; white-space:nowrap;">Unread 0</button>
   <button id="groupsTab" onclick="filterChats('groups')" style="background:#232336; color:#9a9aab; border:none; padding:8px 16px; border-radius:20px; font-weight:500; cursor:pointer; white-space:nowrap;">Groups <span id="groupCount">0</span></button>
-<button id="addGroupBtn" onclick="openGroupModal()" style="background:#232336; color:#9a9aab; border:none; width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+  <button id="addGroupBtn" onclick="openGroupModal()" style="background:#232336; color:#9a9aab; border:none; width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
 </div>
+
 <div id="addUserModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999; align-items:center; justify-content:center;">
   <div style="background:#1a2333; padding:20px; border-radius:16px; width:85%; max-width:350px;">
-    <h3 style="margin:0 0 12px 0;">Add New Chat</h3>
+    <h3 style="margin:0 0 12px 0; color:white;">Add New Chat</h3>
     <input id="addUserInput" placeholder="Enter username..." style="width:100%; padding:12px; border-radius:10px; border:none; margin-bottom:12px; box-sizing:border-box;" />
     <div id="addUserResults" style="max-height:200px; overflow-y:auto; margin-bottom:12px;"></div>
     <div style="display:flex; gap:10px;">
@@ -242,8 +243,23 @@ background:#0A0A14;
     </div>
   </div>
 </div>
-  <!-- END HEADER -->
-    <!-- Archived -->
+
+<!-- GROUP CREATE MODAL - FOR + NEXT TO GROUPS -->
+<div id="myGroupModalTest" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000000005; justify-content:center; align-items:center; padding:20px;">
+  <div style="background:#1e1e32; border:1px solid #2a2a4a; padding:24px; border-radius:20px; width:85%; max-width:360px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h3 style="margin:0; color:white; font-size:18px; font-weight:800;">Create New Group</h3>
+      <span onclick="closeGroupModal()" style="color:#9a9aab; font-size:28px; cursor:pointer;">&times;</span>
+    </div>
+    <input id="newGroupName" type="text" placeholder="Group name (e.g. Dank Fam)" style="width:100%; background:#0f0f1a; border:1px solid #2a2a4a; border-radius:12px; padding:14px; color:white; outline:none; font-size:15px; box-sizing:border-box; margin-bottom:4px;" />
+    <div style="display:flex; gap:12px; margin-top:20px;">
+      <button onclick="closeGroupModal()" style="flex:1; background:#2a2a4a; color:#aaa; border:none; padding:14px; border-radius:12px; font-weight:600; cursor:pointer;">Cancel</button>
+      <button onclick="createGroup()" style="flex:1; background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; border:none; padding:14px; border-radius:12px; font-weight:800; cursor:pointer; border:1px solid #FFFFFF55;">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- END HEADER -->    <!-- Archived -->
   <div style="display:flex; align-items:center; gap:20px; padding:12px 24px; color:#8696a0; cursor:pointer;">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8696a0" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
     <span style="font-size:15px;">Archived</span>
@@ -2173,8 +2189,8 @@ async function loadStatuses() {
 loadStatuses();
     
 // === CONFIG - OPTIONAL CLOUDINARY (fill if you want cloudinary) ===
-const CLOUDINARY_CLOUD_NAME = ""; // e.g. "dxxxxxx"
-const CLOUDINARY_UPLOAD_PRESET = ""; // e.g. "dank_unsigned"
+const CLOUDINARY_CLOUD_NAME = "aqx4n0dz";
+const CLOUDINARY_UPLOAD_PRESET = "dank_profile";
 
 function openGroupModal(){
   var m=document.getElementById('myGroupModalTest'); if(!m) return; m.style.display='flex';
@@ -2192,6 +2208,8 @@ function getCurrentUser(){
   if(u){ return u.startsWith('@')? u : '@' + u; }
   return '@lucy';
 }
+var currentGroupName = '';
+window.groupReplyTo = null;
 async function loadMyTopAvatar(){
   try{
     let uid = getMyUid(); if(!uid) return;
@@ -2212,27 +2230,22 @@ async function updateMyProfilePic(input){
   if(file.size > 5*1024*1024) return showDankAlert('⚠️','Too big','Max 5MB please');
   showDankAlert('⏳','Updating','Uploading to Cloudinary...');
   try{
-    const CLOUD_NAME = "aqx4n0dz";
-    const PRESET = "dank_profile";
+    const CLOUD_NAME = CLOUDINARY_CLOUD_NAME || "aqx4n0dz";
+    const PRESET = CLOUDINARY_UPLOAD_PRESET || "dank_profile";
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", PRESET);
     formData.append("folder", "dank-empire/profiles");
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-      method: "POST",
-      body: formData
-    });
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: "POST", body: formData });
     const data = await res.json();
-    const downloadURL = data.secure_url;
-    if(!downloadURL) throw new Error("Cloudinary upload failed: " + JSON.stringify(data));
+    if(!data.secure_url) throw new Error("Cloudinary upload failed: " + JSON.stringify(data));
     let uid = getMyUid();
-    await db.collection('users').doc(uid).set({ photoURL: downloadURL }, {merge:true});
+    await db.collection('users').doc(uid).set({ photoURL: data.secure_url }, {merge:true});
     let el = document.getElementById('myTopAvatar');
-    if(el) el.src = downloadURL;
-    window.userPhotoCache[uid]=downloadURL;
+    if(el) el.src = data.secure_url;
+    window.userPhotoCache[uid]=data.secure_url;
     document.getElementById('dankAlertModal')?.remove();
     showDankAlert('✅','Done','Profile picture updated!');
-    setTimeout(()=>{ document.getElementById('dankAlertModal')?.remove(); }, 1500);
   }catch(e){
     document.getElementById('dankAlertModal')?.remove();
     showDankAlert('❌','Failed', e.message);
@@ -2247,81 +2260,49 @@ async function resolveUserPhoto(uid){
   try{
     let snap = await db.collection('users').doc(uid).get();
     if(snap.exists && snap.data().photoURL){
-      window.userPhotoCache[uid] = snap.data().photoURL;
-      return snap.data().photoURL;
+      window.userPhotoCache[uid]=snap.data().photoURL; return snap.data().photoURL;
     }
-  }catch(e){}
-  return null;
+  }catch(e){} return null;
 }
 async function resolveUsername(uid){
   if(!uid) return uid;
   if(uid.startsWith('@')) return uid;
   if(window.uidUsernameCache[uid]) return window.uidUsernameCache[uid];
-  if(uid === getMyUid()){ let me = getCurrentUser(); window.uidUsernameCache[uid]=me; return me; }
+  if(uid===getMyUid()){ let me=getCurrentUser(); window.uidUsernameCache[uid]=me; return me; }
   try{
     let snap = await db.collection('usernames').where('uid','==',uid).limit(1).get();
     if(!snap.empty){
-      let uname = snap.docs[0].id; if(!uname.startsWith('@')) uname='@'+uname;
+      let uname=snap.docs[0].id; if(!uname.startsWith('@')) uname='@'+uname;
       window.uidUsernameCache[uid]=uname; return uname;
     }
-  }catch(e){}
-  return uid;
+  }catch(e){} return uid;
 }
 async function resolveUsernames(uids){ let out=[]; for(let id of (uids||[])){ out.push(await resolveUsername(id)); } return out; }
-function showDankAlert(icon, title, msg){
+// ===== FIXED Z-INDEX - NOW FRONT =====
+function showDankAlert(icon,title,msg){
   let old=document.getElementById('dankAlertModal'); if(old) old.remove();
   let m=document.createElement('div'); m.id='dankAlertModal';
-  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000000011; display:flex; justify-content:center; align-items:center; padding:20px;';
-  m.innerHTML=`<div style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:24px; width:100%; max-width:340px; padding:28px 24px; text-align:center; animation: popIn 0.2s ease;">
-    <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:26px; border:1px solid #FFFFFF55;">${icon}</div>
-    <h3 style="margin:0 0 8px; color:white; font-size:18px; font-weight:800;">${title}</h3>
-    <p style="margin:0; color:#9a9aab; font-size:14px; line-height:20px;">${msg}</p>
-    <button onclick="document.getElementById('dankAlertModal').remove()" style="width:100%; margin-top:20px; background:white; color:black; border:none; padding:14px; border-radius:12px; font-weight:800; font-size:15px;">Got it</button>
-  </div><style>@keyframes popIn{0%{transform:scale(0.9); opacity:0}100%{transform:scale(1); opacity:1}}</style>`;
-  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
-  document.body.appendChild(m);
+  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000001000; display:flex; justify-content:center; align-items:center; padding:20px;';
+  m.innerHTML=`<div style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:24px; width:100%; max-width:340px; padding:28px 24px; text-align:center;"><div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:26px;">${icon}</div><h3 style="margin:0 0 8px; color:white; font-size:18px; font-weight:800;">${title}</h3><p style="margin:0; color:#9a9aab; font-size:14px;">${msg}</p><button onclick="document.getElementById('dankAlertModal').remove()" style="width:100%; margin-top:20px; background:white; color:black; border:none; padding:14px; border-radius:12px; font-weight:800;">Got it</button></div>`;
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); }); document.body.appendChild(m);
   setTimeout(()=>{ let el=document.getElementById('dankAlertModal'); if(el) el.remove(); }, 3500);
 }
-function showDankPrompt(title, placeholder, onConfirm){
+function showDankPrompt(title,placeholder,onConfirm){
   let old=document.getElementById('dankPromptModal'); if(old) old.remove();
   let m=document.createElement('div'); m.id='dankPromptModal';
-  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:1000000010; display:flex; justify-content:center; align-items:center; padding:20px;';
-  m.innerHTML=`<div style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:20px; width:100%; max-width:360px; padding:24px; animation: popIn 0.2s ease;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <h3 style="margin:0; color:white; font-size:16px; font-weight:700;">${title}</h3>
-      <span onclick="document.getElementById('dankPromptModal').remove()" style="color:#9a9aab; font-size:24px; cursor:pointer;">&times;</span>
-    </div>
-    <div style="position:relative;">
-      <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#5B8CFF; font-weight:800; font-size:16px;">@</span>
-      <input id="dankPromptInput" placeholder="${placeholder}" style="width:100%; background:#0f0f1a; border:1px solid #2a2a4a; border-radius:12px; padding:14px 14px 14px 34px; color:white; outline:none; font-size:15px; box-sizing:border-box;">
-    </div>
-    <div style="display:flex; gap:12px; margin-top:20px;">
-      <button onclick="document.getElementById('dankPromptModal').remove()" style="flex:1; background:#2a2a4a; color:#aaa; border:none; padding:14px; border-radius:12px; font-weight:600;">Cancel</button>
-      <button id="dankPromptOk" style="flex:1; background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; border:none; padding:14px; border-radius:12px; font-weight:800; border:1px solid #FFFFFF55;">Add</button>
-    </div>
-  </div>`;
-  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
-  document.body.appendChild(m);
-  let inp=document.getElementById('dankPromptInput');
-  setTimeout(()=>inp.focus(), 100);
+  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:1000001001; display:flex; justify-content:center; align-items:center; padding:20px;';
+  m.innerHTML=`<div style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:20px; width:100%; max-width:360px; padding:24px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;"><h3 style="margin:0; color:white; font-size:16px; font-weight:700;">${title}</h3><span onclick="document.getElementById('dankPromptModal').remove()" style="color:#9a9aab; font-size:24px; cursor:pointer;">&times;</span></div><div style="position:relative;"><span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#5B8CFF; font-weight:800;">@</span><input id="dankPromptInput" placeholder="${placeholder}" style="width:100%; background:#0f0f1a; border:1px solid #2a2a4a; border-radius:12px; padding:14px 14px 14px 34px; color:white; outline:none; font-size:15px; box-sizing:border-box;"></div><div style="display:flex; gap:12px; margin-top:20px;"><button onclick="document.getElementById('dankPromptModal').remove()" style="flex:1; background:#2a2a4a; color:#aaa; border:none; padding:14px; border-radius:12px;">Cancel</button><button id="dankPromptOk" style="flex:1; background:#0000FF; color:white; border:none; padding:14px; border-radius:12px; font-weight:800;">Add</button></div></div>`;
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); }); document.body.appendChild(m);
+  let inp=document.getElementById('dankPromptInput'); setTimeout(()=>inp.focus(),100);
   document.getElementById('dankPromptOk').onclick=()=>{ let v=inp.value.trim(); if(!v) return; m.remove(); onConfirm(v); };
   inp.onkeydown=(e)=>{ if(e.key==='Enter') document.getElementById('dankPromptOk').click(); };
 }
-function showDankConfirm(icon, title, msg, onYes){
+function showDankConfirm(icon,title,msg,onYes){
   let old=document.getElementById('dankConfirmModal'); if(old) old.remove();
   let m=document.createElement('div'); m.id='dankConfirmModal';
-  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:1000000012; display:flex; justify-content:center; align-items:center; padding:20px;';
-  m.innerHTML=`<div style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:24px; width:100%; max-width:360px; padding:24px; text-align:center;">
-    <div style="width:52px; height:52px; border-radius:50%; background:#ff475722; border:1px solid #ff475744; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:24px;">${icon}</div>
-    <h3 style="margin:0 0 6px; color:white; font-weight:800;">${title}</h3>
-    <p style="margin:0; color:#9a9aab; font-size:13px;">${msg}</p>
-    <div style="display:flex; gap:12px; margin-top:20px;">
-      <button onclick="document.getElementById('dankConfirmModal').remove()" style="flex:1; background:#2a2a4a; color:white; border:none; padding:13px; border-radius:12px; font-weight:600;">Cancel</button>
-      <button id="dankConfirmYes" style="flex:1; background:#ff4757; color:white; border:none; padding:13px; border-radius:12px; font-weight:800;">Yes</button>
-    </div>
-  </div>`;
-  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
-  document.body.appendChild(m);
+  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:1000001002; display:flex; justify-content:center; align-items:center; padding:20px;';
+  m.innerHTML=`<div style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:24px; width:100%; max-width:360px; padding:24px; text-align:center;"><div style="width:52px; height:52px; border-radius:50%; background:#ff475722; border:1px solid #ff475744; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:24px;">${icon}</div><h3 style="margin:0 0 6px; color:white; font-weight:800;">${title}</h3><p style="margin:0; color:#9a9aab; font-size:13px;">${msg}</p><div style="display:flex; gap:12px; margin-top:20px;"><button onclick="document.getElementById('dankConfirmModal').remove()" style="flex:1; background:#2a2a4a; color:white; border:none; padding:13px; border-radius:12px;">Cancel</button><button id="dankConfirmYes" style="flex:1; background:#ff4757; color:white; border:none; padding:13px; border-radius:12px; font-weight:800;">Yes</button></div></div>`;
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); }); document.body.appendChild(m);
   document.getElementById('dankConfirmYes').onclick=()=>{ m.remove(); onYes(); };
 }
 async function createGroup() {
@@ -2336,7 +2317,7 @@ async function createGroup() {
       admins: [myUidLocal], createdBy: myUidLocal, createdByUsername: myUsername,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    nameInput.value = ''; closeGroupModal(); loadGroups();
+    nameInput.value=''; closeGroupModal(); loadGroups();
     setTimeout(()=>{ filterChats('groups'); }, 600);
     showDankAlert('🎉','Group Created', name+' created successfully');
   } catch (e) { showDankAlert('❌','Failed', e.message); }
@@ -2385,260 +2366,376 @@ function listenForGroupCardCounts(){
     });
   }catch(e){}
 }
-function loadGroups(){
-  try{
-    let myUidLocal = getMyUid(); if(!myUidLocal) return;
-    db.collection('groups').where('members', 'array-contains', myUidLocal).onSnapshot(snap=>{
-      window.allGroups = []; snap.forEach(doc=> window.allGroups.push({id:doc.id,...doc.data()}));
-      if(typeof updateGroupCount === 'function') updateGroupCount(snap.size);
-      const groupsBtn = document.getElementById('groupsTab');
-      if(groupsBtn){ groupsBtn.style.position='relative'; let countSpan = document.getElementById('groupCount'); if(countSpan) countSpan.textContent = snap.size; let dot = document.getElementById('groupBlueDot'); let wasVisible = dot && dot.style.display!=='none'; if(wasVisible && dot){ setTimeout(()=>{ let btn=document.getElementById('groupsTab'); if(btn){ btn.appendChild(dot); dot.style.display='block'; } },20); } }
-      setTimeout(()=>{ listenForUnreadGroups(); listenForGroupCardCounts(); loadMyTopAvatar(); }, 600);
-    });
-  }catch(e){}
-}
-function showGroupInfoModal(groupId){
-  try{ event && event.stopPropagation(); }catch(e){}
-  var g = (window.allGroups||[]).find(x=>x.id===groupId); if(!g){ showDankAlert('⚠️','Not Found','Group not found'); return; }
-  currentGroupName = g.name; window.currentGroupId = g.id; window.currentGroupCreator = g.createdBy; window.currentGroupAdmins = g.admins || [g.createdBy]; window.currentGroupCreatorUsername = g.createdByUsername; currentGroupUids = g.members || []; currentGroupUsernames = g.memberUsernames || []; showGroupMembers();
-}
 function filterChats(type){
-  const all = document.getElementById('allTab'); const unread = document.getElementById('unreadTab'); const groups = document.getElementById('groupsTab');
+  const all = document.getElementById('allTab');
+  const unread = document.getElementById('unreadTab');
+  const groups = document.getElementById('groupsTab');
   [all, unread, groups].forEach(b=>{ if(b){ b.style.background='#232336'; b.style.color='#9a9aab'; }});
-  const active = document.getElementById(type+'Tab'); if(active){ active.style.background='white'; active.style.color='black'; }
-  const chatsList = document.getElementById('chatsList') || document.getElementById('chats'); if(!chatsList) return;
-  if(type==='all'){ if(window.loadChats) window.loadChats(); else if(window.loadMyChats) window.loadMyChats(); }
-  else if(type==='groups'){
-    hideGroupTabDotOnly(); chatsList.innerHTML = ''; const groupsData = window.allGroups || [];
-    if(groupsData.length===0){ chatsList.innerHTML = '<div style="padding:30px; text-align:center; color:#9a9aab;">No groups yet</div>'; return; }
+  const active = document.getElementById(type+'Tab');
+  if(active){ active.style.background='white'; active.style.color='black'; }
+  const chatsList = document.getElementById('chatsList') || document.getElementById('chats') || document.getElementById('chatList');
+  if(!chatsList) return;
+  if(type==='all'){ if(window.loadChats) window.loadChats(); else if(window.loadMyChats) window.loadMyChats(); return; }
+  if(type==='groups'){
+    hideGroupTabDotOnly(); chatsList.innerHTML = '';
+    const groupsData = window.allGroups || [];
+    if(groupsData.length===0){
+      chatsList.innerHTML = '<div style="padding:30px; text-align:center; color:#9a9aab;">No groups yet<br><button onclick="openGroupModal()" style="margin-top:12px; background:#0000FF; color:white; border:none; padding:10px 20px; border-radius:20px;">Create Group</button></div>';
+      return;
+    }
     groupsData.forEach(g=>{
       const div = document.createElement('div'); div.id = 'group-'+g.id;
       div.style.cssText = 'display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #1a1a2e; cursor:pointer; background:#0b141a; border-radius:12px; margin:6px 8px;';
       let existingCount = window.groupUnreadCounts[g.id] || 0; let badgeDisplay = existingCount>0? 'flex' : 'none'; let badgeText = existingCount>99? '99+' : existingCount;
-      let avatarUrl = g.avatar || g.photoURL || g.groupPhoto || ''; let avatarHtml = avatarUrl? `<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : `${(g.name||'G')[0].toUpperCase()}`;
-      div.innerHTML = `<div onclick="showGroupInfoModal('${g.id}')" style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#0000FF 0%,#5B8CFF 100%); display:flex; align-items:center; justify-content:center; color:white; font-weight:900; font-size:20px; border:1px solid #FFFFFF55; cursor:pointer; flex-shrink:0; overflow:hidden;">${avatarHtml}</div><div style="flex:1;"><div style="color:white; font-weight:600;">${g.name}</div><div style="color:#9a9aab; font-size:13px;">${g.members?.length || 1} members</div></div><div id="pill-${g.id}" style="position:relative; background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; padding:5px 12px; border-radius:20px; font-size:11px; font-weight:800; border:1px solid #FFFFFF88;">GROUP<span id="badge-${g.id}" style="display:${badgeDisplay}; position:absolute; top:-9px; right:-9px; min-width:22px; height:22px; background:white; color:#00008B; border-radius:50%; font-size:12px; font-weight:900; align-items:center; justify-content:center; padding:0 4px; border:2px solid #0000FF; box-shadow:0 2px 8px rgba(0,0,0,0.4);">${badgeText}</span></div>`;
-      div.onclick = (e)=>{ if(e.target.closest('[onclick*="showGroupInfoModal"]')) return; openRealGroup(g.name, g.members, g.createdBy, g.id, g.memberUsernames, g.createdByUsername, g.admins); };
+      let avatarUrl = g.avatar || g.photoURL || ''; let avatarHtml = avatarUrl? `<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : `${(g.name||'G')[0].toUpperCase()}`;
+      div.innerHTML = `<div class="grp-avatar-btn" data-gid="${g.id}" style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#0000FF 0%,#5B8CFF 100%); display:flex; align-items:center; justify-content:center; color:white; font-weight:900; font-size:20px; border:1px solid #FFFFFF55; cursor:pointer; flex-shrink:0; overflow:hidden;">${avatarHtml}</div><div style="flex:1;"><div style="color:white; font-weight:600;">${g.name}</div><div style="color:#9a9aab; font-size:13px;">${g.members?.length || 1} members</div></div><div style="position:relative; background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; padding:5px 12px; border-radius:20px; font-size:11px; font-weight:800; border:1px solid #FFFFFF88;">GROUP<span id="badge-${g.id}" style="display:${badgeDisplay}; position:absolute; top:-9px; right:-9px; min-width:22px; height:22px; background:white; color:#00008B; border-radius:50%; font-size:12px; font-weight:900; align-items:center; justify-content:center; padding:0 4px; border:2px solid #0000FF;">${badgeText}</span></div>`;
+      div.addEventListener('click', (e)=>{ if(e.target.closest('.grp-avatar-btn')) return; openRealGroup(g.name, g.members, g.createdBy, g.id, g.memberUsernames, g.createdByUsername, g.admins); });
+      let avatarBtn = div.querySelector('.grp-avatar-btn');
+      if(avatarBtn) avatarBtn.addEventListener('click', (e)=>{ e.stopPropagation(); showGroupInfoModal(g.id); });
       chatsList.appendChild(div);
-    }); setTimeout(listenForGroupCardCounts, 300);
+    });
   }
 }
 function updateGroupCount(n){
-  const allTab = document.getElementById('allTab'); if(allTab) allTab.textContent = "DM's";
-  const groupsTab = document.getElementById('groupsTab');
-  if(groupsTab){ groupsTab.style.position='relative'; let dot = document.getElementById('groupBlueDot'); let wasVisible = dot && dot.style.display!=='none'; let countSpan = document.getElementById('groupCount'); if(countSpan){ countSpan.textContent = n; } else { groupsTab.innerHTML = `Groups <span id="groupCount">${n}</span>`; } if(wasVisible && dot){ setTimeout(()=>{ let btn=document.getElementById('groupsTab'); if(btn){ btn.appendChild(dot); dot.style.display='block'; } },20); } }
+  const groupsTab = document.getElementById('groupsTab'); if(!groupsTab) return;
+  groupsTab.style.position='relative';
+  let countSpan = document.getElementById('groupCount');
+  if(countSpan) countSpan.textContent=n;
+  else { let span=document.createElement('span'); span.id='groupCount'; span.textContent=n; groupsTab.appendChild(document.createTextNode(' ')); groupsTab.appendChild(span); }
+  groupsTab.onclick = ()=> filterChats('groups');
+}
+function formatGroupTime(ts){
+  try{
+    if(!ts) return '';
+    let d = ts.toMillis? ts.toDate() : (ts.seconds? new Date(ts.seconds*1000) : new Date());
+    let h = d.getHours(); let m = d.getMinutes().toString().padStart(2,'0');
+    let ampm = h>=12? 'PM':'AM'; h = h%12; h=h? h:12;
+    return `${h}:${m} ${ampm}`;
+  }catch(e){ return ''; }
+}
+function setGroupReplyTo(msg){
+  window.groupReplyTo = msg;
+  let preview = document.getElementById('groupReplyPreview');
+  let txt = document.getElementById('groupReplyPreviewText');
+  if(preview && txt){
+    txt.innerHTML = `<span style="color:#5B8CFF; font-weight:700;">${msg.senderUsername||'User'}</span><br><span style="color:#ccc;">${msg.text.substring(0,60)}</span>`;
+    preview.style.display='flex';
+    document.getElementById('dankGroupInput')?.focus();
+  }
+}
+function clearGroupReply(){
+  window.groupReplyTo=null;
+  let p=document.getElementById('groupReplyPreview'); if(p) p.style.display='none';
+}
+// ===== FIXED GROUP CHAT - TIME + SWIPE/DOUBLE-CLICK REPLY =====
+function openRealGroup(name, members, createdBy, id, memberUsernames, createdByUsername, admins){
+  try{
+    window.currentGroupId = id;
+    window._currentGroupNameForAvatar = name;
+    currentGroupName = name;
+    window._currentGroupIsAdmin = false;
+    let myUid = getMyUid();
+    try{ if(admins && admins.includes(myUid)) window._currentGroupIsAdmin=true; else if(createdBy===myUid) window._currentGroupIsAdmin=true; }catch(e){}
+    let g = (window.allGroups||[]).find(x=>x.id===id);
+    window._currentGroupAvatar = g? (g.avatar || g.photoURL || '') : '';
+    markGroupSeen(id);
+    window.groupReplyTo=null;
+
+    let existing = document.getElementById('dankGroupChatScreen'); if(existing) existing.remove();
+    let screen = document.createElement('div'); screen.id='dankGroupChatScreen';
+    screen.style.cssText='position:fixed; inset:0; background:#0a0a0f; z-index:999999; display:flex; flex-direction:column;';
+    let avatarUrl = window._currentGroupAvatar || '';
+    let avatarHtml = avatarUrl? `<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover;">` : name[0].toUpperCase();
+    screen.innerHTML=`<div style="background:#1e1e32; padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #2a2a4a;">
+      <div onclick="document.getElementById('dankGroupChatScreen').remove()" style="width:36px; height:36px; border-radius:50%; background:#2a2a4a; display:flex; align-items:center; justify-content:center; color:white; font-size:20px; cursor:pointer;">←</div>
+      <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; overflow:hidden; cursor:pointer;" onclick="showGroupMembers()">${avatarHtml}</div>
+      <div style="flex:1; cursor:pointer;" onclick="showGroupMembers()"><div style="color:white; font-weight:700;">${name}</div><div style="color:#9a9aab; font-size:12px;">${members? members.length:''} members • tap for info</div></div>
+      <div onclick="showGroupMembers()" style="color:white; font-size:22px; cursor:pointer;">⋮</div>
+    </div>
+    <div id="dankGroupMessages" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; background:#0b141a;"></div>
+    <div id="groupReplyPreview" style="display:none; background:#1e1e32; border-top:1px solid #2a2a4a; padding:10px 16px; align-items:center; justify-content:space-between; border-left:4px solid #0000FF;">
+      <div id="groupReplyPreviewText" style="flex:1; font-size:13px; color:#aaa; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+      <div onclick="clearGroupReply()" style="color:#ff5a5a; font-size:20px; margin-left:12px; cursor:pointer;">×</div>
+    </div>
+    <div style="padding:12px; background:#1e1e32; border-top:1px solid #2a2a4a; display:flex; gap:10px;"><input id="dankGroupInput" placeholder="Message ${name}" style="flex:1; background:#0f0f1a; border:1px solid #2a2a4a; border-radius:24px; padding:12px 16px; color:white; outline:none;"><button id="dankGroupSendBtn" style="background:#0000FF; color:white; border:none; width:44px; height:44px; border-radius:50%; font-size:18px;">➤</button></div>
+    <div style="text-align:center; color:#5a5a6a; font-size:11px; padding:4px;">Double-click or swipe right to reply</div>
+    `;
+    document.body.appendChild(screen);
+
+    let msgsDiv = document.getElementById('dankGroupMessages');
+    let input = document.getElementById('dankGroupInput');
+    let sendBtn = document.getElementById('dankGroupSendBtn');
+    function sendGroupMessage(){
+      let text = input.value.trim(); if(!text) return;
+      let payload = { groupId:id, text:text, senderUid:getMyUid(), senderUsername:getCurrentUser(), createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+      if(window.groupReplyTo){ payload.replyTo = { text: window.groupReplyTo.text, senderUsername: window.groupReplyTo.senderUsername, id: window.groupReplyTo.id }; }
+      db.collection('groupMessages').add(payload);
+      input.value=''; clearGroupReply();
+    }
+    sendBtn.onclick = sendGroupMessage;
+    input.onkeydown = (e)=>{ if(e.key==='Enter') sendGroupMessage(); };
+
+    db.collection('groupMessages').where('groupId','==',id).onSnapshot(snap=>{
+      msgsDiv.innerHTML='';
+      if(snap.empty){ msgsDiv.innerHTML='<div style="text-align:center; color:#9a9aab; margin-top:40px;">No messages yet<br>Say hi 👋<br><br><small>Double tap a message to reply</small></div>'; return; }
+      let allMsgs=[]; snap.forEach(doc=> allMsgs.push({ id: doc.id,...doc.data()}));
+      allMsgs.sort((a,b)=>{ let at=a.createdAt?.toMillis?a.createdAt.toMillis(): (a.createdAt?.seconds? a.createdAt.seconds*1000:0); let bt=b.createdAt?.toMillis?b.createdAt.toMillis(): (b.createdAt?.seconds? b.createdAt.seconds*1000:0); return at-bt; });
+      allMsgs.forEach(m=>{
+        let isMe=m.senderUid===getMyUid();
+        let timeStr = formatGroupTime(m.createdAt);
+        let wrap=document.createElement('div');
+        wrap.style.cssText=`display:flex; flex-direction:column; max-width:78%; ${isMe? 'align-self:flex-end; align-items:flex-end;' : 'align-self:flex-start;'}; position:relative; touch-action:pan-y;`;
+        let bubble=document.createElement('div');
+        bubble.className='group-msg-bubble';
+        bubble.style.cssText=`padding:10px 14px; border-radius:18px; position:relative; cursor:pointer; user-select:none; ${isMe? 'background:#0000FF; color:white; border-bottom-right-radius:4px;' : 'background:#1e1e32; color:white; border-bottom-left-radius:4px;'}`;
+        let replyHtml='';
+        if(m.replyTo && m.replyTo.text){
+          replyHtml=`<div style="background:${isMe? 'rgba(0,0,0,0.25)':'rgba(255,255,255,0.08)'}; border-left:3px solid ${isMe? 'white':'#5B8CFF'}; padding:6px 8px; border-radius:6px; margin-bottom:6px; font-size:12px;"><div style="font-weight:700; color:${isMe? '#ddd':'#5B8CFF'}; font-size:11px;">${m.replyTo.senderUsername||'User'}</div><div style="opacity:0.9; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${m.replyTo.text}</div></div>`;
+        }
+        bubble.innerHTML=`${replyHtml}${!isMe? `<div style="font-size:11px; color:#5B8CFF; font-weight:700; margin-bottom:2px;">${m.senderUsername||'User'}</div>`:''}<div style="font-size:14px; word-break:break-word;">${m.text}</div>`;
+        bubble.ondblclick=()=>{ setGroupReplyTo(m); };
+        let startX=0;
+        bubble.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; }, {passive:true});
+        bubble.addEventListener('touchend', e=>{
+          let endX=e.changedTouches[0].clientX;
+          if(endX - startX > 60){ setGroupReplyTo(m); bubble.style.transform='translateX(10px)'; setTimeout(()=> bubble.style.transform='translateX(0)',200); }
+        });
+        let meta=document.createElement('div');
+        meta.style.cssText=`display:flex; gap:4px; align-items:center; margin-top:3px; font-size:11px; color:${isMe? '#aab8ff':'#7a7a8a'};`;
+        meta.innerHTML=`<span>${timeStr}</span>${isMe? `<span style="color:#7affa0"> ✓✓</span>`:''}`;
+        wrap.appendChild(bubble);
+        wrap.appendChild(meta);
+        msgsDiv.appendChild(wrap);
+      });
+      msgsDiv.scrollTop = msgsDiv.scrollHeight;
+    });
+  }catch(e){ console.error(e); alert('Failed: '+e.message); }
 }
 
-function ensureGroupChatView(){
-  var v=document.getElementById('groupChatView'); if(v &&!document.getElementById('groupTypingIndicator')){ v.remove(); v=null; } if(v) return v;
-  v=document.createElement('div'); v.id='groupChatView';
-  // WALLPAPER FIXED FOR GROUP
-  v.style.cssText='display:none; position:fixed; inset:0; z-index:9999999; background:#0b141a url(https://res.cloudinary.com/aqx4n0dz/image/upload/IMG-20261013-WA0025.jpg) center/cover no-repeat; flex-direction:column;';
-  v.innerHTML=`
-  <div style="display:flex; align-items:center; gap:12px; padding:14px; background:#1a1a3a; border-bottom:1px solid #2a2a4a;">
-    <button onclick="closeGroupChat()" style="width:36px; height:36px; border-radius:50%; border:none; background:#2a2a4a; color:white;">←</button>
-    <div id="gcAvatar" style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:900; overflow:hidden;" onclick="showGroupMembers()">L</div>
-    <div style="flex:1;" onclick="showGroupMembers()"><div id="gcName" style="color:white; font-weight:700;">Group</div><div id="gcMembers" style="color:#9a9aab; font-size:12px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">members</div></div>
-    <div onclick="showGroupMembers()" style="color:#6c5ce7; font-size:22px; padding:5px 10px; cursor:pointer;">⋮</div>
-  </div>
-  <div id="gcMessages" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:6px; background:transparent;"></div>
-  <div id="groupTypingIndicator" style="display:none; padding:5px 16px 8px 16px; color:#9a9aab; font-size:11px; font-style:italic; align-items:center; gap:8px; background:transparent;">
-    <span style="display:flex; gap:2px; align-items:center; background:#1a1a2e; padding:6px 9px; border-radius:12px;"><span style="width:3px; height:3px; background:#5B8CFF; border-radius:50%; animation: typingDot 1s infinite;"></span><span style="width:3px; height:3px; background:#5B8CFF; border-radius:50%; animation: typingDot 1s infinite 0.2s;"></span><span style="width:3px; height:3px; background:#5B8CFF; border-radius:50%; animation: typingDot 1s infinite 0.4s;"></span></span><span id="groupTypingText">typing...</span>
-  </div>
-  <div id="gcReplyPreview" style="display:none; background:#1f2c34; padding:10px 14px; border-left:4px solid #0000FF; flex-direction:column;">
-    <div style="display:flex; justify-content:space-between;"><span id="gcReplyName" style="color:#5B8CFF; font-weight:700; font-size:12px;">Replying to @user</span><span onclick="cancelReply()" style="color:#aaa; cursor:pointer;">✕</span></div>
-    <div id="gcReplyText" style="color:#8696a0; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">message</div>
-  </div>
-  <div id="gcNormalBar" style="display:flex; align-items:center; gap:8px; padding:10px 12px; background:#1f2c34;">
-    <button onclick="document.getElementById('gcMediaInput').click()" style="width:42px; height:42px; border-radius:50%; border:none; background:transparent; color:#8696a0; display:flex; align-items:center; justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></button>
-    <input id="gcMediaInput" type="file" style="display:none;" accept="image/*,video/*,.pdf,.doc,.docx,.zip" onchange="sendGroupMedia(this)">
-    <div style="flex:1; background:#2a3942; border-radius:24px; display:flex; align-items:center; padding:6px 14px;">
-      <input id="gcInput" placeholder="Type a message" style="flex:1; background:transparent; border:none; color:white; outline:none; font-size:15px;" onkeydown="if(event.key==='Enter') sendGroupMessage()" oninput="toggleMicSend(); handleGroupTypingInput();">
-    </div>
-    <button id="gcMicBtn" onclick="startVoiceNote()" style="width:46px; height:46px; border-radius:50%; border:none; background:#0000FF; color:white; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="23" x2="16" y2="23" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></button>
-    <button id="gcSendBtn" onclick="sendGroupMessage()" style="display:none; width:46px; height:46px; border-radius:50%; border:none; background:#0000FF; color:white; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
-  </div>
-  <div id="gcRecordingBar" style="display:none; align-items:center; gap:12px; padding:10px 12px; background:#1f2c34;">
-    <button onclick="cancelVoiceNote()" style="width:36px; height:36px; border-radius:50%; border:none; background:#ff4757; color:white;">✕</button>
-    <div style="flex:1; display:flex; align-items:center; gap:10px;"><div style="width:10px; height:10px; background:#ff4757; border-radius:50%; animation:pulse 1s infinite;"></div><div id="gcTimer" style="color:white; font-weight:600; font-size:15px;">0:00</div><div id="gcWave" style="flex:1; display:flex; align-items:center; gap:3px; height:24px;"></div></div>
-    <button onclick="stopAndSendVoice()" style="width:46px; height:46px; border-radius:50%; border:none; background:#00a884; color:white; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
-  </div>
-  <style>@keyframes pulse{0%{opacity:1}50%{opacity:0.4}100%{opacity:1}} @keyframes typingDot{0%,60%,100%{opacity:0.3}30%{opacity:1}}</style>`;
-  document.body.appendChild(v); return v;
-}
-var currentGroupName=null; var currentGroupUids=[]; var currentGroupUsernames=[]; var groupMsgUnsub=null;
-var gcRecorder=null; var gcAudioChunks=[]; var gcTimerInt=null; var gcSeconds=0; var replyToMsg=null;
-var groupTypingTimeout=null; var currentGroupIdForTyping=null; var groupTypingUnsub=null;
-function listenForGroupTyping(groupId){
-  currentGroupIdForTyping = groupId; if(groupTypingUnsub){ try{groupTypingUnsub();}catch(e){} groupTypingUnsub=null; }
-  try{ groupTypingUnsub = db.collection('groups').doc(groupId).collection('typing').onSnapshot(snap=>{ const indicator = document.getElementById('groupTypingIndicator'); const textEl = document.getElementById('groupTypingText'); if(!indicator||!textEl) return; const now = Date.now(); const me = getCurrentUser().toLowerCase(); let typingUsers = []; snap.forEach(doc=>{ let d = doc.data(); let uname = doc.id; if(uname.toLowerCase()!==me && (now - (d.time||0) < 4000)){ typingUsers.push(uname); } }); if(typingUsers.length>0){ if(typingUsers.length===1) textEl.textContent = typingUsers[0] + ' is typing...'; else if(typingUsers.length===2) textEl.textContent = typingUsers[0] + ' and ' + typingUsers[1] + ' are typing...'; else textEl.textContent = typingUsers.length + ' people are typing...'; indicator.style.display='flex'; let box = document.getElementById('gcMessages'); if(box) box.scrollTop = box.scrollHeight; } else { indicator.style.display='none'; } }); }catch(e){}
-}
-function handleGroupTypingInput(){ if(!currentGroupIdForTyping) return; const me = getCurrentUser(); try{ db.collection('groups').doc(currentGroupIdForTyping).collection('typing').doc(me).set({ time: Date.now() }); }catch(e){} if(groupTypingTimeout) clearTimeout(groupTypingTimeout); groupTypingTimeout = setTimeout(()=>{ try{ db.collection('groups').doc(currentGroupIdForTyping).collection('typing').doc(me).delete(); }catch(e){} }, 3000); }
-function stopGroupTyping(){ if(!currentGroupIdForTyping) return; const me = getCurrentUser(); try{ db.collection('groups').doc(currentGroupIdForTyping).collection('typing').doc(me).delete(); }catch(e){} const ind = document.getElementById('groupTypingIndicator'); if(ind) ind.style.display='none'; }
-function toggleMicSend(){ let inp=document.getElementById('gcInput'); let mic=document.getElementById('gcMicBtn'); let send=document.getElementById('gcSendBtn'); if(!inp||!mic||!send) return; if(inp.value.trim().length>0){ mic.style.display='none'; send.style.display='flex'; } else { mic.style.display='flex'; send.style.display='none'; } }
-function setReply(m){ replyToMsg = m; let p=document.getElementById('gcReplyPreview'); if(p){ p.style.display='flex'; } let n=document.getElementById('gcReplyName'); if(n){ n.textContent='Replying to '+m.senderUsername; } let t=document.getElementById('gcReplyText'); if(t){ t.textContent=m.text||''; } let inp=document.getElementById('gcInput'); if(inp) inp.focus(); }
-function cancelReply(){ replyToMsg=null; let p=document.getElementById('gcReplyPreview'); if(p) p.style.display='none'; }
-function attachBubbleEvents(row, m){
-  let startX=0, startY=0, longPressTimer=null, moved=false; let lastTap=0;
-  row.addEventListener('touchstart', e=>{ startX = e.touches[0].clientX; startY = e.touches[0].clientY; moved=false; let currentTime = new Date().getTime(); let tapLength = currentTime - lastTap; if(tapLength < 500 && tapLength > 0){ setReply(m); e.preventDefault(); } lastTap = currentTime; longPressTimer = setTimeout(()=>{ if(!moved) showMsgOptions(m); }, 600); }, {passive:false});
-  row.addEventListener('touchmove', e=>{ let dx = e.touches[0].clientX - startX; let dy = e.touches[0].clientY - startY; if(Math.abs(dx)>10 || Math.abs(dy)>10) moved=true; if(Math.abs(dx)>15) clearTimeout(longPressTimer); if(dx>60 && Math.abs(dy)<40){ row.style.transform=`translateX(${Math.min(dx,80)}px)`; row.style.transition='none'; if(dx>65){ setReply(m); row.style.transform='translateX(0)'; clearTimeout(longPressTimer); } } }, {passive:true});
-  row.addEventListener('touchend', ()=>{ clearTimeout(longPressTimer); row.style.transform='translateX(0)'; row.style.transition='transform 0.2s ease'; });
-  row.addEventListener('dblclick', ()=>{ setReply(m); }); row.addEventListener('mousedown', e=>{ startX=e.clientX; longPressTimer=setTimeout(()=>showMsgOptions(m), 700); }); row.addEventListener('mouseup', ()=>{ clearTimeout(longPressTimer); }); row.addEventListener('mouseleave', ()=>{ clearTimeout(longPressTimer); }); row.addEventListener('contextmenu', e=>{ e.preventDefault(); showMsgOptions(m); });
-}
-function showMsgOptions(m){
-  let old=document.getElementById('gcMsgOptions'); if(old) old.remove(); let me = getCurrentUser(); let isMe = m.senderUsername===me || m.senderUid===getMyUid();
-  let modal=document.createElement('div'); modal.id='gcMsgOptions'; modal.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000000005; display:flex; justify-content:center; align-items:flex-end; padding:16px;';
-  modal.innerHTML=`<div style="background:#1e1e2f; width:100%; max-width:380px; border-radius:20px 20px 0 0; overflow:hidden; border:1px solid #2a2a4a;"><div style="padding:16px; text-align:center; color:#9a9aab; font-size:13px; border-bottom:1px solid #2a2a40;">${m.senderUsername} • ${m.text?m.text.substring(0,40):''}</div><div onclick="doReplyFromOptions()" style="padding:16px; color:white; display:flex; gap:12px; cursor:pointer; border-bottom:1px solid #2a2a40;"><span>↩️</span> Reply</div><div onclick="copyMsg()" style="padding:16px; color:white; display:flex; gap:12px; cursor:pointer; border-bottom:1px solid #2a2a40;"><span>📋</span> Copy</div>${isMe?`<div onclick="editMsg()" style="padding:16px; color:white; display:flex; gap:12px; cursor:pointer; border-bottom:1px solid #2a2a40;"><span>✏️</span> Edit</div><div onclick="deleteMsg()" style="padding:16px; color:#ff4757; display:flex; gap:12px; cursor:pointer;"><span>🗑️</span> Delete</div>`:''}<div onclick="closeMsgOptions()" style="padding:16px; text-align:center; color:#aaa; background:#2a2a40; margin-top:8px; border-radius:12px;">Cancel</div></div>`;
-  modal.addEventListener('click', e=>{ if(e.target===modal) closeMsgOptions(); }); document.body.appendChild(modal); modal._data = m;
-}
-function closeMsgOptions(){ let el=document.getElementById('gcMsgOptions'); if(el) el.remove(); }
-function doReplyFromOptions(){ let modal=document.getElementById('gcMsgOptions'); let m=modal?modal._data:null; closeMsgOptions(); if(m) setReply(m); }
-function copyMsg(){ let modal=document.getElementById('gcMsgOptions'); let m=modal?modal._data:null; if(m&&m.text){ navigator.clipboard.writeText(m.text).then(()=>showDankAlert('📋','Copied','Message copied')); } closeMsgOptions(); }
-function editMsg(){ let modal=document.getElementById('gcMsgOptions'); let m=modal?modal._data:null; closeMsgOptions(); if(!m) return; showDankPrompt('Edit Message', m.text, (newText)=>{ if(newText===null) return; db.collection('groupMessages').doc(m.id).update({text:newText.trim(), edited:true}).catch(e=>showDankAlert('❌','Failed',e.message)); }); }
-function deleteMsg(){ let modal=document.getElementById('gcMsgOptions'); let m=modal?modal._data:null; closeMsgOptions(); if(!m) return; showDankConfirm('🗑️','Delete Message','Delete this message permanently?', ()=>{ db.collection('groupMessages').doc(m.id).delete().catch(e=>showDankAlert('❌','Failed',e.message)); }); }
-async function openRealGroup(name, members, creator, groupId, memberUsernames, creatorUsername, admins){
-  currentGroupName=name; window.currentGroupId = groupId || name; window.currentGroupCreator = creator; window.currentGroupAdmins = admins || [creator]; window.currentGroupCreatorUsername = creatorUsername;
-  var v=ensureGroupChatView(); v.style.display='flex'; document.getElementById('gcName').textContent=name;
-  let gData = (window.allGroups||[]).find(x=>x.id===groupId); let avUrl = gData? (gData.avatar || gData.photoURL || '') : ''; let avEl = document.getElementById('gcAvatar');
-  if(avUrl){ avEl.innerHTML = `<img src="${avUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`; avEl.style.background = 'transparent'; } else { avEl.textContent = name.charAt(0).toUpperCase(); avEl.style.background = 'linear-gradient(135deg,#0000FF,#5B8CFF)'; } avEl.style.overflow='hidden';
-  document.getElementById('gcMembers').textContent='Loading...'; let box = document.getElementById('gcMessages'); box.innerHTML='<div style="text-align:center; color:#555; padding:20px;">Loading messages...</div>';
-  try{
-    if(groupId){ let fresh = await db.collection('groups').doc(groupId).get(); if(fresh.exists){ let gd = fresh.data(); members = gd.members || members; memberUsernames = gd.memberUsernames || memberUsernames; creator = gd.createdBy || creator; creatorUsername = gd.createdByUsername || creatorUsername; admins = gd.admins || admins; window.currentGroupCreator = creator; window.currentGroupAdmins = admins; window.currentGroupCreatorUsername = creatorUsername; let freshAv = gd.avatar || gd.photoURL || ''; if(freshAv){ avEl.innerHTML = `<img src="${freshAv}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`; avEl.style.background='transparent'; } } }
-  }catch(e){}
-  currentGroupUids = members || []; let usernames = memberUsernames; if(!usernames || usernames.length!== currentGroupUids.length){ usernames = await resolveUsernames(currentGroupUids); } currentGroupUsernames = usernames;
-  document.getElementById('gcMembers').textContent = usernames.join(', ') + ' | You: ' + getCurrentUser();
-  try{ markGroupSeen(groupId); hideGroupTabDotOnly(); }catch(e){}
-  if(groupMsgUnsub) groupMsgUnsub();
-  groupMsgUnsub = db.collection('groupMessages').where('groupId','==',window.currentGroupId).onSnapshot(async snap=>{
-    box.innerHTML=''; if(snap.empty){ box.innerHTML='<div style="text-align:center; color:#6a6a8a; margin-top:40px;">No messages yet. Say hi</div>'; return; }
-    let list=[]; snap.forEach(doc=> list.push({id:doc.id,...doc.data()})); list.sort((a,b)=> (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
-    let uniqueUids = [...new Set(list.map(x=>x.senderUid).filter(Boolean))];
-    await Promise.all(uniqueUids.map(uid=> resolveUserPhoto(uid)));
-    list.forEach(m=>{
-      let me = getCurrentUser(); let isMe = m.senderUsername===me || m.senderUid===getMyUid(); let sender = m.senderUsername||'@user';
-      let senderPhoto = window.userPhotoCache[m.senderUid] || null;
-      let senderAvatarHtml = senderPhoto? `<img src="${senderPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : sender.replace('@','').charAt(0).toUpperCase();
-      let time = m.createdAt?.toDate? m.createdAt.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : 'now';
-      let ticks = isMe? `<span style="display:inline-flex; margin-left:4px;"><svg width="16" height="11" viewBox="0 0 16 11"><path d="M1 5 L4 8 L7 3" fill="none" stroke="#53bdeb" stroke-width="1.5"/><path d="M6 5 L9 8 L14 3" fill="none" stroke="#53bdeb" stroke-width="1.5"/></svg></span>` : '';
-      let replyHtml = m.replyTo? `<div style="background:${isMe?'#001a8a':'#111b21'}; border-left:3px solid #5B8CFF; padding:4px 8px; border-radius:6px; margin-bottom:6px;"><div style="color:#5B8CFF; font-size:11px; font-weight:700;">${m.replyTo.sender}</div><div style="color:#8696a0; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">${(m.replyTo.text||'').replace(/</g,'&lt;')}</div></div>` : '';
-      let row = document.createElement('div'); row.className='gc-msg-row'; row.dataset.id=m.id; row.style.cssText = isMe? 'display:flex; justify-content:flex-end; margin:6px 0; position:relative; touch-action:pan-y;' : 'display:flex; gap:8px; align-items:flex-end; margin:6px 0; position:relative; touch-action:pan-y;';
-      if(isMe){ row.innerHTML = `<div class="gc-bubble" style="max-width:75%; background:#0000FF; color:white; padding:6px 8px 4px 10px; border-radius:12px 12px 0 12px;">${replyHtml}<div style="font-size:14.5px; line-height:19px; word-break:break-word;">${(m.text||'').replace(/</g,'&lt;')}</div><div style="display:flex; justify-content:flex-end; align-items:center; gap:2px; margin-top:4px;"><span style="font-size:10.5px; color:#c7d2ff;">${time}</span>${ticks}</div></div>`; }
-      else { row.innerHTML = `<div style="width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:12px; flex-shrink:0; overflow:hidden;">${senderAvatarHtml}</div><div class="gc-bubble" style="max-width:70%; background:#202c33; color:white; padding:6px 8px 4px 10px; border-radius:12px 12px 12px 0;"><div style="font-size:12.5px; font-weight:700; color:#5B8CFF; margin-bottom:2px;">${sender}</div>${replyHtml}<div style="font-size:14.5px; line-height:19px; word-break:break-word;">${(m.text||'').replace(/</g,'&lt;')}</div><div style="text-align:right; margin-top:4px;"><span style="font-size:10.5px; color:#8696a0;">${time}</span></div></div>`; }
-      attachBubbleEvents(row, m); box.appendChild(row);
-    }); box.scrollTop = box.scrollHeight;
-  }); listenForGroupTyping(window.currentGroupId);
-}
-function closeGroupChat(){ stopGroupTyping(); if(groupTypingUnsub){ try{groupTypingUnsub();}catch(e){} groupTypingUnsub=null; } if(groupMsgUnsub){ try{groupMsgUnsub();}catch(e){} groupMsgUnsub=null; } var v=document.getElementById('groupChatView'); if(v) v.style.display='none'; currentGroupName=null; cancelReply(); setTimeout(listenForGroupCardCounts, 300); }
-async function sendGroupMessage(){
-  stopGroupTyping(); let inp = document.getElementById('gcInput'); if(!inp) return; let text = inp.value.trim(); if(!text) return;
-  try{ let payload = { groupId: window.currentGroupId, groupName: currentGroupName, senderUid: getMyUid(), senderUsername: getCurrentUser(), text: text, type: 'text', createdAt: firebase.firestore.FieldValue.serverTimestamp() }; if(replyToMsg){ payload.replyTo = {id:replyToMsg.id, sender:replyToMsg.senderUsername, text:replyToMsg.text}; } await db.collection('groupMessages').add(payload); inp.value=''; toggleMicSend(); cancelReply(); }catch(e){ showDankAlert('❌','Send failed', e.message); }
-}
+// ===== NEW PANEL DESIGN - MATCHES YOUR SCREENSHOT =====
 async function showGroupMembers(){
-  var nameEl = document.getElementById('gcName'); var groupName = (nameEl && nameEl.innerText)? nameEl.innerText : (currentGroupName || 'Group');
-  var members = currentGroupUsernames || []; var uids = currentGroupUids || []; var me = getCurrentUser(); var meLower = me.toLowerCase();
-  var creatorUid = window.currentGroupCreator || ''; var creatorUsername = (window.currentGroupCreatorUsername || '').toLowerCase(); var adminUids = window.currentGroupAdmins || [creatorUid];
-  let combined = members.map((m,i)=>({ username: m, uid: uids[i] || m, isAdmin: (uids[i] && (uids[i]===creatorUid || adminUids.includes(uids[i]))) || m.toLowerCase()===creatorUsername, isMe: m.toLowerCase()===meLower })); combined.sort((a,b)=> (b.isAdmin - a.isAdmin));
-  var amIAdmin = combined.some(c=> c.isMe && c.isAdmin) || meLower===creatorUsername;
-  var g = (window.allGroups||[]).find(x=>x.id===window.currentGroupId); var desc = (g && g.description)? g.description : ''; var avatarUrl = (g && (g.avatar || g.photoURL || g.groupPhoto))? (g.avatar || g.photoURL || g.groupPhoto) : '';
-  window._currentGroupIsAdmin = amIAdmin; window._currentGroupAvatar = avatarUrl; window._currentGroupNameForAvatar = groupName;
-  var existing = document.getElementById('groupMembersModal'); if(existing) existing.remove(); var modal = document.createElement('div'); modal.id='groupMembersModal'; modal.style.cssText='position:fixed; inset:0; background:#0b0b1e; z-index:1000000000; display:flex; flex-direction:column; overflow-y:auto;';
-  // PRELOAD member photos
-  await Promise.all(combined.map(c=> resolveUserPhoto(c.uid)));
-  var listHtml = combined.map((c)=>{
-    let photo = window.userPhotoCache[c.uid] || null;
-    let avatarInner = photo? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : c.username.replace('@','').charAt(0).toUpperCase();
-    let adminBadge = c.isAdmin? `<span style="color:#9a9aab; font-size:12px; margin-left:auto;">Admin</span><span style="margin-left:8px; color:#3a3a5a;">›</span>` : `<span style="margin-left:auto; color:#3a3a5a;">›</span>`;
-    return `<div onclick="chatWithMember('${c.username}')" style="display:flex; align-items:center; padding:14px 16px; border-bottom:1px solid #1a1a2e; cursor:pointer;"><div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; overflow:hidden;">${avatarInner}</div><div style="flex:1; margin-left:12px;"><div style="color:white; font-weight:600; font-size:15px;">${c.isMe?'You':c.username}</div>${c.isMe?`<div style="color:#00e676; font-size:12px;">Add member tag</div>`:''}</div>${adminBadge}</div>`;
-  }).join('');
-  let avatarInner = avatarUrl? `<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover;">` : `<div style="font-size:38px; color:#5B8CFF;">👥</div>`; let cameraBadge = amIAdmin? `<div style="position:absolute; bottom:2px; right:2px; width:28px; height:28px; background:linear-gradient(135deg,#0000FF,#5B8CFF); border-radius:50%; border:2px solid #12121f; display:flex; align-items:center; justify-content:center; font-size:14px; color:white;">📷</div>` : '';
-  modal.innerHTML=`
-  <input id="groupAvatarInput" type="file" accept="image/*" style="display:none;" onchange="uploadGroupAvatar(this)">
-  <div style="background:#0b141a; min-height:100vh;">
-    <div style="background:#12121f; padding:14px 16px 24px; border-bottom:1px solid #1a1a2e;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;"><span onclick="closeGroupMembers()" style="color:white; font-size:22px; cursor:pointer;">←</span><div style="display:flex; gap:18px; color:white; font-size:18px;"><span onclick="showDankAlert('📷','QR Code','Group QR coming soon')">◫</span><span>⋮</span></div></div>
-      <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
-        <div onclick="handleGroupAvatarClick()" style="width:96px; height:96px; border-radius:50%; background:linear-gradient(135deg,#0000FF22,#5B8CFF55); border:2px solid #5B8CFF33; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; cursor:pointer; margin-bottom:14px;">${avatarInner}${cameraBadge}</div>
-        <h2 style="margin:0; color:white; font-size:22px; font-weight:800;">${groupName}</h2><p style="margin:6px 0 12px; color:#9a9aab; font-size:13px;">Group · ${combined.length} members</p><div onclick="editGroupDescription()" style="color:#5B8CFF; font-size:14px; cursor:pointer; font-weight:600;">${desc? desc : 'Add group description'}</div>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; margin-top:22px;">
-        <div onclick="showDankAlert('📞','Voice Call','Voice call coming soon')" style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:14px; padding:14px 6px; text-align:center; cursor:pointer;"><div style="font-size:20px;">📞</div><div style="color:white; font-size:12px; margin-top:6px; font-weight:600;">Voice</div></div>
-        <div onclick="showDankAlert('🎥','Video Call','Video call coming soon')" style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:14px; padding:14px 6px; text-align:center; cursor:pointer;"><div style="font-size:20px;">🎥</div><div style="color:white; font-size:12px; margin-top:6px; font-weight:600;">Video</div></div>
-        <div onclick="shareGroup()" style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:14px; padding:14px 6px; text-align:center; cursor:pointer;"><div style="font-size:20px;">↗️</div><div style="color:white; font-size:12px; margin-top:6px; font-weight:600;">Share</div></div>
-        <div onclick="document.getElementById('memberSearchBox')?.focus()" style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:14px; padding:14px 6px; text-align:center; cursor:pointer;"><div style="font-size:20px;">🔍</div><div style="color:white; font-size:12px; margin-top:6px; font-weight:600;">Search</div></div>
-      </div>
-      <div style="display:flex; gap:8px; margin-top:18px; justify-content:center;"><div style="background:white; color:black; padding:8px 16px; border-radius:20px; font-size:13px; font-weight:700;">Members</div><div onclick="showDankAlert('🖼️','Media','Media tab coming soon')" style="background:#1e1e32; border:1px solid #2a2a4a; color:#9a9aab; padding:8px 16px; border-radius:20px; font-size:13px;">Media</div><div onclick="showDankAlert('⚙️','Settings','Settings tab coming soon')" style="background:#1e1e32; border:1px solid #2a2a4a; color:#9a9aab; padding:8px 16px; border-radius:20px; font-size:13px;">Settings</div></div>
+  let groupId = window.currentGroupId; if(!groupId) return;
+  let g = (window.allGroups||[]).find(x=>x.id===groupId); if(!g) return;
+  let old=document.getElementById('groupMembersModal'); if(old) old.remove();
+  let isAdmin=window._currentGroupIsAdmin;
+  let avatarUrl=g.avatar||g.photoURL||'';
+  let myUid=getMyUid();
+
+  let m=document.createElement('div'); m.id='groupMembersModal';
+  m.style.cssText='position:fixed; inset:0; background:#060610; z-index:1000000020; display:flex; flex-direction:column; overflow-y:auto;';
+  m.innerHTML=`
+  <div style="background:#0a0a18; min-height:100vh; padding-bottom:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px;">
+      <div onclick="closeGroupMembers()" style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:22px; cursor:pointer;">←</div>
+      <div onclick="showGroupOptions()" style="color:white; font-size:20px; cursor:pointer;">⋮</div>
     </div>
-    <div style="padding:12px 16px 6px; display:flex; justify-content:space-between; align-items:center;"><span style="color:#9a9aab; font-size:13px;">${combined.length} members</span><span onclick="document.getElementById('memberSearchBox')?.focus()" style="width:28px; height:28px; background:#1e1e32; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#9a9aab; font-size:14px;">🔍</span></div>
-    <div style="margin:0 12px; background:#12121f; border-radius:16px; overflow:hidden; border:1px solid #1a1a2e;"><div style="display:flex; align-items:center; padding:12px 16px; border-bottom:1px solid #1a1a2e;"><input id="memberSearchBox" placeholder="Search members" oninput="filterMembers(this.value)" style="flex:1; background:transparent; border:none; color:white; outline:none; font-size:14px;"></div><div id="membersListContainer">${listHtml}</div></div>
-    <div style="padding:16px; display:flex; flex-direction:column; gap:10px; padding-bottom:30px;">${amIAdmin?`<button onclick="addGroupMemberPrompt()" style="width:100%; background:linear-gradient(135deg,#0000FF,#5B8CFF); color:white; border:none; padding:15px; border-radius:14px; font-weight:800;">+ Add Members</button>`:''}<button onclick="exitGroup()" style="width:100%; background:#1e1e32; border:1px solid #ff475722; color:#ff6b81; padding:14px; border-radius:14px; font-weight:600;">Exit Group</button></div>
-  </div>`;
-  modal.addEventListener('click', function(e){ if(e.target===this) closeGroupMembers(); }); document.body.appendChild(modal); window._allMembersHtml = listHtml; window._membersData = combined;
+    <div style="display:flex; flex-direction:column; align-items:center; padding:10px 20px 20px;">
+      <div style="position:relative; width:120px; height:120px; margin-bottom:14px;">
+        <div onclick="handleGroupAvatarClick()" style="width:120px; height:120px; border-radius:50%; background:#151528; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; border:1px solid #2a2a4a;">
+          ${avatarUrl? `<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover;">` : `<div style="font-size:48px;">👥</div>`}
+        </div>
+        ${isAdmin? `<div onclick="handleGroupAvatarClick()" style="position:absolute; bottom:2px; right:2px; width:36px; height:36px; background:#2a2a4a; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; border:2px solid #0a0a18; cursor:pointer;">📷</div>`:''}
+      </div>
+      <h2 style="margin:0; color:white; font-size:22px; font-weight:800;">${g.name}</h2>
+      <div style="margin-top:4px; color:#7a7a8a; font-size:14px;">Group · ${g.members?.length||1} members</div>
+      <div onclick="editGroupDescription()" style="margin-top:10px; color:#3a7bff; font-size:15px; font-weight:600; cursor:pointer; text-align:center; max-width:280px;">${g.description? `<span style="color:#ccc;">${g.description}</span><br><span style="font-size:13px; color:#3a7bff;">Tap to edit</span>` : 'Add group description'}</div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; padding:0 16px 20px;">
+      <div onclick="handleVoiceCall()" style="background:#16162a; border:1px solid #1e1e3a; border-radius:16px; padding:14px 6px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;"><div style="font-size:20px;">📞</div><div style="color:white; font-size:13px; font-weight:600;">Voice</div></div>
+      <div onclick="handleVideoCall()" style="background:#16162a; border:1px solid #1e1e3a; border-radius:16px; padding:14px 6px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;"><div style="font-size:20px;">🎥</div><div style="color:white; font-size:13px; font-weight:600;">Video</div></div>
+      <div onclick="handleShareGroup()" style="background:#16162a; border:1px solid #1e1e3a; border-radius:16px; padding:14px 6px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;"><div style="font-size:20px;">↗️</div><div style="color:white; font-size:13px; font-weight:600;">Share</div></div>
+      <div onclick="handleSearchGroup()" style="background:#16162a; border:1px solid #1e1e3a; border-radius:16px; padding:14px 6px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;"><div style="font-size:20px;">🔍</div><div style="color:white; font-size:13px; font-weight:600;">Search</div></div>
+    </div>
+    <div style="margin:0 12px; background:#12121f; border-radius:18px; overflow:hidden; border:1px solid #1e1e3a;"><div id="membersListNew" style="display:flex; flex-direction:column;"><div style="padding:14px; text-align:center; color:#7a7a8a;">Loading members...</div></div></div>
+    <div style="padding:16px 16px 30px; display:flex; flex-direction:column; gap:10px;">
+      <button onclick="addGroupMemberPrompt()" style="width:100%; background:linear-gradient(135deg,#2a4bff,#4a7bff); color:white; border:none; padding:16px; border-radius:14px; font-weight:700; font-size:15px; cursor:pointer;">+ Add Members</button>
+      <button onclick="exitGroup()" style="width:100%; background:#1a1a2a; color:#ff5a5a; border:1px solid #2a2a3a; padding:16px; border-radius:14px; font-weight:600; font-size:15px; cursor:pointer;">Exit Group</button>
+    </div>
+  </div>
+  <input type="file" id="groupAvatarInput" accept="image/*" style="display:none;" onchange="uploadGroupAvatar(this)">
+  `;
+  document.body.appendChild(m);
+
+  let list = document.getElementById('membersListNew');
+  list.innerHTML='';
+  for(let idx=0; idx<(g.members||[]).length; idx++){
+    let uid=g.members[idx];
+    let uname=(g.memberUsernames && g.memberUsernames[idx])? g.memberUsernames[idx] : await resolveUsername(uid);
+    let photo=await resolveUserPhoto(uid);
+    let isMe = uid===myUid;
+    let isAdminUser = g.admins && g.admins.includes(uid);
+    let displayName = isMe? 'You' : uname;
+    let row=document.createElement('div');
+    row.style.cssText='display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #1a1a2e; cursor:pointer; background:#12121f;';
+    row.innerHTML=`
+      <div style="width:44px; height:44px; border-radius:50%; overflow:hidden; background:#2a2a4a; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        ${photo? `<img src="${photo}" style="width:100%; height:100%; object-fit:cover;">` : `<span style="color:white; font-weight:700;">${displayName.replace('@','')[0].toUpperCase()}</span>`}
+      </div>
+      <div style="flex:1;">
+        <div style="color:white; font-size:15px; font-weight:600;">${displayName}</div>
+        ${isMe? `<div style="color:#2ecc71; font-size:12px;">Add member tag</div>` : ''}
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        ${isAdminUser? `<span style="color:#9a9aab; font-size:12px;">Admin</span>` : ''}
+        <span style="color:#3a3a4a; font-size:18px;">›</span>
+      </div>
+    `;
+    row.onclick=()=>{ if(isMe){ showMemberOptions(uname, uid); } else { chatWithMember(uname); } };
+    list.appendChild(row);
+  }
 }
-function closeGroupMembers(){ var m=document.getElementById('groupMembersModal'); if(m) m.remove(); }
-function filterMembers(q){ let cont = document.getElementById('membersListContainer'); if(!cont) return; if(!q){ cont.innerHTML = window._allMembersHtml; return; } q = q.toLowerCase(); let filtered = window._membersData.filter(c=> c.username.toLowerCase().includes(q)); cont.innerHTML = filtered.map(c=>{
-  let photo = window.userPhotoCache[c.uid]||null;
-  let av = photo? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : c.username.replace('@','').charAt(0).toUpperCase();
-  return `<div onclick="chatWithMember('${c.username}')" style="display:flex; align-items:center; padding:14px 16px; border-bottom:1px solid #1a1a2e; cursor:pointer;"><div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; overflow:hidden;">${av}</div><div style="flex:1; margin-left:12px; color:white; font-weight:600;">${c.isMe?'You':c.username}</div></div>`; }).join(''); }
-function editGroupDescription(){ showDankPrompt('Group Description','Describe this group', async (val)=>{ try{ await db.collection('groups').doc(window.currentGroupId).update({description: val}); showDankAlert('✅','Updated','Description saved'); let g = window.allGroups.find(x=>x.id===window.currentGroupId); if(g) g.description = val; closeGroupMembers(); setTimeout(()=> showGroupMembers(), 300); }catch(e){ showDankAlert('❌','Failed', e.message); } }); }
-function shareGroup(){ let text = 'Join my group: ' + currentGroupName + ' on Dank App'; if(navigator.share){ navigator.share({title: currentGroupName, text: text}); } else { navigator.clipboard.writeText(text).then(()=> showDankAlert('🔗','Link Copied','Invite text copied')); } }
-function handleGroupAvatarClick(){
-  let isAdmin = window._currentGroupIsAdmin; let url = window._currentGroupAvatar; if(!isAdmin){ if(!url) return showDankAlert('👥','Group Photo','No group photo yet'); return viewGroupAvatar(url); }
-  let old=document.getElementById('avatarAdminMenu'); if(old) old.remove(); let m=document.createElement('div'); m.id='avatarAdminMenu'; m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:1000000020; display:flex; justify-content:center; align-items:flex-end; padding:16px;';
-  m.innerHTML=`<div style="background:#1e1e32; width:100%; max-width:380px; border-radius:20px; overflow:hidden; border:1px solid #2a2a4a;"><div style="padding:16px; text-align:center; border-bottom:1px solid #2a2a40; color:white; font-weight:700;">${window._currentGroupNameForAvatar}</div>${url?`<div onclick="viewGroupAvatar('${url}'); document.getElementById('avatarAdminMenu').remove();" style="padding:16px; color:white; display:flex; gap:12px; cursor:pointer; border-bottom:1px solid #2a2a40;"><span>👁️</span> View photo</div>`:''}<div onclick="document.getElementById('avatarAdminMenu').remove(); document.getElementById('groupAvatarInput').click();" style="padding:16px; color:white; display:flex; gap:12px; cursor:pointer; border-bottom:1px solid #2a2a40;"><span>📷</span> ${url?'Change photo':'Add photo'}</div>${url?`<div onclick="document.getElementById('avatarAdminMenu').remove(); removeGroupAvatar();" style="padding:16px; color:#ff6b81; display:flex; gap:12px; cursor:pointer;"><span>🗑️</span> Remove photo</div>`:''}<div onclick="document.getElementById('avatarAdminMenu').remove()" style="padding:16px; text-align:center; color:#aaa; background:#2a2a40; margin-top:8px; border-radius:12px; cursor:pointer;">Cancel</div></div>`;
+function closeGroupMembers(){ let el=document.getElementById('groupMembersModal'); if(el) el.remove(); }
+function showGroupInfoModal(groupId){ window.currentGroupId=groupId; showGroupMembers(); }
+function showMemberOptions(username, uid){
+  let old=document.getElementById('memberOptionsModal'); if(old) old.remove();
+  let m=document.createElement('div'); m.id='memberOptionsModal';
+  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000001003; display:flex; justify-content:center; align-items:flex-end; padding:16px;';
+  m.innerHTML=`<div style="background:#1e1e32; width:100%; max-width:380px; border-radius:20px; overflow:hidden; border:1px solid #2a2a4a;">
+    <div style="padding:18px; text-align:center; color:white; font-weight:700; border-bottom:1px solid #2a2a4a;">${username}</div>
+    <div onclick="document.getElementById('memberOptionsModal').remove(); chatWithMember('${username}')" style="padding:16px; color:white; cursor:pointer; border-bottom:1px solid #2a2a4a;">💬 Message ${username}</div>
+    <div onclick="document.getElementById('memberOptionsModal').remove(); viewMemberProfile('${uid}')" style="padding:16px; color:white; cursor:pointer; border-bottom:1px solid #2a2a4a;">👤 View Profile</div>
+    ${window._currentGroupIsAdmin? `<div onclick="document.getElementById('memberOptionsModal').remove(); removeMemberFromGroup('${uid}','${username}')" style="padding:16px; color:#ff4757; cursor:pointer;">🚪 Remove from group</div>` : ''}
+    <div onclick="document.getElementById('memberOptionsModal').remove()" style="padding:16px; text-align:center; color:#aaa; background:#2a2a40; margin-top:8px; border-radius:12px; cursor:pointer;">Cancel</div>
+  </div>`;
   m.addEventListener('click', e=>{ if(e.target===m) m.remove(); }); document.body.appendChild(m);
 }
-function viewGroupAvatar(url){ let old=document.getElementById('avatarViewer'); if(old) old.remove(); let v=document.createElement('div'); v.id='avatarViewer'; v.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:1000000030; display:flex; justify-content:center; align-items:center; flex-direction:column;'; v.innerHTML=`<div style="position:absolute; top:16px; left:16px; color:white; font-size:24px; cursor:pointer;" onclick="document.getElementById('avatarViewer').remove()">×</div><img src="${url}" style="max-width:92vw; max-height:85vh; border-radius:12px; border:1px solid #333;"><div style="margin-top:18px; color:white; font-weight:700;">${window._currentGroupNameForAvatar || 'Group'}</div>`; v.addEventListener('click', e=>{ if(e.target===v) v.remove(); }); document.body.appendChild(v); }
+function viewMemberProfile(uid){ showDankAlert('👤','Profile','Opening profile for '+uid); }
+async function removeMemberFromGroup(uid, username){
+  showDankConfirm('🚪','Remove Member','Remove '+username+' from group?', async ()=>{
+    try{
+      let groupId=window.currentGroupId;
+      await db.collection('groups').doc(groupId).update({
+        members: firebase.firestore.FieldValue.arrayRemove(uid),
+        memberUsernames: firebase.firestore.FieldValue.arrayRemove(username)
+      });
+      showDankAlert('✅','Removed', username+' removed'); closeGroupMembers(); setTimeout(()=> showGroupMembers(), 500);
+    }catch(e){ showDankAlert('❌','Failed', e.message); }
+  });
+}
+function handleVoiceCall(){ showDankAlert('📞','Voice Call','Starting voice call for '+currentGroupName+'...'); }
+function handleVideoCall(){ showDankAlert('🎥','Video Call','Starting video call for '+currentGroupName+'...'); }
+function handleShareGroup(){
+  let g=(window.allGroups||[]).find(x=>x.id===window.currentGroupId);
+  if(!g) return;
+  let text=`Join my group "${g.name}" on Dank Empire! Group ID: ${g.id}`;
+  if(navigator.share){ navigator.share({ title: g.name, text: text }).catch(()=>{}); }
+  else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=> showDankAlert('🔗','Copied','Group invite copied!')); }
+  else { showDankAlert('🔗','Share Group', text); }
+}
+function handleSearchGroup(){
+  let old=document.getElementById('groupSearchModal'); if(old) old.remove();
+  let m=document.createElement('div'); m.id='groupSearchModal';
+  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:1000001004; display:flex; justify-content:center; align-items:flex-start; padding:20px; padding-top:60px;';
+  m.innerHTML=`<div style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:20px; width:100%; max-width:380px; padding:16px;">
+    <div style="display:flex; gap:10px; align-items:center;">
+      <input id="groupSearchInput" placeholder="Search messages..." style="flex:1; background:#0f0f1a; border:1px solid #2a2a4a; border-radius:12px; padding:12px; color:white; outline:none;">
+      <span onclick="document.getElementById('groupSearchModal').remove()" style="color:#9a9aab; font-size:22px; cursor:pointer;">×</span>
+    </div>
+    <div id="searchResults" style="margin-top:12px; max-height:300px; overflow-y:auto;"></div>
+  </div>`;
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); }); document.body.appendChild(m);
+  let inp=document.getElementById('groupSearchInput'); setTimeout(()=>inp.focus(),100);
+  inp.oninput=()=>{
+    let q=inp.value.toLowerCase(); let resDiv=document.getElementById('searchResults'); resDiv.innerHTML='';
+    if(!q) return;
+    db.collection('groupMessages').where('groupId','==',window.currentGroupId).get().then(snap=>{
+      snap.forEach(doc=>{
+        let d=doc.data(); if(d.text && d.text.toLowerCase().includes(q)){
+          let div=document.createElement('div'); div.style.cssText='padding:10px; border-bottom:1px solid #2a2a4a; color:white; font-size:14px;'; div.textContent=`${d.senderUsername}: ${d.text}`; resDiv.appendChild(div);
+        }
+      });
+      if(resDiv.innerHTML==='') resDiv.innerHTML='<div style="padding:10px; color:#9a9aab;">No results</div>';
+    });
+  };
+}
+function showGroupOptions(){
+  let old=document.getElementById('groupOptionsModal'); if(old) old.remove();
+  let m=document.createElement('div'); m.id='groupOptionsModal';
+  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000001003; display:flex; justify-content:center; align-items:flex-end; padding:16px;';
+  m.innerHTML=`<div style="background:#1e1e32; width:100%; max-width:380px; border-radius:20px; overflow:hidden; border:1px solid #2a2a4a;">
+    <div onclick="document.getElementById('groupOptionsModal').remove(); editGroupDescription()" style="padding:16px; color:white; cursor:pointer; border-bottom:1px solid #2a2a4a;">✏️ Edit group info</div>
+    <div onclick="document.getElementById('groupOptionsModal').remove(); handleShareGroup()" style="padding:16px; color:white; cursor:pointer; border-bottom:1px solid #2a2a4a;">🔗 Share group</div>
+    <div onclick="document.getElementById('groupOptionsModal').remove(); showDankAlert('🔕','Muted','Group muted')" style="padding:16px; color:white; cursor:pointer; border-bottom:1px solid #2a2a4a;">🔕 Mute</div>
+    <div onclick="document.getElementById('groupOptionsModal').remove(); exitGroup()" style="padding:16px; color:#ff5a5a; cursor:pointer;">🚪 Exit group</div>
+    <div onclick="document.getElementById('groupOptionsModal').remove()" style="padding:16px; text-align:center; color:#aaa; background:#2a2a40; margin-top:8px; border-radius:12px; cursor:pointer;">Cancel</div>
+  </div>`;
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); }); document.body.appendChild(m);
+}
+function handleGroupAvatarClick(){
+  let isAdmin = window._currentGroupIsAdmin;
+  let url = window._currentGroupAvatar;
+  if(!isAdmin){ if(url) viewGroupAvatar(url); else showDankAlert('ℹ️','Group Photo','No photo yet - only admins can add'); return; }
+  let old=document.getElementById('avatarOptionModal'); if(old) old.remove();
+  let m=document.createElement('div'); m.id='avatarOptionModal';
+  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000001005; display:flex; justify-content:center; align-items:flex-end; padding:16px;';
+  m.innerHTML=`<div style="background:#1e1e32; width:100%; max-width:380px; border-radius:20px; overflow:hidden; border:1px solid #2a2a4a;"><div style="padding:18px; text-align:center; border-bottom:1px solid #2a2a4a; color:white; font-weight:700;">Group Photo</div>${url?`<div onclick="viewGroupAvatar('${url}'); document.getElementById('avatarOptionModal').remove();" style="padding:16px; color:white; cursor:pointer; display:flex; gap:12px; border-bottom:1px solid #2a2a4a;"><span>👁️</span> View Photo</div>`:''}<div onclick="document.getElementById('avatarOptionModal').remove(); document.getElementById('groupAvatarInput').click();" style="padding:16px; color:white; cursor:pointer; display:flex; gap:12px; border-bottom:1px solid #2a2a4a;"><span>📷</span> ${url?'Change':'Add'} Photo</div>${url?`<div onclick="document.getElementById('avatarOptionModal').remove(); removeGroupAvatar();" style="padding:16px; color:#ff4757; cursor:pointer; display:flex; gap:12px;"><span>🗑️</span> Remove Photo</div>`:''}<div onclick="document.getElementById('avatarOptionModal').remove()" style="padding:16px; text-align:center; color:#aaa; background:#2a2a40; margin-top:8px; border-radius:12px; cursor:pointer;">Cancel</div></div>`;
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); }); document.body.appendChild(m);
+}
+function viewGroupAvatar(url){
+  let old=document.getElementById('avatarViewer'); if(old) old.remove();
+  let v=document.createElement('div'); v.id='avatarViewer';
+  v.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:1000001006; display:flex; justify-content:center; align-items:center; flex-direction:column;';
+  v.innerHTML=`<div style="position:absolute; top:16px; left:16px; color:white; font-size:32px; cursor:pointer; width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.15); border-radius:50%;" onclick="document.getElementById('avatarViewer').remove()">×</div><img src="${url}" style="max-width:92vw; max-height:85vh; border-radius:12px;"><div style="margin-top:18px; color:white; font-weight:700;">${window._currentGroupNameForAvatar || 'Group'}</div>`;
+  v.addEventListener('click', e=>{ if(e.target===v) v.remove(); }); document.body.appendChild(v);
+}
 async function uploadGroupAvatar(input){
   let file = input.files[0]; if(!file) return;
-  if(file.size > 5*1024*1024) return showDankAlert('⚠️','Too large','Max 5MB please');
-  showDankAlert('⏳','Uploading','Uploading group photo...');
+  if(file.size > 5*1024*1024) return showDankAlert('⚠️','Too big','Max 5MB please');
+  showDankAlert('⏳','Uploading','Uploading group photo to Cloudinary...');
   try{
     let groupId = window.currentGroupId;
-    let downloadURL = '';
-    if(typeof CLOUDINARY_CLOUD_NAME!== 'undefined' && CLOUDINARY_CLOUD_NAME && typeof CLOUDINARY_UPLOAD_PRESET!== 'undefined' && CLOUDINARY_UPLOAD_PRESET){
-      let formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-      let res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method:'POST', body: formData });
-      let data = await res.json();
-      if(data.secure_url) downloadURL = data.secure_url;
-    }
-    if(!downloadURL && typeof firebase.storage === 'function'){
-      let storageRef = firebase.storage().ref(`groupAvatars/${groupId}/${Date.now()}_${file.name}`);
-      await storageRef.put(file);
-      downloadURL = await storageRef.getDownloadURL();
-    }
-    if(!downloadURL){
-      downloadURL = await new Promise((resolve, reject)=>{
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-    await db.collection('groups').doc(groupId).update({ avatar: downloadURL, photoURL: downloadURL, groupPhoto: downloadURL });
-    let g = window.allGroups.find(x=>x.id===groupId); if(g){ g.avatar = downloadURL; g.photoURL = downloadURL; g.groupPhoto = downloadURL; }
-    document.getElementById('dankAlertModal')?.remove();
-    showDankAlert('✅','Updated','Group photo updated');
-    closeGroupMembers();
-    setTimeout(()=> showGroupMembers(), 400);
-    setTimeout(()=>{ try{ filterChats('groups'); }catch(e){} }, 800);
-  }catch(e){
-    document.getElementById('dankAlertModal')?.remove();
-    showDankAlert('❌','Failed', e.message);
-  }
+    const CLOUD_NAME = CLOUDINARY_CLOUD_NAME || "aqx4n0dz";
+    const PRESET = CLOUDINARY_UPLOAD_PRESET || "dank_profile";
+    const formData = new FormData(); formData.append("file", file); formData.append("upload_preset", PRESET); formData.append("folder", "dank-empire/groups");
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: "POST", body: formData });
+    const data = await res.json(); if(!data.secure_url) throw new Error("Upload failed: " + JSON.stringify(data));
+    await db.collection('groups').doc(groupId).update({ avatar: data.secure_url, photoURL: data.secure_url });
+    document.getElementById('dankAlertModal')?.remove(); showDankAlert('✅','Updated','Group photo updated!'); closeGroupMembers(); setTimeout(()=> showGroupMembers(), 500);
+  }catch(e){ document.getElementById('dankAlertModal')?.remove(); showDankAlert('❌','Failed', e.message); }
   input.value='';
 }
 async function removeGroupAvatar(){
   showDankConfirm('🗑️','Remove photo','Remove group photo?', async ()=>{
-    try{
-      let groupId = window.currentGroupId;
-      await db.collection('groups').doc(groupId).update({ avatar: firebase.firestore.FieldValue.delete(), photoURL: firebase.firestore.FieldValue.delete(), groupPhoto: firebase.firestore.FieldValue.delete() });
-      let g = window.allGroups.find(x=>x.id===groupId); if(g){ delete g.avatar; delete g.photoURL; delete g.groupPhoto; }
-      showDankAlert('✅','Removed','Group photo removed');
-      closeGroupMembers(); setTimeout(()=> showGroupMembers(), 400);
-    }catch(e){ showDankAlert('❌','Failed', e.message); }
+    try{ let groupId = window.currentGroupId; await db.collection('groups').doc(groupId).update({ avatar: firebase.firestore.FieldValue.delete(), photoURL: firebase.firestore.FieldValue.delete() }); showDankAlert('✅','Removed','Group photo removed'); closeGroupMembers(); setTimeout(()=> showGroupMembers(), 400); }catch(e){ showDankAlert('❌','Failed', e.message); }
   });
 }
+function editGroupDescription(){
+  if(!window._currentGroupIsAdmin) return showDankAlert('🔒','Admin only','Only admins can edit description');
+  let g = (window.allGroups||[]).find(x=>x.id===window.currentGroupId); let currentDesc = g && g.description? g.description : '';
+  let old=document.getElementById('groupDescEditModal'); if(old) old.remove();
+  let m=document.createElement('div'); m.id='groupDescEditModal';
+  m.style.cssText='position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:1000001007; display:flex; justify-content:center; align-items:center; padding:20px;';
+  m.innerHTML=`<div style="background:#1e1e32; border:1px solid #2a2a4a; border-radius:20px; width:100%; max-width:360px; padding:24px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;"><h3 style="margin:0; color:white; font-size:16px; font-weight:700;">Edit Description</h3><span onclick="document.getElementById('groupDescEditModal').remove()" style="color:#9a9aab; font-size:24px; cursor:pointer;">&times;</span></div><textarea id="groupDescEditInput" placeholder="What's this group about?" style="width:100%; background:#0f0f1a; border:1px solid #2a2a4a; border-radius:12px; padding:14px; color:white; outline:none; font-size:15px; min-height:110px; resize:none; box-sizing:border-box;">${currentDesc}</textarea><div style="display:flex; gap:12px; margin-top:20px;"><button onclick="document.getElementById('groupDescEditModal').remove()" style="flex:1; background:#2a2a4a; color:#aaa; border:none; padding:14px; border-radius:12px;">Cancel</button><button onclick="saveGroupDescription()" style="flex:1; background:#0000FF; color:white; border:none; padding:14px; border-radius:12px; font-weight:800;">Save</button></div></div>`;
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); }); document.body.appendChild(m); setTimeout(()=> document.getElementById('groupDescEditInput').focus(), 100);
+}
+async function saveGroupDescription(){
+  let input = document.getElementById('groupDescEditInput'); if(!input) return; let text = input.value.trim(); let groupId = window.currentGroupId; if(!groupId) return;
+  try{ if(text) await db.collection('groups').doc(groupId).update({ description: text }); else await db.collection('groups').doc(groupId).update({ description: firebase.firestore.FieldValue.delete() }); document.getElementById('groupDescEditModal').remove(); showDankAlert('✅','Saved','Description updated!'); closeGroupMembers(); setTimeout(()=> showGroupMembers(), 400); }catch(e){ showDankAlert('❌','Failed', e.message); }
+}
+function fixGroupPlusBtn(){
+  try{
+    let addBtn = document.getElementById('addGroupBtn');
+    if(addBtn){ addBtn.onclick = (e)=>{ e.stopPropagation(); openGroupModal(); }; return; }
+    const groupsTab = document.getElementById('groupsTab'); if(!groupsTab ||!groupsTab.parentElement) return;
+    const bar = groupsTab.parentElement;
+    for(let child of bar.children){ if(child.id==='groupsTab') continue; if(child.textContent.trim()==='+' && child.id!=='groupsTab'){ child.id='addGroupBtn'; child.onclick = (e)=>{ e.stopPropagation(); openGroupModal(); }; break; } }
+    groupsTab.onclick = ()=> filterChats('groups');
+  }catch(e){}
+}
+setTimeout(fixGroupPlusBtn, 500);
+setInterval(fixGroupPlusBtn, 3000);
+function loadGroups(){
+  try{
+    let myUidLocal = getMyUid(); if(!myUidLocal) return;
+    db.collection('groups').where('members', 'array-contains', myUidLocal).onSnapshot(snap=>{
+      window.allGroups = [];
+      snap.forEach(doc=> window.allGroups.push({id:doc.id,...doc.data()}));
+      updateGroupCount(snap.size);
+      setTimeout(()=>{ listenForUnreadGroups(); listenForGroupCardCounts(); loadMyTopAvatar(); fixGroupPlusBtn(); }, 600);
+    }, err=>{ console.log('Groups error', err); });
+  }catch(e){ console.log('loadGroups error', e); }
+}
+loadGroups();
 function addGroupMemberPrompt(){ showDankPrompt('Add Member','username e.g. john', (val)=>{ let username = val.trim(); if(!username.startsWith('@')) username='@'+username; addGroupMemberToCurrent(username); }); }
 async function addGroupMemberToCurrent(username){
   let clean = username.replace('@','').toLowerCase(); let groupId = window.currentGroupId; if(!groupId) return showDankAlert('⚠️','Oops','No group selected');
@@ -2649,10 +2746,10 @@ async function addGroupMemberToCurrent(username){
     showDankAlert('✅','Invite Sent','Invite sent to <b>'+username+'</b>');
   }catch(e){ showDankAlert('❌','Failed', e.message); }
 }
-async function exitGroup(){ showDankConfirm('🚪','Exit Group','Are you sure you want to exit <b>'+currentGroupName+'</b>?', async ()=>{ let groupId = window.currentGroupId; let myUid = getMyUid(); let me = getCurrentUser(); try{ await db.collection('groups').doc(groupId).update({ members: firebase.firestore.FieldValue.arrayRemove(myUid), memberUsernames: firebase.firestore.FieldValue.arrayRemove(me) }); closeGroupMembers(); closeGroupChat(); loadGroups(); showDankAlert('👋','Exited','You left the group'); }catch(e){ showDankAlert('❌','Failed', e.message); } }); }
-function chatWithMember(username){ closeGroupMembers(); closeGroupChat(); let clean = username.replace('@',''); if(typeof openChat==='function'){ openChat(clean); } }
+async function exitGroup(){ showDankConfirm('🚪','Exit Group','Are you sure you want to exit <b>'+currentGroupName+'</b>?', async ()=>{ let groupId = window.currentGroupId; let myUid = getMyUid(); let me = getCurrentUser(); try{ await db.collection('groups').doc(groupId).update({ members: firebase.firestore.FieldValue.arrayRemove(myUid), memberUsernames: firebase.firestore.FieldValue.arrayRemove(me) }); closeGroupMembers(); let chatScreen=document.getElementById('dankGroupChatScreen'); if(chatScreen) chatScreen.remove(); loadGroups(); showDankAlert('👋','Exited','You left the group'); }catch(e){ showDankAlert('❌','Failed', e.message); } }); }
+function chatWithMember(username){ closeGroupMembers(); let chatScreen=document.getElementById('dankGroupChatScreen'); if(chatScreen) chatScreen.remove(); let clean = username.replace('@',''); if(typeof openChat==='function'){ openChat(clean); } else { showDankAlert('💬','Chat','Opening chat with '+username); } }
 function listenForGroupInvites(){ var me = getCurrentUser(); if(!me) return; firebase.firestore().collection('groupInvites').where('to','==', me.toLowerCase()).where('status','==','pending').onSnapshot(snap=>{ snap.docChanges().forEach(change=>{ if(change.type==='added'){ showInvitePrompt(change.doc.id, change.doc.data()); } }); }); }
-function showInvitePrompt(inviteId, invite){ if(document.getElementById('inviteModal-'+inviteId)) return; var modal = document.createElement('div'); modal.id='inviteModal-'+inviteId; modal.style.cssText='position:fixed; inset:0; background:rgba(10,37,64,0.82); z-index:1000000002; display:flex; justify-content:center; align-items:center; padding:20px;'; modal.innerHTML=`<div style="background:#fff; width:100%; max-width:360px; border-radius:24px; padding:28px 24px; text-align:center;"><h2 style="color:#0a2540; margin:0 0 8px;">You're Invited!</h2><p style="color:#555;"><b>${invite.from}</b> invited you to join</p><p style="font-size:22px; font-weight:800; color:#0a2540;">${invite.groupName}</p><div style="display:flex; gap:12px; margin-top:20px;"><button onclick="respondToInvite('${inviteId}','declined')" style="flex:1; background:white; border:1.5px solid #d0d9e6; padding:14px; border-radius:14px; font-weight:600;">Decline</button><button onclick="respondToInvite('${inviteId}','accepted')" style="flex:1; background:#0000FF; color:white; padding:14px; border-radius:14px; border:none; font-weight:800;">Join</button></div></div>`; document.body.appendChild(modal); }
+function showInvitePrompt(inviteId, invite){ if(document.getElementById('inviteModal-'+inviteId)) return; var modal = document.createElement('div'); modal.id='inviteModal-'+inviteId; modal.style.cssText='position:fixed; inset:0; background:rgba(10,37,64,0.82); z-index:1000001008; display:flex; justify-content:center; align-items:center; padding:20px;'; modal.innerHTML=`<div style="background:#fff; width:100%; max-width:360px; border-radius:24px; padding:28px 24px; text-align:center;"><h2 style="color:#0a2540; margin:0 0 8px;">You're Invited!</h2><p style="color:#555;"><b>${invite.from}</b> invited you to join</p><p style="font-size:22px; font-weight:800; color:#0a2540;">${invite.groupName}</p><div style="display:flex; gap:12px; margin-top:20px;"><button onclick="respondToInvite('${inviteId}','declined')" style="flex:1; background:white; border:1.5px solid #d0d9e6; padding:14px; border-radius:14px; font-weight:600;">Decline</button><button onclick="respondToInvite('${inviteId}','accepted')" style="flex:1; background:#0000FF; color:white; padding:14px; border-radius:14px; border:none; font-weight:800;">Join</button></div></div>`; document.body.appendChild(modal); }
 function respondToInvite(inviteId, action){ var modal = document.getElementById('inviteModal-'+inviteId); firebase.firestore().collection('groupInvites').doc(inviteId).get().then(doc=>{ if(!doc.exists) return; var invite = doc.data(); if(action==='accepted'){ var myUid = getMyUid(); var me = getCurrentUser(); if(!myUid) return showDankAlert('🔒','Login','Not logged in!'); firebase.firestore().collection('groups').doc(invite.groupId).update({ members: firebase.firestore.FieldValue.arrayUnion(myUid), memberUsernames: firebase.firestore.FieldValue.arrayUnion(me) }).then(()=>{ return firebase.firestore().collection('groupInvites').doc(inviteId).delete(); }).then(()=>{ if(modal) modal.remove(); loadGroups(); showDankAlert('🎉','Joined','You joined '+invite.groupName); }); } else { firebase.firestore().collection('groupInvites').doc(inviteId).delete().then(()=>{ if(modal) modal.remove(); }); } }); }
 setTimeout(listenForGroupInvites, 2000);
 document.addEventListener('DOMContentLoaded', ()=>{
