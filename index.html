@@ -196,7 +196,7 @@ background:#0A0A14;
 </div>    
 <div id="chatsPage" class="screen" style="display:none; flex-direction:column; height:100dvh; background:#0b141a; color:white; font-family:-apple-system, sans-serif;">  
 <!-- MAIN HEADER - Deep Blue -->
-<div class="sticky-top" style="background:#1900B3; padding:12px 16px 16px; border-bottom-left-radius:16px; border-bottom-right-radius:16px;">
+<div class="sticky-top" style="background:#1900B3; padding:12px 16px 16px; border-bottom-left-radius:16px; border-bottom-right-radius:16px; position:sticky; top:0; z-index:50;">
     
     <!-- Top icons row -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -219,17 +219,18 @@ background:#0A0A14;
     <h1 style="margin:0 0 12px; font-size:28px; font-weight:700; letter-spacing:-0.5px; color:white;">Chats</h1>
 
     <!-- Search on blue -->
-    <div style="background:#0A0C8A; border-radius:16px; padding:14px 16px; display:flex; align-items:center; gap:10px; color:#a0a0c0;">
+    <div style="background:#0A0C8A; border-radius:16px; padding:14px 16px; display:flex; align-items:center; gap:10px; color:#a0a0c0; cursor:pointer;" onclick="openAddUser()">
       <span style="font-size:16px;">🔍</span>
       <span style="font-size:15px;">Search real users</span>
     </div>
 </div>
+
 <!-- FILTER TABS - DM's / Unread / Groups -->
-<div style="display:flex; gap:8px; padding:12px 16px; overflow-x:auto; align-items:center; background:#0a0a14;">
+<div style="display:flex; gap:8px; padding:12px 16px; overflow-x:auto; align-items:center; background:#0a0a14; position:sticky; top:0; z-index:40;">
   <button id="allTab" onclick="filterChats('all')" style="background:white; color:black; border:none; padding:8px 16px; border-radius:20px; font-weight:600; cursor:pointer; white-space:nowrap;">DM's</button>
   <button id="unreadTab" onclick="filterChats('unread')" style="background:#232336; color:#9a9aab; border:none; padding:8px 16px; border-radius:20px; font-weight:500; cursor:pointer; white-space:nowrap;">Unread 0</button>
   <button id="groupsTab" onclick="filterChats('groups')" style="background:#232336; color:#9a9aab; border:none; padding:8px 16px; border-radius:20px; font-weight:500; cursor:pointer; white-space:nowrap;">Groups <span id="groupCount">0</span></button>
-  <button id="addGroupBtn" onclick="openGroupModal()" style="background:#232336; color:#9a9aab; border:none; width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+  <button id="addGroupBtn" onclick="openGroupModal()" style="background:#232336; color:#9a9aab; border:none; width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;">+</button>
 </div>
 
 <div id="addUserModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999; align-items:center; justify-content:center;">
@@ -259,7 +260,8 @@ background:#0A0A14;
   </div>
 </div>
 
-<!-- END HEADER -->    <!-- Archived -->
+<!-- END HEADER -->
+    <!-- Archived -->
   <div style="display:flex; align-items:center; gap:20px; padding:12px 24px; color:#8696a0; cursor:pointer;">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8696a0" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
     <span style="font-size:15px;">Archived</span>
@@ -2278,7 +2280,6 @@ async function resolveUsername(uid){
   }catch(e){} return uid;
 }
 async function resolveUsernames(uids){ let out=[]; for(let id of (uids||[])){ out.push(await resolveUsername(id)); } return out; }
-// ===== FIXED Z-INDEX - NOW FRONT =====
 function showDankAlert(icon,title,msg){
   let old=document.getElementById('dankAlertModal'); if(old) old.remove();
   let m=document.createElement('div'); m.id='dankAlertModal';
@@ -2341,31 +2342,9 @@ function markGroupSeen(groupId){
   try{ let seen=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}'); seen[groupId]=Date.now(); localStorage.setItem('dank_groups_seen',JSON.stringify(seen)); updateGroupCardBadge(groupId, 0); }catch(e){}
 }
 window.groupUnreadUnsubs = window.groupUnreadUnsubs || []; window.groupCardUnsubs = window.groupCardUnsubs || []; window.groupUnreadCounts = window.groupUnreadCounts || {};
-function listenForUnreadGroups(){
-  try{
-    window.groupUnreadUnsubs.forEach(u=>{ try{u()}catch(e){} }); window.groupUnreadUnsubs=[];
-    let myUid = getMyUid(); let me = getCurrentUser(); let groups = window.allGroups||[]; if(!groups.length) return;
-    groups.forEach(g=>{
-      let unsub = db.collection('groupMessages').where('groupId','==',g.id).onSnapshot(snap=>{
-        snap.docChanges().forEach(ch=>{ if(ch.type!=='added') return; let doc = ch.doc.data(); if(!doc) return; if(doc.senderUid===myUid || doc.senderUsername===me) return; if(window.currentGroupId===g.id) return; let seenMap={}; try{ seenMap=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}'); }catch(e){} let lastSeen = seenMap[g.id] || 0; let msgTime = doc.createdAt?.toMillis? doc.createdAt.toMillis() : Date.now(); if(msgTime > lastSeen || lastSeen===0){ showGroupDot(); } });
-      }); window.groupUnreadUnsubs.push(unsub);
-    });
-  }catch(e){}
-}
+function listenForUnreadGroups(){ return; }
+function listenForGroupCardCounts(){ return; }
 function updateGroupCardBadge(groupId, count){ let badge = document.getElementById('badge-'+groupId); if(!badge) return; if(count > 0){ badge.textContent = count > 99? '99+' : count; badge.style.display='flex'; } else { badge.style.display='none'; } }
-function listenForGroupCardCounts(){
-  try{
-    window.groupCardUnsubs.forEach(u=>{ try{u()}catch(e){} }); window.groupCardUnsubs=[];
-    let myUid = getMyUid(); let me = getCurrentUser();
-    (window.allGroups||[]).forEach(g=>{
-      let unsub = db.collection('groupMessages').where('groupId','==',g.id).onSnapshot(snap=>{
-        let seenMap={}; try{ seenMap=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}'); }catch(e){} let lastSeen = seenMap[g.id] || 0; let count=0;
-        snap.forEach(doc=>{ let d=doc.data(); if(!d) return; if(d.senderUid===myUid || d.senderUsername===me) return; let t = d.createdAt?.toMillis? d.createdAt.toMillis() : 0; if(t===0){ count++; } else if(t > lastSeen){ count++; } });
-        window.groupUnreadCounts[g.id]=count; updateGroupCardBadge(g.id, count); if(count>0 && window.currentGroupId!==g.id) showGroupDot();
-      }); window.groupCardUnsubs.push(unsub);
-    });
-  }catch(e){}
-}
 function filterChats(type){
   const all = document.getElementById('allTab');
   const unread = document.getElementById('unreadTab');
@@ -2427,7 +2406,6 @@ function clearGroupReply(){
   window.groupReplyTo=null;
   let p=document.getElementById('groupReplyPreview'); if(p) p.style.display='none';
 }
-// ===== FIXED GROUP CHAT - TIME + SWIPE/DOUBLE-CLICK REPLY =====
 function openRealGroup(name, members, createdBy, id, memberUsernames, createdByUsername, admins){
   try{
     window.currentGroupId = id;
@@ -2445,21 +2423,19 @@ function openRealGroup(name, members, createdBy, id, memberUsernames, createdByU
     let screen = document.createElement('div'); screen.id='dankGroupChatScreen';
     screen.style.cssText='position:fixed; inset:0; background:#0a0a0f; z-index:999999; display:flex; flex-direction:column;';
     let avatarUrl = window._currentGroupAvatar || '';
-    let avatarHtml = avatarUrl? `<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover;">` : name[0].toUpperCase();
-    screen.innerHTML=`<div style="background:#1e1e32; padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #2a2a4a;">
-      <div onclick="document.getElementById('dankGroupChatScreen').remove()" style="width:36px; height:36px; border-radius:50%; background:#2a2a4a; display:flex; align-items:center; justify-content:center; color:white; font-size:20px; cursor:pointer;">←</div>
-      <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; overflow:hidden; cursor:pointer;" onclick="showGroupMembers()">${avatarHtml}</div>
-      <div style="flex:1; cursor:pointer;" onclick="showGroupMembers()"><div style="color:white; font-weight:700;">${name}</div><div style="color:#9a9aab; font-size:12px;">${members? members.length:''} members • tap for info</div></div>
-      <div onclick="showGroupMembers()" style="color:white; font-size:22px; cursor:pointer;">⋮</div>
-    </div>
-    <div id="dankGroupMessages" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; background:#0b141a;"></div>
-    <div id="groupReplyPreview" style="display:none; background:#1e1e32; border-top:1px solid #2a2a4a; padding:10px 16px; align-items:center; justify-content:space-between; border-left:4px solid #0000FF;">
-      <div id="groupReplyPreviewText" style="flex:1; font-size:13px; color:#aaa; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
-      <div onclick="clearGroupReply()" style="color:#ff5a5a; font-size:20px; margin-left:12px; cursor:pointer;">×</div>
-    </div>
-    <div style="padding:12px; background:#1e1e32; border-top:1px solid #2a2a4a; display:flex; gap:10px;"><input id="dankGroupInput" placeholder="Message ${name}" style="flex:1; background:#0f0f1a; border:1px solid #2a2a4a; border-radius:24px; padding:12px 16px; color:white; outline:none;"><button id="dankGroupSendBtn" style="background:#0000FF; color:white; border:none; width:44px; height:44px; border-radius:50%; font-size:18px;">➤</button></div>
-    <div style="text-align:center; color:#5a5a6a; font-size:11px; padding:4px;">Double-click or swipe right to reply</div>
-    `;
+    let avatarHtml = avatarUrl? '<img src="'+avatarUrl+'" style="width:100%; height:100%; object-fit:cover;">' : name[0].toUpperCase();
+    screen.innerHTML='<div style="background:#1e1e32; padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #2a2a4a;">' +
+      '<div onclick="document.getElementById(\'dankGroupChatScreen\').remove(); if(window.groupMsgUnsub){try{window.groupMsgUnsub()}catch(e){}}" style="width:36px; height:36px; border-radius:50%; background:#2a2a4a; display:flex; align-items:center; justify-content:center; color:white; font-size:20px; cursor:pointer;">←</div>' +
+      '<div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#0000FF,#5B8CFF); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; overflow:hidden; cursor:pointer;" onclick="showGroupMembers()">'+avatarHtml+'</div>' +
+      '<div style="flex:1; cursor:pointer;" onclick="showGroupMembers()"><div style="color:white; font-weight:700;">'+name+'</div><div style="color:#9a9aab; font-size:12px;">'+(members? members.length:'')+' members • tap for info</div></div>' +
+      '<div onclick="showGroupMembers()" style="color:white; font-size:22px; cursor:pointer;">⋮</div></div>' +
+    '<div id="dankGroupMessages" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; background:#0b141a;"></div>' +
+    '<div id="groupReplyPreview" style="display:none; background:#1e1e32; border-top:1px solid #2a2a4a; padding:10px 16px; align-items:center; justify-content:space-between; border-left:4px solid #0000FF;">' +
+      '<div id="groupReplyPreviewText" style="flex:1; font-size:13px; color:#aaa; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>' +
+      '<div onclick="clearGroupReply()" style="color:#ff5a5a; font-size:20px; margin-left:12px; cursor:pointer;">×</div></div>' +
+    '<input type="file" id="groupMediaInput" accept="image/*,video/*" hidden />' +
+    '<div style="padding:12px; background:#1e1e32; border-top:1px solid #2a2a4a; display:flex; gap:10px; align-items:center;"><button id="groupMediaBtn" type="button" style="background:#2a2a4a; color:white; border:none; width:44px; height:44px; border-radius:50%; font-size:20px; flex-shrink:0; cursor:pointer;">📎</button><input id="dankGroupInput" placeholder="Message '+name+'" style="flex:1; background:#0f0f1a; border:1px solid #2a2a4a; border-radius:24px; padding:12px 16px; color:white; outline:none;"><button id="dankGroupSendBtn" style="background:#0000FF; color:white; border:none; width:44px; height:44px; border-radius:50%; font-size:18px;">➤</button></div>' +
+    '<div style="text-align:center; color:#5a5a6a; font-size:11px; padding:4px;">Double-click or swipe right to reply</div>';
     document.body.appendChild(screen);
 
     let msgsDiv = document.getElementById('dankGroupMessages');
@@ -2467,15 +2443,37 @@ function openRealGroup(name, members, createdBy, id, memberUsernames, createdByU
     let sendBtn = document.getElementById('dankGroupSendBtn');
     function sendGroupMessage(){
       let text = input.value.trim(); if(!text) return;
-      let payload = { groupId:id, text:text, senderUid:getMyUid(), senderUsername:getCurrentUser(), createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+      let payload = { groupId:id, text:text, senderUid:getMyUid(), senderUsername:getCurrentUser(), type:'text', createdAt: firebase.firestore.FieldValue.serverTimestamp() };
       if(window.groupReplyTo){ payload.replyTo = { text: window.groupReplyTo.text, senderUsername: window.groupReplyTo.senderUsername, id: window.groupReplyTo.id }; }
-      db.collection('groupMessages').add(payload);
+      db.collection('groupMessages').add(payload).catch(e=>{
+        if(e.code==='resource-exhausted') showDankAlert('⚠️','Quota','Free limit hit, resets midnight PST');
+        else showDankAlert('❌','Failed', e.message);
+      });
       input.value=''; clearGroupReply();
     }
     sendBtn.onclick = sendGroupMessage;
     input.onkeydown = (e)=>{ if(e.key==='Enter') sendGroupMessage(); };
 
-    db.collection('groupMessages').where('groupId','==',id).onSnapshot(snap=>{
+    // MEDIA UPLOAD
+    const groupMediaBtn = document.getElementById('groupMediaBtn');
+    const groupMediaInput = document.getElementById('groupMediaInput');
+    if(groupMediaBtn){
+      groupMediaBtn.onclick = ()=> groupMediaInput.click();
+      groupMediaInput.onchange = async (e)=>{
+        const file = e.target.files[0]; if(!file) return;
+        input.placeholder = 'Uploading...';
+        try{
+          const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', 'dankconnect_unsigned');
+          const res = await fetch('https://api.cloudinary.com/v1_1/aqx4n0dz/auto/upload', {method:'POST', body:fd});
+          const data = await res.json(); if(!data.secure_url) throw new Error('Upload failed');
+          await db.collection('groupMessages').add({ groupId:id, text:'', mediaUrl:data.secure_url, type: file.type.startsWith('video')?'video':'image', senderUid:getMyUid(), senderUsername:getCurrentUser(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        }catch(err){ showDankAlert('❌','Failed', err.message); }
+        finally{ input.placeholder = 'Message '+name; groupMediaInput.value=''; }
+      };
+    }
+
+    if(window.groupMsgUnsub){ try{window.groupMsgUnsub()}catch(e){} }
+    window.groupMsgUnsub = db.collection('groupMessages').where('groupId','==',id).orderBy('createdAt','desc').limit(50).onSnapshot(snap=>{
       msgsDiv.innerHTML='';
       if(snap.empty){ msgsDiv.innerHTML='<div style="text-align:center; color:#9a9aab; margin-top:40px;">No messages yet<br>Say hi 👋<br><br><small>Double tap a message to reply</small></div>'; return; }
       let allMsgs=[]; snap.forEach(doc=> allMsgs.push({ id: doc.id,...doc.data()}));
@@ -2484,15 +2482,21 @@ function openRealGroup(name, members, createdBy, id, memberUsernames, createdByU
         let isMe=m.senderUid===getMyUid();
         let timeStr = formatGroupTime(m.createdAt);
         let wrap=document.createElement('div');
-        wrap.style.cssText=`display:flex; flex-direction:column; max-width:78%; ${isMe? 'align-self:flex-end; align-items:flex-end;' : 'align-self:flex-start;'}; position:relative; touch-action:pan-y;`;
+        wrap.style.cssText='display:flex; flex-direction:column; max-width:78%; '+(isMe? 'align-self:flex-end; align-items:flex-end;' : 'align-self:flex-start;')+'; position:relative; touch-action:pan-y;';
         let bubble=document.createElement('div');
         bubble.className='group-msg-bubble';
-        bubble.style.cssText=`padding:10px 14px; border-radius:18px; position:relative; cursor:pointer; user-select:none; ${isMe? 'background:#0000FF; color:white; border-bottom-right-radius:4px;' : 'background:#1e1e32; color:white; border-bottom-left-radius:4px;'}`;
+        bubble.style.cssText='padding:10px 14px; border-radius:18px; position:relative; cursor:pointer; user-select:none; '+(isMe? 'background:#0000FF; color:white; border-bottom-right-radius:4px;' : 'background:#1e1e32; color:white; border-bottom-left-radius:4px;');
         let replyHtml='';
         if(m.replyTo && m.replyTo.text){
-          replyHtml=`<div style="background:${isMe? 'rgba(0,0,0,0.25)':'rgba(255,255,255,0.08)'}; border-left:3px solid ${isMe? 'white':'#5B8CFF'}; padding:6px 8px; border-radius:6px; margin-bottom:6px; font-size:12px;"><div style="font-weight:700; color:${isMe? '#ddd':'#5B8CFF'}; font-size:11px;">${m.replyTo.senderUsername||'User'}</div><div style="opacity:0.9; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${m.replyTo.text}</div></div>`;
+          replyHtml='<div style="background:'+(isMe? 'rgba(0,0,0,0.25)':'rgba(255,255,255,0.08)')+'; border-left:3px solid '+(isMe? 'white':'#5B8CFF')+'; padding:6px 8px; border-radius:6px; margin-bottom:6px; font-size:12px;"><div style="font-weight:700; color:'+(isMe? '#ddd':'#5B8CFF')+'; font-size:11px;">'+(m.replyTo.senderUsername||'User')+'</div><div style="opacity:0.9; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">'+m.replyTo.text+'</div></div>';
         }
-        bubble.innerHTML=`${replyHtml}${!isMe? `<div style="font-size:11px; color:#5B8CFF; font-weight:700; margin-bottom:2px;">${m.senderUsername||'User'}</div>`:''}<div style="font-size:14px; word-break:break-word;">${m.text}</div>`;
+        if(m.type==='image' && m.mediaUrl){
+          bubble.innerHTML=replyHtml+(!isMe? '<div style="font-size:11px; color:#5B8CFF; font-weight:700; margin-bottom:2px;">'+(m.senderUsername||'User')+'</div>':'')+'<img src="'+m.mediaUrl+'" style="max-width:220px; border-radius:12px;" onclick="window.open(\''+m.mediaUrl+'\')">';
+        } else if(m.type==='video' && m.mediaUrl){
+          bubble.innerHTML=replyHtml+(!isMe? '<div style="font-size:11px; color:#5B8CFF; font-weight:700; margin-bottom:2px;">'+(m.senderUsername||'User')+'</div>':'')+'<video src="'+m.mediaUrl+'" controls style="max-width:240px; border-radius:12px;"></video>';
+        } else {
+          bubble.innerHTML=replyHtml+(!isMe? '<div style="font-size:11px; color:#5B8CFF; font-weight:700; margin-bottom:2px;">'+(m.senderUsername||'User')+'</div>':'')+'<div style="font-size:14px; word-break:break-word;">'+(m.text||'')+'</div>';
+        }
         bubble.ondblclick=()=>{ setGroupReplyTo(m); };
         let startX=0;
         bubble.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; }, {passive:true});
@@ -2501,18 +2505,23 @@ function openRealGroup(name, members, createdBy, id, memberUsernames, createdByU
           if(endX - startX > 60){ setGroupReplyTo(m); bubble.style.transform='translateX(10px)'; setTimeout(()=> bubble.style.transform='translateX(0)',200); }
         });
         let meta=document.createElement('div');
-        meta.style.cssText=`display:flex; gap:4px; align-items:center; margin-top:3px; font-size:11px; color:${isMe? '#aab8ff':'#7a7a8a'};`;
-        meta.innerHTML=`<span>${timeStr}</span>${isMe? `<span style="color:#7affa0"> ✓✓</span>`:''}`;
+        meta.style.cssText='display:flex; gap:4px; align-items:center; margin-top:3px; font-size:11px; color:'+(isMe? '#aab8ff':'#7a7a8a')+';';
+        meta.innerHTML='<span>'+timeStr+'</span>'+(isMe? '<span style="color:#5B8CFF; font-weight:800;"> ✓✓</span>':'');
         wrap.appendChild(bubble);
         wrap.appendChild(meta);
         msgsDiv.appendChild(wrap);
       });
       msgsDiv.scrollTop = msgsDiv.scrollHeight;
+    }, err=>{
+      console.log('groupMessages error', err.code, err.message);
+      if(err.code==='resource-exhausted'){
+        msgsDiv.innerHTML='<div style="text-align:center; color:#ffcc00; padding:20px;">⚠️ Free quota hit - will reset midnight PST.</div>';
+      } else if(err.code==='failed-precondition'){
+        msgsDiv.innerHTML='<div style="text-align:center; color:#ffcc00; padding:20px;">Index building... wait 2 mins and reopen group.</div>';
+      }
     });
   }catch(e){ console.error(e); alert('Failed: '+e.message); }
 }
-
-// ===== NEW PANEL DESIGN - MATCHES YOUR SCREENSHOT =====
 async function showGroupMembers(){
   let groupId = window.currentGroupId; if(!groupId) return;
   let g = (window.allGroups||[]).find(x=>x.id===groupId); if(!g) return;
@@ -2520,7 +2529,6 @@ async function showGroupMembers(){
   let isAdmin=window._currentGroupIsAdmin;
   let avatarUrl=g.avatar||g.photoURL||'';
   let myUid=getMyUid();
-
   let m=document.createElement('div'); m.id='groupMembersModal';
   m.style.cssText='position:fixed; inset:0; background:#060610; z-index:1000000020; display:flex; flex-direction:column; overflow-y:auto;';
   m.innerHTML=`
@@ -2555,7 +2563,6 @@ async function showGroupMembers(){
   <input type="file" id="groupAvatarInput" accept="image/*" style="display:none;" onchange="uploadGroupAvatar(this)">
   `;
   document.body.appendChild(m);
-
   let list = document.getElementById('membersListNew');
   list.innerHTML='';
   for(let idx=0; idx<(g.members||[]).length; idx++){
@@ -2638,7 +2645,7 @@ function handleSearchGroup(){
   inp.oninput=()=>{
     let q=inp.value.toLowerCase(); let resDiv=document.getElementById('searchResults'); resDiv.innerHTML='';
     if(!q) return;
-    db.collection('groupMessages').where('groupId','==',window.currentGroupId).get().then(snap=>{
+    db.collection('groupMessages').where('groupId','==',window.currentGroupId).limit(50).get().then(snap=>{
       snap.forEach(doc=>{
         let d=doc.data(); if(d.text && d.text.toLowerCase().includes(q)){
           let div=document.createElement('div'); div.style.cssText='padding:10px; border-bottom:1px solid #2a2a4a; color:white; font-size:14px;'; div.textContent=`${d.senderUsername}: ${d.text}`; resDiv.appendChild(div);
@@ -2727,12 +2734,25 @@ setInterval(fixGroupPlusBtn, 3000);
 function loadGroups(){
   try{
     let myUidLocal = getMyUid(); if(!myUidLocal) return;
-    db.collection('groups').where('members', 'array-contains', myUidLocal).onSnapshot(snap=>{
+    let cached = localStorage.getItem('dank_groups_cache');
+    if(cached){
+      try{
+        let parsed = JSON.parse(cached);
+        window.allGroups = parsed;
+        updateGroupCount(parsed.length);
+        fixGroupPlusBtn();
+      }catch(e){}
+    }
+    db.collection('groups').where('members', 'array-contains', myUidLocal).get().then(snap=>{
       window.allGroups = [];
       snap.forEach(doc=> window.allGroups.push({id:doc.id,...doc.data()}));
+      localStorage.setItem('dank_groups_cache', JSON.stringify(window.allGroups));
       updateGroupCount(snap.size);
-      setTimeout(()=>{ listenForUnreadGroups(); listenForGroupCardCounts(); loadMyTopAvatar(); fixGroupPlusBtn(); }, 600);
-    }, err=>{ console.log('Groups error', err); });
+      setTimeout(()=>{ loadMyTopAvatar(); fixGroupPlusBtn(); }, 600);
+    }).catch(err=>{ console.log('Groups get error', err.code, err.message); });
+    if(!window.groupsRefreshInterval){
+      window.groupsRefreshInterval = setInterval(()=> loadGroups(), 5*60*1000);
+    }
   }catch(e){ console.log('loadGroups error', e); }
 }
 loadGroups();
@@ -2748,9 +2768,9 @@ async function addGroupMemberToCurrent(username){
 }
 async function exitGroup(){ showDankConfirm('🚪','Exit Group','Are you sure you want to exit <b>'+currentGroupName+'</b>?', async ()=>{ let groupId = window.currentGroupId; let myUid = getMyUid(); let me = getCurrentUser(); try{ await db.collection('groups').doc(groupId).update({ members: firebase.firestore.FieldValue.arrayRemove(myUid), memberUsernames: firebase.firestore.FieldValue.arrayRemove(me) }); closeGroupMembers(); let chatScreen=document.getElementById('dankGroupChatScreen'); if(chatScreen) chatScreen.remove(); loadGroups(); showDankAlert('👋','Exited','You left the group'); }catch(e){ showDankAlert('❌','Failed', e.message); } }); }
 function chatWithMember(username){ closeGroupMembers(); let chatScreen=document.getElementById('dankGroupChatScreen'); if(chatScreen) chatScreen.remove(); let clean = username.replace('@',''); if(typeof openChat==='function'){ openChat(clean); } else { showDankAlert('💬','Chat','Opening chat with '+username); } }
-function listenForGroupInvites(){ var me = getCurrentUser(); if(!me) return; firebase.firestore().collection('groupInvites').where('to','==', me.toLowerCase()).where('status','==','pending').onSnapshot(snap=>{ snap.docChanges().forEach(change=>{ if(change.type==='added'){ showInvitePrompt(change.doc.id, change.doc.data()); } }); }); }
+function listenForGroupInvites(){ var me = getCurrentUser(); if(!me) return; db.collection('groupInvites').where('to','==', me.toLowerCase()).where('status','==','pending').onSnapshot(snap=>{ snap.docChanges().forEach(change=>{ if(change.type==='added'){ showInvitePrompt(change.doc.id, change.doc.data()); } }); }); }
 function showInvitePrompt(inviteId, invite){ if(document.getElementById('inviteModal-'+inviteId)) return; var modal = document.createElement('div'); modal.id='inviteModal-'+inviteId; modal.style.cssText='position:fixed; inset:0; background:rgba(10,37,64,0.82); z-index:1000001008; display:flex; justify-content:center; align-items:center; padding:20px;'; modal.innerHTML=`<div style="background:#fff; width:100%; max-width:360px; border-radius:24px; padding:28px 24px; text-align:center;"><h2 style="color:#0a2540; margin:0 0 8px;">You're Invited!</h2><p style="color:#555;"><b>${invite.from}</b> invited you to join</p><p style="font-size:22px; font-weight:800; color:#0a2540;">${invite.groupName}</p><div style="display:flex; gap:12px; margin-top:20px;"><button onclick="respondToInvite('${inviteId}','declined')" style="flex:1; background:white; border:1.5px solid #d0d9e6; padding:14px; border-radius:14px; font-weight:600;">Decline</button><button onclick="respondToInvite('${inviteId}','accepted')" style="flex:1; background:#0000FF; color:white; padding:14px; border-radius:14px; border:none; font-weight:800;">Join</button></div></div>`; document.body.appendChild(modal); }
-function respondToInvite(inviteId, action){ var modal = document.getElementById('inviteModal-'+inviteId); firebase.firestore().collection('groupInvites').doc(inviteId).get().then(doc=>{ if(!doc.exists) return; var invite = doc.data(); if(action==='accepted'){ var myUid = getMyUid(); var me = getCurrentUser(); if(!myUid) return showDankAlert('🔒','Login','Not logged in!'); firebase.firestore().collection('groups').doc(invite.groupId).update({ members: firebase.firestore.FieldValue.arrayUnion(myUid), memberUsernames: firebase.firestore.FieldValue.arrayUnion(me) }).then(()=>{ return firebase.firestore().collection('groupInvites').doc(inviteId).delete(); }).then(()=>{ if(modal) modal.remove(); loadGroups(); showDankAlert('🎉','Joined','You joined '+invite.groupName); }); } else { firebase.firestore().collection('groupInvites').doc(inviteId).delete().then(()=>{ if(modal) modal.remove(); }); } }); }
+function respondToInvite(inviteId, action){ var modal = document.getElementById('inviteModal-'+inviteId); db.collection('groupInvites').doc(inviteId).get().then(doc=>{ if(!doc.exists) return; var invite = doc.data(); if(action==='accepted'){ var myUid = getMyUid(); var me = getCurrentUser(); if(!myUid) return showDankAlert('🔒','Login','Not logged in!'); db.collection('groups').doc(invite.groupId).update({ members: firebase.firestore.FieldValue.arrayUnion(myUid), memberUsernames: firebase.firestore.FieldValue.arrayUnion(me) }).then(()=>{ return db.collection('groupInvites').doc(inviteId).delete(); }).then(()=>{ if(modal) modal.remove(); loadGroups(); showDankAlert('🎉','Joined','You joined '+invite.groupName); }); } else { db.collection('groupInvites').doc(inviteId).delete().then(()=>{ if(modal) modal.remove(); }); } }); }
 setTimeout(listenForGroupInvites, 2000);
 document.addEventListener('DOMContentLoaded', ()=>{
   setTimeout(()=>{ loadGroups(); loadMyTopAvatar(); }, 1000);
