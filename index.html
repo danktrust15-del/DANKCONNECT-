@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DankConnect - Splash</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DANKCONNECT">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d00b3">
+<link rel="apple-touch-icon" href="logo.png?v=26">
+<title>DANKCONNECT</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script>
@@ -225,13 +231,24 @@ background:#0A0A14;
     </div>
 </div>
 
-<!-- FILTER TABS - DM's / Unread / Groups -->
-<div style="display:flex; gap:8px; padding:12px 16px; overflow-x:auto; align-items:center; background:#0a0a14; position:sticky; top:0; z-index:40;">
+<!-- FILTER TABS - DM's / Unread / Groups - FIXED WITH ID -->
+<div id="filterTabsRow" style="display:flex; gap:8px; padding:12px 16px; overflow-x:auto; align-items:center; background:#0a0a14; position:sticky; top:0; z-index:40; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); will-change: transform, opacity, height;">
   <button id="allTab" onclick="filterChats('all')" style="background:white; color:black; border:none; padding:8px 16px; border-radius:20px; font-weight:600; cursor:pointer; white-space:nowrap;">DM's</button>
   <button id="unreadTab" onclick="filterChats('unread')" style="background:#232336; color:#9a9aab; border:none; padding:8px 16px; border-radius:20px; font-weight:500; cursor:pointer; white-space:nowrap;">Unread 0</button>
-  <button id="groupsTab" onclick="filterChats('groups')" style="background:#232336; color:#9a9aab; border:none; padding:8px 16px; border-radius:20px; font-weight:500; cursor:pointer; white-space:nowrap;">Groups <span id="groupCount">0</span></button>
+  <button id="groupsTab" onclick="filterChats('groups')" style="background:#232336; color:#9a9aab; border:none; padding:8px 16px; border-radius:20px; font-weight:500; cursor:pointer; white-space:nowrap; position:relative; overflow:visible;">Groups <span id="groupCount">0</span>
+    <!-- BLUE BLINKING DOT - RESTORED -->
+    <span id="groupsBlueDot" style="position:absolute; top:-5px; right:-5px; width:10px; height:10px; background:#0a84ff; border-radius:50%; border:2px solid white; display:none; animation:blinkBlueDot 1s infinite; box-shadow:0 0 8px rgba(10,132,255,0.9); z-index:5;"></span>
+  </button>
   <button id="addGroupBtn" onclick="openGroupModal()" style="background:#232336; color:#9a9aab; border:none; width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;">+</button>
 </div>
+
+<style>
+@keyframes blinkBlueDot {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.3); }
+  100% { opacity: 1; transform: scale(1); }
+}
+</style>
 
 <div id="addUserModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999; align-items:center; justify-content:center;">
   <div style="background:#1a2333; padding:20px; border-radius:16px; width:85%; max-width:350px;">
@@ -2324,27 +2341,119 @@ async function createGroup() {
   } catch (e) { showDankAlert('❌','Failed', e.message); }
 }
 const createRealGroup = createGroup;
+
+// === FINAL FIX - DEEP BLUE WHITE RING ULTRA CLOSE + REALTIME UNREAD ===
 function showGroupDot(){
   let btn=document.getElementById('groupsTab'); if(!btn) return;
   btn.style.position='relative';
-  let dot=document.getElementById('groupBlueDot');
+  btn.style.overflow='visible';
   if(!document.getElementById('blueBlinkStyle')){
     let style=document.createElement('style'); style.id='blueBlinkStyle';
     style.innerHTML=`@keyframes blueBlink{0%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:0.6}100%{transform:scale(1);opacity:1}}`;
     document.head.appendChild(style);
   }
-  if(!dot){ dot=document.createElement('span'); dot.id='groupBlueDot'; dot.style.cssText='position:absolute;top:2px;right:4px;width:12px;height:12px;background:#0000FF;border-radius:50%;border:2px solid white;z-index:5;display:block;animation:blueBlink 1.1s infinite;'; btn.appendChild(dot); }
-  dot.style.display='block';
+  let dot=document.getElementById('groupsBlueDot') || document.getElementById('groupBlueDot');
+  if(!dot){ dot=document.createElement('span'); dot.id='groupsBlueDot'; btn.appendChild(dot); }
+  dot.style.cssText='position:absolute !important; top:-2px !important; right:0px !important; width:9px !important; height:9px !important; background:#0000FF !important; border-radius:50% !important; border:2px solid white !important; z-index:20 !important; display:block !important; animation:blueBlink 1.1s infinite !important; box-shadow:0 0 6px rgba(0,0,255,0.9) !important;';
 }
-function hideGroupTabDotOnly(){ let dot=document.getElementById('groupBlueDot'); if(dot) dot.style.display='none'; }
+function hideGroupTabDotOnly(){ 
+  let dot=document.getElementById('groupsBlueDot') || document.getElementById('groupBlueDot'); 
+  if(dot) dot.style.display='none'; 
+}
 function hideGroupDot(){ hideGroupTabDotOnly(); }
+window.setGroupsUnread = function(count){ if(count>0) showGroupDot(); else hideGroupTabDotOnly(); }
+window.showGroupDot = showGroupDot;
+window.hideGroupTabDotOnly = hideGroupTabDotOnly;
+
 function markGroupSeen(groupId){
-  try{ let seen=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}'); seen[groupId]=Date.now(); localStorage.setItem('dank_groups_seen',JSON.stringify(seen)); updateGroupCardBadge(groupId, 0); }catch(e){}
+  try{ 
+    let seen=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}'); 
+    seen[groupId]=Date.now(); 
+    localStorage.setItem('dank_groups_seen',JSON.stringify(seen)); 
+    updateGroupCardBadge(groupId, 0); 
+    window.groupUnreadCounts[groupId]=0;
+  }catch(e){}
 }
-window.groupUnreadUnsubs = window.groupUnreadUnsubs || []; window.groupCardUnsubs = window.groupCardUnsubs || []; window.groupUnreadCounts = window.groupUnreadCounts || {};
-function listenForUnreadGroups(){ return; }
-function listenForGroupCardCounts(){ return; }
-function updateGroupCardBadge(groupId, count){ let badge = document.getElementById('badge-'+groupId); if(!badge) return; if(count > 0){ badge.textContent = count > 99? '99+' : count; badge.style.display='flex'; } else { badge.style.display='none'; } }
+
+window.groupUnreadUnsubs = window.groupUnreadUnsubs || []; 
+window.groupCardUnsubs = window.groupCardUnsubs || []; 
+window.groupUnreadCounts = window.groupUnreadCounts || {};
+window.groupMsgListeners = window.groupMsgListeners || [];
+
+function listenForUnreadGroups(){
+  try{
+    // clear old msg listeners
+    window.groupMsgListeners.forEach(u=>{ try{u()}catch(e){} });
+    window.groupMsgListeners=[];
+    let myUid = getMyUid(); if(!myUid) return;
+    db.collection('groups').where('members','array-contains', myUid).onSnapshot(groupSnap=>{
+      window.allGroups = [];
+      groupSnap.forEach(doc=> window.allGroups.push({id:doc.id, ...doc.data()}));
+      updateGroupCount(window.allGroups.length);
+      // realtime per group
+      groupSnap.forEach(gDoc=>{
+        let gid=gDoc.id;
+        let unsub = db.collection('groupMessages').where('groupId','==',gid).orderBy('createdAt','desc').limit(1).onSnapshot(msgSnap=>{
+          if(msgSnap.empty) return;
+          let lastMsg=msgSnap.docs[0].data();
+          let sender=lastMsg.senderUid||lastMsg.senderId||'';
+          if(sender===myUid) return;
+          let seen=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}');
+          let lastSeen=seen[gid]||0;
+          let t=lastMsg.createdAt?.toMillis?lastMsg.createdAt.toMillis():(lastMsg.createdAt?.seconds?lastMsg.createdAt.seconds*1000:Date.now());
+          if(t>lastSeen){
+            console.log('🔵 NEW MSG in',gid.slice(0,5));
+            showGroupDot();
+            // count badges
+            db.collection('groupMessages').where('groupId','==',gid).limit(50).get().then(s=>{
+              let cnt=0; s.forEach(d=>{
+                let m=d.data(); let mt=m.createdAt?.toMillis?m.createdAt.toMillis():(m.createdAt?.seconds?m.createdAt.seconds*1000:Date.now());
+                let ms=m.senderUid||''; if(ms!==myUid && mt>lastSeen) cnt++;
+              });
+              window.groupUnreadCounts[gid]=cnt; updateGroupCardBadge(gid,cnt);
+            });
+          }
+        });
+        window.groupMsgListeners.push(unsub);
+      });
+      // if seen empty -> force show because you have msgs from screenshot
+      let seenAll=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}');
+      if(Object.keys(seenAll).length===0) showGroupDot();
+    });
+  }catch(e){ console.log('listen error',e); }
+}
+
+async function checkAllGroupsUnread(){
+  // kept for compatibility - realtime does the work
+  let seen=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}');
+  if(Object.keys(seen).length===0 && window.allGroups?.length>0) showGroupDot();
+}
+function listenForGroupCardCounts(){
+  let myUid=getMyUid(); if(!myUid) return;
+  let seen=JSON.parse(localStorage.getItem('dank_groups_seen')||'{}');
+  (window.allGroups||[]).forEach(async (g)=>{
+    let lastSeen=seen[g.id]||0;
+    try{
+      let snap=await db.collection('groupMessages').where('groupId','==',g.id).limit(50).get();
+      let count=0; snap.forEach(d=>{
+        let m=d.data(); let t=m.createdAt?.toMillis?m.createdAt.toMillis():(m.createdAt?.seconds?m.createdAt.seconds*1000:Date.now());
+        let s=m.senderUid||''; if(s!==myUid && t>lastSeen) count++;
+      });
+      window.groupUnreadCounts[g.id]=count; updateGroupCardBadge(g.id,count);
+      if(count>0) showGroupDot();
+    }catch(e){}
+  });
+}
+function updateGroupCardBadge(groupId, count){ 
+  let badge = document.getElementById('badge-'+groupId); 
+  if(!badge) return; 
+  if(count > 0){ 
+    badge.textContent = count > 99? '99+' : count; 
+    badge.style.display='flex'; 
+  } else { 
+    badge.style.display='none'; 
+  } 
+}
 function filterChats(type){
   const all = document.getElementById('allTab');
   const unread = document.getElementById('unreadTab');
@@ -2356,7 +2465,7 @@ function filterChats(type){
   if(!chatsList) return;
   if(type==='all'){ if(window.loadChats) window.loadChats(); else if(window.loadMyChats) window.loadMyChats(); return; }
   if(type==='groups'){
-    hideGroupTabDotOnly(); chatsList.innerHTML = '';
+    chatsList.innerHTML = '';
     const groupsData = window.allGroups || [];
     if(groupsData.length===0){
       chatsList.innerHTML = '<div style="padding:30px; text-align:center; color:#9a9aab;">No groups yet<br><button onclick="openGroupModal()" style="margin-top:12px; background:#0000FF; color:white; border:none; padding:10px 20px; border-radius:20px;">Create Group</button></div>';
@@ -2373,6 +2482,7 @@ function filterChats(type){
       if(avatarBtn) avatarBtn.addEventListener('click', (e)=>{ e.stopPropagation(); showGroupInfoModal(g.id); });
       chatsList.appendChild(div);
     });
+    setTimeout(()=>{ listenForGroupCardCounts(); }, 300);
   }
 }
 function updateGroupCount(n){
@@ -2406,6 +2516,12 @@ function clearGroupReply(){
   window.groupReplyTo=null;
   let p=document.getElementById('groupReplyPreview'); if(p) p.style.display='none';
 }
+
+// === AUTO START ===
+setTimeout(()=>{ 
+  console.log('🔵 Auto start unread listeners');
+  listenForUnreadGroups(); 
+}, 1200);
 function openRealGroup(name, members, createdBy, id, memberUsernames, createdByUsername, admins){
   try{
     window.currentGroupId = id;
@@ -2454,7 +2570,6 @@ function openRealGroup(name, members, createdBy, id, memberUsernames, createdByU
     sendBtn.onclick = sendGroupMessage;
     input.onkeydown = (e)=>{ if(e.key==='Enter') sendGroupMessage(); };
 
-    // MEDIA UPLOAD
     const groupMediaBtn = document.getElementById('groupMediaBtn');
     const groupMediaInput = document.getElementById('groupMediaInput');
     if(groupMediaBtn){
@@ -2776,6 +2891,118 @@ document.addEventListener('DOMContentLoaded', ()=>{
   setTimeout(()=>{ loadGroups(); loadMyTopAvatar(); }, 1000);
 });
 setTimeout(()=>{ try{ loadMyTopAvatar(); }catch(e){} }, 1500);
+// === FINAL - HIDES BOTH DM's + ARCHIVED, NO WHITE ===
+(function(){
+  const myGroups = document.getElementById('myGroupsContainer');
+  const chatsList = document.getElementById('chatsList');
+  const chatsPage = document.getElementById('chatsPage');
+  let filterRow = null;
+  let archivedRow = null;
+
+  // DM's row
+  document.querySelectorAll('button').forEach(b=>{
+    if(b.textContent.trim() === "DM's") filterRow = b.parentElement;
+  });
+  if(!filterRow) return console.log("DM's not found");
+
+  // ARCHIVED - Use the WORKING method from your screenshot
+  const archivedCandidates = [];
+  document.querySelectorAll('div').forEach(d=>{
+    if(d.textContent.trim() === 'Archived' && d.id !== 'chatsPage'){
+      archivedCandidates.push(d);
+    }
+  });
+
+  console.log("Archived candidates:", archivedCandidates.length);
+
+  for(let d of archivedCandidates){
+    // In your screenshot, parent was the row itself
+    let parent = d.parentElement;
+    if(parent && parent.id !== 'chatsPage' && !parent.contains(myGroups)){
+      // This parent is the flex row with icon + Archived text
+      if(parent.textContent.includes('Archived')){
+        archivedRow = parent;
+        break;
+      }
+    }
+  }
+
+  // If still not found, search children of chatsPage
+  if(!archivedRow && chatsPage){
+    const children = Array.from(chatsPage.children);
+    for(let child of children){
+      if(child.textContent.includes('Archived') && !child.contains(myGroups) && child.id !== 'chatsPage' && child.textContent.length < 100){
+        archivedRow = child;
+        break;
+      }
+    }
+  }
+
+  console.log("Filter:", filterRow, "contains?", filterRow.contains(myGroups));
+  console.log("Archived:", archivedRow, "contains?", archivedRow?.contains(myGroups));
+
+  if(!archivedRow) console.log("⚠️ Archived not found - will hide only filter");
+
+  // Transitions
+  filterRow.style.transition = "all 0.35s ease";
+  filterRow.style.setProperty('position', 'relative', 'important');
+  if(archivedRow){
+    archivedRow.style.transition = "all 0.35s ease";
+    archivedRow.style.setProperty('position', 'relative', 'important');
+  }
+
+  function hide(){
+    // DM's
+    filterRow.style.opacity = "0";
+    filterRow.style.transform = "translateY(-20px)";
+    filterRow.style.height = "0px";
+    filterRow.style.padding = "0";
+    filterRow.style.margin = "0";
+    filterRow.style.overflow = "hidden";
+    filterRow.style.pointerEvents = "none";
+    // ARCHIVED - THIS WAS MISSING BEFORE
+    if(archivedRow && !archivedRow.contains(myGroups) && archivedRow.id !== 'chatsPage'){
+      archivedRow.style.opacity = "0";
+      archivedRow.style.transform = "translateY(-20px)";
+      archivedRow.style.height = "0px";
+      archivedRow.style.padding = "0";
+      archivedRow.style.margin = "0";
+      archivedRow.style.overflow = "hidden";
+      archivedRow.style.pointerEvents = "none";
+      console.log("Hiding Archived");
+    }
+  }
+
+  function show(){
+    filterRow.style.opacity = "1";
+    filterRow.style.transform = "translateY(0)";
+    filterRow.style.height = "auto";
+    filterRow.style.padding = "12px 16px";
+    filterRow.style.margin = "";
+    filterRow.style.overflow = "auto";
+    filterRow.style.pointerEvents = "auto";
+    if(archivedRow && !archivedRow.contains(myGroups) && archivedRow.id !== 'chatsPage'){
+      archivedRow.style.opacity = "1";
+      archivedRow.style.transform = "translateY(0)";
+      archivedRow.style.height = "auto";
+      archivedRow.style.padding = "12px 24px";
+      archivedRow.style.margin = "";
+      archivedRow.style.overflow = "";
+      archivedRow.style.pointerEvents = "auto";
+      console.log("Showing Archived");
+    }
+  }
+
+  const scrollers = [myGroups, chatsList, window, document.documentElement].filter(Boolean);
+  scrollers.forEach(el=>{
+    el.addEventListener('scroll', ()=>{
+      const top = myGroups?.scrollTop || chatsList?.scrollTop || window.scrollY || document.documentElement.scrollTop || 0;
+      if(top > 10) hide(); else show();
+    }, {passive:true, capture:true});
+  });
+
+  console.log("✅ Ready - both DM's + Archived will hide, no white");
+})();
 </script>
 </body>
 </html>
