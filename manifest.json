@@ -1,24 +1,30 @@
 {
-  "name": "DANKCONNECT - V26 True Offline",
+  "name": "DANKCONNECT GH - Empowered by DANK-EMPIRE",
   "short_name": "DANKCONNECT",
-  "description": "V26 True Offline - Ghana's Secure Chat",
-  "start_url": "./index.html?v=26",
+  "description": "Ghana's No.1 Social App - Empowered by DANK-EMPIRE - V27",
+  "start_url": "/DANKCONNECT-/?v=27",
   "display": "standalone",
-  "background_color": "#0d00b3",
-  "theme_color": "#0d00b3",
+  "background_color": "#ffffff",
+  "theme_color": "#0000cc",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "logo.png?v=26",
+      "src": "/DANKCONNECT-/logo.png?v=27",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "logo.png?v=26",
+      "src": "/DANKCONNECT-/logo.png?v=27",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/DANKCONNECT-/logo.png?v=27",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
