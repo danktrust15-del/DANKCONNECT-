@@ -6,14 +6,14 @@
 <link rel="manifest" href="/DANKCONNECT-/manifest.json">
 <style>
 body{background:linear-gradient(180deg,#ffffff 0%,#e6eaff 40%,#2a4bff 100%);text-align:center;font-family:Arial;padding:40px 20px;margin:0;min-height:100vh;}
-/* === FORCED VISIBLE RING AROUND LOGO === */
-.logo-wrap{position:relative;width:170px;height:170px;margin:0 auto;display:flex;justify-content:center;align-items:center;}
-.logo-img{width:115px;height:115px;border-radius:26px;background:#fff;padding:6px;box-shadow:0 10px 30px rgba(0,0,200,0.4);z-index:10;position:relative;}
-.progress-ring{position:absolute;top:0;left:0;width:170px;height:170px;transform:rotate(-90deg);z-index:5;display:block !important;}
-.progress-ring-bg{fill:none;stroke:#9aa7ff;stroke-width:8;opacity:1;}
-.progress-ring-circle{fill:none;stroke:#001aff;stroke-width:9;stroke-linecap:round;stroke-dasharray:439.82;stroke-dashoffset:439.82;transition:stroke-dashoffset 0.15s linear;}
-#percentCount{font-size:28px;font-weight:900;color:#0018b5;margin:10px 0 2px;display:none;}
-#percentLabel{font-size:12px;color:#00a651;font-weight:700;display:none;margin-bottom:6px;}
+/* === BIG CIRCLE AROUND LOGO WITH GAP === */
+.logo-wrap{position:relative;width:200px;height:200px;margin:0 auto;display:flex;justify-content:center;align-items:center;}
+.logo-img{width:120px;height:120px;border-radius:26px;background:#fff;padding:6px;box-shadow:0 10px 30px rgba(0,0,200,0.4);z-index:10;position:relative;}
+.progress-ring{position:absolute;top:0;left:0;width:200px;height:200px;transform:rotate(-90deg);z-index:5;display:block;}
+.progress-ring-bg{fill:none;stroke:#c2c8ff;stroke-width:6;}
+.progress-ring-circle{fill:none;stroke:#001aff;stroke-width:8;stroke-linecap:round;stroke-dasharray:534;stroke-dashoffset:534;transition:stroke-dashoffset 0.15s linear;}
+#percentCount{font-size:32px;font-weight:900;color:#0018b5;margin:12px 0 2px;display:none;}
+#percentLabel{font-size:13px;color:#0033cc;font-weight:700;display:none;margin-bottom:6px;}
 h1{font-size:34px;letter-spacing:2px;margin:8px 0 5px;color:#00008b}
 .sub{color:#0000cc;font-weight:bold;letter-spacing:3px;font-size:12px;margin-bottom:5px}
 .desc{color:#333;font-size:15px;margin-top:8px}
@@ -33,10 +33,10 @@ h1{font-size:34px;letter-spacing:2px;margin:8px 0 5px;color:#00008b}
 </head>
 <body>
 <div class="logo-wrap">
-  <svg class="progress-ring" viewBox="0 0 170 170"><circle class="progress-ring-bg" cx="85" cy="85" r="70"></circle><circle id="progressCircle" class="progress-ring-circle" cx="85" cy="85" r="70"></circle></svg>
+  <svg class="progress-ring" viewBox="0 0 200 200"><circle class="progress-ring-bg" cx="100" cy="100" r="85"></circle><circle id="progressCircle" class="progress-ring-circle" cx="100" cy="100" r="85"></circle></svg>
   <img src="https://danktrust15-del.github.io/DANKCONNECT-/logo.png" class="logo-img" alt="Logo">
 </div>
-<div id="percentCount">0%</div><div id="percentLabel">✅ Installed!</div>
+<div id="percentCount">0%</div><div id="percentLabel">Installing...</div>
 <h1>DANKCONNECT<br>GH 🇬🇭</h1>
 <div class="sub">EMPOWERED BY DANK-EMPIRE</div>
 <div class="desc" id="mainDesc">Ghana's No.1 Social App</div>
@@ -44,11 +44,11 @@ h1{font-size:34px;letter-spacing:2px;margin:8px 0 5px;color:#00008b}
 <div id="status" class="badge">✅ 100% Safe • No Virus • Fast Install</div><br>
 <button class="donate-btn" id="donateBtn">❤️ Support DANK-EMPIRE - DONATE</button>
 <p class="small" id="iosHelp" style="display:none">On iPhone:<br>Tap <b>Share ⬆️</b> > <b>Add to Home Screen</b> > <b>Add</b></p>
-<div id="donateModal" class="donate-modal"><div class="donate-card"><h2>💖 Support DANK-EMPIRE 💖</h2><p class="donate-desc">Your donation helps us build Dank-Empire. Let's build together. Every cedis counts.</p><div class="donate-section-title">💰 Donation Details</div><div class="detail-box"><span>📱 MTN MoMo: <strong id="momoNumber">0538958153</strong></span></div><div class="detail-box"><span>👤 Name: <strong>Dank Empire</strong></span></div><div class="detail-box"><span>📝 Reference: <strong>Donation</strong></span></div><button class="copy-main-btn" onclick="copyMomo()">📋 Copy MoMo Number</button><button class="close-main-btn" onclick="closeModal()">Close</button><div style="text-align:center;margin-top:15px;font-size:12px;color:#666;">🇬🇭 DankConnect GH</div></div></div>
+<div id="donateModal" class="donate-modal"><div class="donate-card"><h2>💖 Support DANK-EMPIRE 💖</h2><p class="donate-desc">Your donation helps us to support the aim of making the dream of building Dank-Empire come through, A strong system envisioned to be outstanding and reaching the pleasures of the people. Let's build together. Every cedis counts.</p><div class="donate-section-title">💰 Donation Details</div><div class="detail-box"><span>📱 MTN MoMo: <strong id="momoNumber">0538958153</strong></span><span>📋</span></div><div class="detail-box"><span>👤 Name: <strong>Dank Empire</strong></span><span>👤</span></div><div class="detail-box"><span>📝 Reference: <strong>Donation</strong></span><span>📝</span></div><button class="copy-main-btn" onclick="copyMomo()">📋 Copy MoMo Number</button><button class="close-main-btn" onclick="closeModal()">Close</button><div style="text-align:center;margin-top:15px;font-size:12px;color:#666;">🇬🇭 DankConnect GH</div></div></div>
 <script>
-let deferredPrompt;const installBtn=document.getElementById('installBtn');const statusEl=document.getElementById('status');const circle=document.getElementById('progressCircle');const percentCount=document.getElementById('percentCount');const percentLabel=document.getElementById('percentLabel');const mainDesc=document.getElementById('mainDesc');const circumference=2*Math.PI*70;
-function setProgress(p){const o=circumference-(p/100*circumference);circle.style.strokeDashoffset=o;percentCount.textContent=p+"%";percentLabel.textContent=p<100?"⏳ Installing...":"✅ Installed!";statusEl.textContent=p<100?`⏳ Installing... ${p}%`:"🎉 Installed! Check home screen!";}
-function startInstallCount(){percentCount.style.display="block";percentLabel.style.display="block";mainDesc.style.display="none";percentLabel.style.color="#0033cc";let p=0;const iv=setInterval(()=>{p+=Math.floor(Math.random()*5)+2;if(p>=100){p=100;clearInterval(iv);percentLabel.style.color="#00a651";percentLabel.textContent="✅ Installed!";setTimeout(()=>{statusEl.innerHTML="🎉 Installation Complete! Open from home screen";installBtn.textContent="✅ OPEN APP";},400);}setProgress(p);},110);}
+let deferredPrompt;const installBtn=document.getElementById('installBtn');const statusEl=document.getElementById('status');const circle=document.getElementById('progressCircle');const percentCount=document.getElementById('percentCount');const percentLabel=document.getElementById('percentLabel');const mainDesc=document.getElementById('mainDesc');const circumference=2*Math.PI*85;
+function setProgress(p){const o=circumference-(p/100*circumference);circle.style.strokeDashoffset=o;percentCount.textContent=p+"%";percentLabel.textContent=p<100?`Installing... ${p}%`:"✅ Installed!";statusEl.textContent=p<100?`⏳ Installing... ${p}%`:"🎉 Installed! Check home screen!";}
+function startInstallCount(){percentCount.style.display="block";percentLabel.style.display="block";mainDesc.style.display="none";let p=0;const iv=setInterval(()=>{p+=Math.floor(Math.random()*5)+2;if(p>=100){p=100;clearInterval(iv);percentLabel.style.color="#00a651";percentLabel.textContent="✅ Installed!";setTimeout(()=>{statusEl.innerHTML="🎉 Installation Complete! Open from home screen";installBtn.textContent="✅ OPEN APP";},400);}setProgress(p);},110);}
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;statusEl.innerHTML="✅ Tap INSTALL to add to phone";});
 installBtn.addEventListener('click',async()=>{startInstallCount();if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;}else{setTimeout(()=>{window.location.href="https://danktrust15-del.github.io/DANKCONNECT-/";},3000);}});
 if(/iPhone|iPad|iPod/.test(navigator.userAgent)){document.getElementById('iosHelp').style.display='block';}
