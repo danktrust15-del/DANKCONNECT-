@@ -32,16 +32,19 @@ a{color:#2040ff;text-decoration:underline;}
 <h2>2. Data We Collect</h2>
 <div class="card">
 <ul>
-<li><strong>Account Data:</strong> Username, display name, profile photo (if you upload)</li>
-<li><strong>Contact Data:</strong> Phone number or email if you provide for login</li>
-<li><strong>Content Data:</strong> Messages, posts, images you share in the app</li>
-<li><strong>Technical Data:</strong> Device type, browser, IP address, app version for security</li>
-<li><strong>No Financial Data:</strong> We do not collect MoMo PIN, bank cards or passwords</li>
+<li><strong>Real Name:</strong> Your full real name you provide at sign-up for account identification</li>
+<li><strong>Username:</strong> Your unique @username used for login and tagging</li>
+<li><strong>Password:</strong> Encrypted & hashed securely — we never store or see your plain password</li>
+<li><strong>Profile Data:</strong> Profile photo (if you upload one)</li>
+<li><strong>Content Data:</strong> Messages, posts, comments, and images you share inside DANKCONNECT</li>
+<li><strong>Technical Data:</strong> Device type, browser, IP address, app version for security and performance</li>
+<li><strong>What We DON'T Collect:</strong> We do NOT collect phone number, email, MoMo PIN, or bank card for login — only Real Name, Username & Password</li>
 </ul>
 </div>
 
 <h2>3. How We Use Your Data</h2>
 <ul>
+<li>To create your account using Real Name, Username and Password</li>
 <li>To provide and improve chat and social features</li>
 <li>To keep the platform safe, prevent fraud, spam and abuse</li>
 <li>To respond to support and legal requests</li>
@@ -49,7 +52,7 @@ a{color:#2040ff;text-decoration:underline;}
 </ul>
 
 <h2>4. Legal Basis (Act 843)</h2>
-<p>We process your data based on your consent when you create an account and check "I agree". You can withdraw consent by deleting your account anytime.</p>
+<p>We process your data based on your consent when you create an account with Real Name, Username, Password and check "I agree". You can withdraw consent by deleting your account anytime.</p>
 
 <h2>5. Data Sharing</h2>
 <p>We do NOT share your personal data except:</p>
@@ -60,13 +63,13 @@ a{color:#2040ff;text-decoration:underline;}
 </ul>
 
 <h2>6. Data Security & Retention</h2>
-<p>We use reasonable security measures to protect your data. Messages are stored securely. We retain your account data until you delete your account. You can request deletion anytime via Contact email. We will delete within 30 days.</p>
+<p>Passwords are hashed using industry-standard encryption. We use reasonable security measures to protect your Real Name and Username. We retain your account data until you delete your account. You can request deletion anytime via Contact email. We will delete within 30 days.</p>
 
 <h2>7. Your Rights Under Act 843</h2>
 <div class="card">
 You have the right to:
-<br>✅ Access your data
-<br>✅ Correct inaccurate data
+<br>✅ Access your Real Name & Username data
+<br>✅ Correct inaccurate Real Name
 <br>✅ Delete your account and data (Right to be Forgotten)
 <br>✅ Object to processing
 <br>✅ Report misuse to Data Protection Commission, Ghana - <a href="https://www.dataprotection.org.gh" target="_blank">dataprotection.org.gh</a>
