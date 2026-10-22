@@ -7,7 +7,7 @@
 body{font-family:Arial,sans-serif;line-height:1.7;color:#222;padding:20px;max-width:800px;margin:0 auto;background:#fff;}
 h1{color:#00008b;text-align:center;margin-top:10px;}
 h2{color:#0a1a8a;margin-top:30px;border-left:4px solid #2040ff;padding-left:10px;}
-a{color:#2040ff;text-decoration:none;}
+a{color:#2040ff;text-decoration:underline;}
 .header{background:linear-gradient(135deg,#0000cc,#2040ff);color:#fff;padding:20px;border-radius:15px;text-align:center;margin-bottom:20px;}
 .card{background:#f8f9ff;padding:15px;border-radius:10px;border:1px solid #e0e0ff;margin:15px 0;}
 .small{font-size:12px;color:#666;text-align:center;margin-top:30px;}
@@ -23,7 +23,7 @@ a{color:#2040ff;text-decoration:none;}
 <p><strong>Effective Date:</strong> October 22, 2026<br>
 <strong>Last Updated:</strong> October 22, 2026<br>
 <strong>Controller:</strong> DANK-EMPIRE / DANKCONNECT GH<br>
-<strong>Contact:</strong> dankconnectgh@gmail.com<br>
+<strong>Contact:</strong> <a href="mailto:dankconnect15@gmail.com">dankconnect15@gmail.com</a><br>
 <strong>Location:</strong> Accra, Ghana</p>
 
 <h2>1. Introduction</h2>
@@ -69,8 +69,8 @@ You have the right to:
 <br>✅ Correct inaccurate data
 <br>✅ Delete your account and data (Right to be Forgotten)
 <br>✅ Object to processing
-<br>✅ Report misuse to Data Protection Commission, Ghana - <a href="https://www.dataprotection.org.gh">dataprotection.org.gh</a>
-<br><br>To exercise, email us at dankconnectgh@gmail.com
+<br>✅ Report misuse to Data Protection Commission, Ghana - <a href="https://www.dataprotection.org.gh" target="_blank">dataprotection.org.gh</a>
+<br><br>To exercise, email us at <a href="mailto:dankconnect15@gmail.com">dankconnect15@gmail.com</a>
 </div>
 
 <h2>8. Children's Privacy</h2>
@@ -89,7 +89,7 @@ You have the right to:
 
 <h2>10. Reporting Abuse</h2>
 <div class="card">
-If you see abuse: Use in-app Report button or email <strong>dankconnectgh@gmail.com</strong> with username and screenshot. We review within 24-48 hours.
+If you see abuse: Use in-app Report button or email <a href="mailto:dankconnect15@gmail.com">dankconnect15@gmail.com</a> with username and screenshot. We review within 24-48 hours.
 <br><br>
 For serious crimes, we will cooperate with Ghana Police Cybercrime Unit and Cyber Security Authority as required by Act 1038.
 </div>
@@ -102,12 +102,12 @@ For serious crimes, we will cooperate with Ghana Police Cybercrime Unit and Cybe
 
 <h2>13. Contact Us</h2>
 <p>For privacy questions, account deletion, or complaints:<br>
-<strong>Email:</strong> dankconnectgh@gmail.com<br>
+<strong>Email:</strong> <a href="mailto:dankconnect15@gmail.com">dankconnect15@gmail.com</a><br>
 <strong>Project:</strong> DANKCONNECT GH - Empowered by DANK-EMPIRE<br>
 <strong>Address:</strong> Accra, Greater Accra, Ghana</p>
 
-<p class="small">© 2026 DANKCONNECT GH - Empowered by DANK-EMPIRE. All rights reserved.<br>
+<p class="small">©️ 2026 DANKCONNECT GH - Empowered by DANK-EMPIRE. All rights reserved.<br>
 This policy complies with Data Protection Act, 2012 (Act 843) Ghana.<br><br>
-<a href="https://danktrust15-del.github.io/DANKCONNECT-/">← Back to Install Page</a></p>
+<a href="index.html">← Back to Install Page</a></p>
 </body>
 </html>
