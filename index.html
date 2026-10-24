@@ -905,63 +905,87 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
   document.getElementById('authError').textContent = '';
 }
 </script>
-<!-- SETTINGS PAGE -->
-<div id="settingsPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0b141a; z-index:100;">
+<!-- SETTINGS PAGE - CARDS EDITION - FIXED FINAL - SHOWS REAL PHOTO & NAME -->
+<div id="settingsPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0A1931; z-index:100; overflow-y:auto; padding-bottom:80px;">
 
-  <div style="background:#0000FF; padding:16px; padding-top:40px;">
+  <div style="background:#0000FF; padding:16px; padding-top:40px; position:sticky; top:0; z-index:10;">
     <div style="display:flex; align-items:center; gap:16px;">
      <span onclick="document.getElementById('settingsPage').style.display='none'; document.getElementById('chatsPage').style.display='block'" style="color:white; font-size:22px; cursor:pointer;">←</span>
       <h2 style="color:white; margin:0; font-size:20px;">Settings</h2>
     </div>
   </div>
 
-  <!-- Profile Row -->
-  <div style="display:flex; align-items:center; gap:14px; padding:16px; border-bottom:1px solid #222d34;">
-    <div style="width:40px; height:40px; background:#e7e9fb; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  <!-- PROFILE CARD - CLICKABLE - SHOWS REAL PHOTO -->
+  <div onclick="openMyProfilePage()" style="background:#111E36; margin:16px; border-radius:16px; padding:16px; display:flex; align-items:center; gap:14px; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.06);">
+    <img id="settingsPageAvatar" src="https://via.placeholder.com/100/1A2A44/FFFFFF?text=DC" style="width:52px; height:52px; border-radius:50%; object-fit:cover; background:#1A2A44; border:2px solid rgba(255,255,255,0.1);">
+    <div style="flex:1;">
+     <div id="settingsPageName" style="color:white; font-size:17px; font-weight:600;">Your Name</div>
+      <div style="color:#7A8DB0; font-size:13px; margin-top:2px;">Let's get connected with DankConnect</div>
     </div>
-    <div>
-     <div style="color:white; font-size:18px; font-weight:500;">Your Name</div>
-      <div style="color:#8696a0; font-size:14px;">Let's get connected with DankConnect</div>
+    <div style="color:#7A8DB0; font-size:22px;">›</div>
+  </div>
+
+  <!-- ADMIN CARD -->
+  <div style="background:#111E36; margin:0 16px 12px 16px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.06); box-shadow:0 2px 10px rgba(0,0,0,0.15);">
+    <div onclick="document.getElementById('pin-modal').style.display='flex'" style="display:flex; align-items:center; gap:16px; padding:16px; cursor:pointer;">
+      <div style="width:42px; height:42px; background:#2A3A5C; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A7CFF" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+      </div>
+      <div style="flex:1;">
+        <div style="color:white; font-size:15px; font-weight:500;">Admin Panel</div>
+        <div style="color:#7A8DB0; font-size:12px; margin-top:2px;">Manage quotes & users</div>
+      </div>
+      <div style="color:#7A8DB0;">›</div>
     </div>
   </div>
 
-  <!-- List -->
-  <div style="padding:10px 16px;">
-<div onclick="document.getElementById('pin-modal').style.display='flex'" style="display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid #222d34; cursor:pointer;"><div style="color:white; font-size:16px;">Admin Panel</div>
-</div> 
-    <div style="display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid #222d34;">
-      <div style="width:40px; height:40px; background:#e7e9fb; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  <!-- SETTINGS GROUP CARD -->
+  <div style="background:#111E36; margin:0 16px 12px 16px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.06); box-shadow:0 2px 10px rgba(0,0,0,0.15);">
+    <div style="padding:0 16px;">
+      <div style="display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06); cursor:pointer;">
+        <div style="width:42px; height:42px; background:#E7E9FB; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <span style="color:white; font-size:15px; font-weight:500; flex:1;">Account</span>
+        <span style="color:#7A8DB0;">›</span>
       </div>
-      <span style="color:white; font-size:16px;">Account</span>
-    </div>
 
-<div onclick="window.open('privacy.html','_blank')" style="display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid #222d34; cursor:pointer;">
-<div style="width:40px; height:40px; background:#e7e9fb; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <div onclick="window.open('privacy.html','_blank')" style="display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06); cursor:pointer;">
+        <div style="width:42px; height:42px; background:#E7E9FB; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <span style="color:white; font-size:15px; font-weight:500; flex:1;">Privacy Policy & Terms</span>
+        <span style="color:#7A8DB0;">›</span>
       </div>
-<span style="color:white; font-size:16px;">Privacy Policy & Terms</span>
-</div>
 
-    <div style="display:flex; align-items:center; gap:16px; padding:14px 0;">
-      <div style="width:40px; height:40px; background:#e7e9fb; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div style="display:flex; align-items:center; gap:16px; padding:16px 0; cursor:pointer;">
+        <div style="width:42px; height:42px; background:#E7E9FB; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <span style="color:white; font-size:15px; font-weight:500; flex:1;">Notifications</span>
+        <span style="color:#7A8DB0;">›</span>
       </div>
-      <span style="color:white; font-size:16px;">Notifications</span>
     </div>
   </div>
 
-<div onclick="logout()" style="display:flex; align-items:center; gap:16px; padding:14px 20px; border-top:1px solid #222d34; margin-top:10px; cursor:pointer;">  <div style="width:40px; height:40px; background:#fde8e8; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+  <!-- LOGOUT CARD -->
+  <div style="background:#111E36; margin:0 16px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,59,48,0.15); box-shadow:0 2px 10px rgba(0,0,0,0.15);">
+    <div onclick="logout()" style="display:flex; align-items:center; gap:16px; padding:16px; cursor:pointer;">
+      <div style="width:42px; height:42px; background:#FDE8E8; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+      <span style="color:#FF3B30; font-size:15px; font-weight:600; flex:1;">Log Out</span>
+    </div>
   </div>
-  <span style="color:#FF3B30; font-size:16px; font-weight:500;">Log Out</span>
-</div>
-    <div id="adminQuotesSection" style="display:none; padding:16px; border-top:1px solid #222d3d;">
-  <div onclick="openQuotesAdmin()" style="background:#333; border-radius:12px; padding:14px; color:#fff; text-align:center; cursor:pointer;">ADMIN: Post Motivational Quote</div>
-</div>
-</div>
 
+  <div id="adminQuotesSection" style="display:none; padding:16px;">
+    <div onclick="openQuotesAdmin()" style="background:#1A2A44; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; color:#fff; text-align:center; cursor:pointer;">ADMIN: Post Motivational Quote</div>
+  </div>
+
+  <div style="text-align:center; margin-top:20px; color:#4A5A7A; font-size:12px;">
+    DankConnect v1.0 • Made in Ghana 🇬🇭
+  </div>
+</div>
 <div id="callsPage" style="display:none; background:#0b141a; min-height:100vh; color:white;">
   <div style="padding:12px 16px; font-size:20px; font-weight:bold;">Calls</div>
   <div style="padding:40px 16px; text-align:center; color:#8696a0;">No calls yet</div>
@@ -1029,21 +1053,16 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
 <script>
 
 function showPage(id){
-  // FIX A: Always kill white auth/splash layers
   const auth = document.getElementById('auth');
   const splash = document.getElementById('splash');
   if(auth){ auth.style.display='none'; auth.style.visibility='hidden'; }
   if(splash) splash.style.display='none';
   document.body.style.background='#0A1931';
   document.documentElement.style.background='#0A1931';
-
-  // Hide all main pages
-  ['chatsPage','updatesPage','callsPage','settingsPage','quotesPage','quotes-admin','pin-modal','statusViewer'].forEach(p=>{
+  ['chatsPage','updatesPage','callsPage','settingsPage','quotesPage','quotes-admin','pin-modal','statusViewer','editProfilePage'].forEach(p=>{
     const el = document.getElementById(p);
     if(el) el.style.display='none';
   });
-
-  // Show requested page
   const target = document.getElementById(id);
   if(target){
     target.style.display='block';
@@ -1051,29 +1070,308 @@ function showPage(id){
     target.style.minHeight='100vh';
     target.style.color='white';
   }
-
-  // FIX B: hide bottom nav when inside quotesPage, show otherwise + highlight active tab
   const bottomNav = document.getElementById('bottomNav');
   if(bottomNav){
-    bottomNav.style.display = (id === 'quotesPage' || id === 'quotes-admin') ? 'none' : 'flex';
-    
-    // FIX C: highlight active tab (Updates white when on updatesPage)
-    const activeName = id.replace('Page','').toLowerCase(); // chats, updates, calls, settings
+    bottomNav.style.display = (id === 'quotesPage' || id === 'quotes-admin' || id === 'editProfilePage') ? 'none' : 'flex';
+    const activeName = id.replace('Page','').toLowerCase();
     bottomNav.querySelectorAll('div').forEach(tab=>{
       const txt = tab.textContent.trim().toLowerCase();
-      const isActive = txt === activeName || (activeName==='chats' && txt==='chats') || (activeName==='updates' && txt==='updates') || (activeName==='calls' && txt==='calls') || (activeName==='settings' && txt==='settings') || (activeName==='communities' && txt==='communities');
-      if(isActive){
-        tab.style.color='white';
-        tab.style.fontWeight='bold';
-        tab.style.opacity='1';
-      } else {
-        tab.style.color='#7A8DB0';
-        tab.style.fontWeight='normal';
-        tab.style.opacity='0.8';
-      }
+      const isActive = txt === activeName;
+      tab.style.color = isActive ? 'white' : '#7A8DB0';
+      tab.style.fontWeight = isActive ? 'bold' : 'normal';
+      tab.style.opacity = isActive ? '1' : '0.8';
     });
   }
+  if(id === 'settingsPage'){
+    syncSettingsPage();
+    setTimeout(syncSettingsPage, 100);
+  }
 }
+
+function getMyUidSafe(){
+  try{
+    if(window.firebase && typeof firebase.auth === 'function' && firebase.auth().currentUser) return firebase.auth().currentUser.uid;
+    if(window.firebaseAuth && firebaseAuth.currentUser) return firebaseAuth.currentUser.uid;
+    if(window.auth && auth.currentUser) return auth.currentUser.uid;
+    if(window.firebase && firebase.auth && firebase.auth.currentUser) return firebase.auth.currentUser.uid;
+  }catch(e){}
+  return null;
+}
+
+function openMyProfilePage(){
+  const profileAvatar = document.getElementById('profilePageAvatar');
+  const saved = localStorage.getItem('myPhotoURL');
+  if(saved && profileAvatar) profileAvatar.src = saved;
+  const savedCover = localStorage.getItem('myCoverPhotoURL');
+  if(savedCover){
+    const coverEl = document.getElementById('profileCoverPhoto');
+    const ph = document.getElementById('profileCoverPlaceholder');
+    if(coverEl){ coverEl.src = savedCover; coverEl.style.display='block'; if(ph) ph.style.display='none'; }
+  }
+  showPage('editProfilePage');
+  loadMyProfileData();
+  syncSettingsPage();
+}
+
+function loadMyProfileData(){
+  const profileAvatar = document.getElementById('profilePageAvatar');
+  const savedPhoto = localStorage.getItem('myPhotoURL');
+  if(savedPhoto && profileAvatar) profileAvatar.src = savedPhoto;
+
+  // PRIORITY 1: Local name wins - survives refresh
+  const localName = localStorage.getItem('myName') || localStorage.getItem('myProfileName');
+  const localUpdatedAt = parseInt(localStorage.getItem('myNameUpdatedAt') || '0');
+  if(localName && document.getElementById('profilePageName')){
+    document.getElementById('profilePageName').innerText = localName;
+    syncSettingsPage();
+  }
+
+  const savedCover = localStorage.getItem('myCoverPhotoURL');
+  if(savedCover){
+    const coverEl = document.getElementById('profileCoverPhoto');
+    const ph = document.getElementById('profileCoverPlaceholder');
+    if(coverEl){ coverEl.src = savedCover; coverEl.style.display='block'; if(ph) ph.style.display='none'; }
+  }
+  syncSettingsPage();
+
+  const uid = getMyUidSafe();
+  if(!uid) return;
+  try{
+    if(firebase.firestore){
+      firebase.firestore().collection('users').doc(uid).get().then(doc=>{
+        if(doc.exists){
+          const data = doc.data();
+          const firebaseName = data.name || data.displayName || data.username;
+          const firebaseTime = data.updatedAt ? data.updatedAt.toMillis() : 0;
+
+          if(firebaseName){
+            const shouldUseFirebase = !localName || (firebaseTime > localUpdatedAt && firebaseTime !== 0);
+            if(shouldUseFirebase){
+              document.getElementById('profilePageName').innerText = firebaseName;
+              localStorage.setItem('myName', firebaseName);
+              localStorage.setItem('myProfileName', firebaseName);
+              syncSettingsPage();
+            } else if(localName) {
+              // Local newer - push to Firebase to fix it
+              firebase.firestore().collection('users').doc(uid).set({
+                name: localName,
+                displayName: localName,
+                searchName: localName.toLowerCase(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              }, { merge: true });
+            }
+          }
+
+          if(data.about && document.getElementById('profilePageAbout')) document.getElementById('profilePageAbout').innerText = data.about;
+          if((data.details || data.bio) && document.getElementById('profilePageDetails')) document.getElementById('profilePageDetails').innerText = data.details || data.bio;
+          if(data.photoURL && profileAvatar){
+            if(!savedPhoto || data.photoURL !== savedPhoto){
+              profileAvatar.src = data.photoURL;
+              localStorage.setItem('myPhotoURL', data.photoURL);
+              syncTopAvatarForce();
+              syncSettingsPage();
+            }
+          }
+          if(data.coverPhotoURL){
+            const coverEl = document.getElementById('profileCoverPhoto');
+            const ph = document.getElementById('profileCoverPlaceholder');
+            if(coverEl){
+              coverEl.src = data.coverPhotoURL;
+              coverEl.style.display='block';
+              if(ph) ph.style.display='none';
+              localStorage.setItem('myCoverPhotoURL', data.coverPhotoURL);
+            }
+          }
+        }
+      });
+    }
+  }catch(e){}
+}
+
+async function uploadProfileToCloudinary(input){
+  const file = input.files[0];
+  if(!file) return;
+  const CLOUD_NAME = 'aqx4n0dz';
+  const UPLOAD_PRESET = 'dank_profile';
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', UPLOAD_PRESET);
+  const avatarEl = document.getElementById('profilePageAvatar');
+  if(avatarEl) avatarEl.style.opacity = '0.5';
+  try{
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method:'POST', body:formData });
+    const data = await res.json();
+    if(!data.secure_url) throw new Error('Upload failed: ' + JSON.stringify(data));
+    const newUrl = data.secure_url;
+    if(avatarEl){ avatarEl.src = newUrl; avatarEl.style.opacity = '1'; }
+    localStorage.setItem('myPhotoURL', newUrl);
+    try{
+      const uid = getMyUidSafe();
+      if(uid && firebase.firestore){
+        await firebase.firestore().collection('users').doc(uid).set({ photoURL: newUrl, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      }
+    }catch(fe){}
+    syncTopAvatarForce();
+    syncSettingsPage();
+    setTimeout(()=>{ syncTopAvatarForce(); syncSettingsPage(); }, 200);
+    alert('Profile photo updated!');
+  }catch(e){
+    alert('Upload failed: '+e.message);
+    if(avatarEl) avatarEl.style.opacity = '1';
+  }
+}
+
+async function uploadCoverToCloudinary(input){
+  const file = input.files[0];
+  if(!file) return;
+  const CLOUD_NAME = 'aqx4n0dz';
+  const UPLOAD_PRESET = 'dank_profile';
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', UPLOAD_PRESET);
+  const coverEl = document.getElementById('profileCoverPhoto');
+  const placeholder = document.getElementById('profileCoverPlaceholder');
+  if(coverEl) coverEl.style.opacity = '0.5';
+  try{
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method:'POST', body:formData });
+    const data = await res.json();
+    if(!data.secure_url) throw new Error('Upload failed');
+    const newUrl = data.secure_url;
+    if(coverEl){
+      coverEl.src = newUrl;
+      coverEl.style.display = 'block';
+      coverEl.style.opacity = '1';
+    }
+    if(placeholder) placeholder.style.display = 'none';
+    localStorage.setItem('myCoverPhotoURL', newUrl);
+    const uid = getMyUidSafe();
+    if(uid && firebase.firestore){
+      await firebase.firestore().collection('users').doc(uid).set({ coverPhotoURL: newUrl, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    }
+    alert('Cover photo updated!');
+  }catch(e){
+    alert('Cover upload failed: '+e.message);
+    if(coverEl) coverEl.style.opacity = '1';
+  }
+}
+
+function editProfileName(){
+  const current = document.getElementById('profilePageName')?.innerText || localStorage.getItem('myName') || '';
+  const newName = prompt('Enter new name:', current);
+  if(!newName || !newName.trim()) return;
+  const trimmed = newName.trim();
+  
+  // Save locally FIRST - survives refresh
+  localStorage.setItem('myName', trimmed);
+  localStorage.setItem('myProfileName', trimmed);
+  localStorage.setItem('myNameUpdatedAt', Date.now().toString());
+  
+  document.getElementById('profilePageName').innerText = trimmed;
+  const sName = document.getElementById('settingsPageName');
+  if(sName) sName.innerText = trimmed;
+
+  function pushNameToFirebase(retries = 3){
+    const uid = getMyUidSafe();
+    if(!uid){
+      if(retries > 0) setTimeout(()=> pushNameToFirebase(retries - 1), 1000);
+      return;
+    }
+    if(firebase.firestore){
+      firebase.firestore().collection('users').doc(uid).set({
+        name: trimmed,
+        displayName: trimmed,
+        searchName: trimmed.toLowerCase(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(()=>{
+        if(retries > 0) setTimeout(()=> pushNameToFirebase(retries - 1), 2000);
+      });
+    }
+  }
+  pushNameToFirebase();
+  
+  syncSettingsPage();
+  syncTopAvatarForce();
+  alert('Name updated to: ' + trimmed);
+}
+
+function editProfileDetails(){
+  const el = document.getElementById('profilePageDetails');
+  const current = el ? el.innerText : '';
+  const newDetails = prompt('Enter your details/bio:', current);
+  if(!newDetails || !newDetails.trim()) return;
+  const trimmed = newDetails.trim();
+  document.getElementById('profilePageDetails').innerText = trimmed;
+  localStorage.setItem('myDetails', trimmed);
+  const uid = getMyUidSafe();
+  if(uid && firebase.firestore) firebase.firestore().collection('users').doc(uid).set({ details: trimmed, bio: trimmed, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(()=>{});
+}
+
+function editProfileAbout(){
+  const el = document.getElementById('profilePageAbout');
+  const current = el ? el.innerText : 'Available';
+  const newAbout = prompt('Enter About:', current);
+  if(!newAbout || !newAbout.trim()) return;
+  const trimmed = newAbout.trim();
+  document.getElementById('profilePageAbout').innerText = trimmed;
+  localStorage.setItem('myAbout', trimmed);
+  const uid = getMyUidSafe();
+  if(uid && firebase.firestore) firebase.firestore().collection('users').doc(uid).set({ about: trimmed, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(()=>{});
+}
+
+function syncTopAvatarForce(){
+  const url = localStorage.getItem('myPhotoURL');
+  if(!url) return;
+  const allImgs = [...document.querySelectorAll('img')];
+  const topCandidates = allImgs.filter(img=>{
+    const r = img.getBoundingClientRect();
+    return r.top < 150 && r.left > window.innerWidth - 200 && r.width >= 28 && r.width <= 70 && r.height >= 28 && r.height <= 70;
+  });
+  topCandidates.sort((a,b)=> b.getBoundingClientRect().left - a.getBoundingClientRect().left);
+  if(topCandidates[0] && topCandidates[0].src !== url){
+    topCandidates[0].src = url;
+    topCandidates[0].style.objectFit = 'cover';
+    topCandidates[0].style.borderRadius = '50%';
+  }
+}
+
+function syncSettingsPage(){
+  const photo = localStorage.getItem('myPhotoURL');
+  const name = localStorage.getItem('myName') || localStorage.getItem('myProfileName') || document.getElementById('profilePageName')?.innerText || '';
+  const sAvatar = document.getElementById('settingsPageAvatar');
+  const sName = document.getElementById('settingsPageName');
+  if(sAvatar && photo){
+    sAvatar.src = photo;
+    sAvatar.style.objectFit = 'cover';
+  }
+  if(sName && name && name.trim() && name !== 'Your Name'){
+    sName.innerText = name.trim();
+  }
+}
+
+setTimeout(()=>{
+  document.addEventListener('click', function(e){
+    const t = e.target;
+    if(t.tagName === 'IMG'){
+      const r = t.getBoundingClientRect();
+      if(r.top < 150 && r.left > window.innerWidth - 200 && r.width >= 28 && r.width <= 70){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        openMyProfilePage();
+        return false;
+      }
+    }
+  }, true);
+  syncTopAvatarForce();
+  syncSettingsPage();
+  setInterval(()=>{
+    syncTopAvatarForce();
+    syncSettingsPage();
+  }, 1000);
+  const saved = localStorage.getItem('myPhotoURL');
+  if(saved) setTimeout(()=>{ syncTopAvatarForce(); syncSettingsPage(); }, 300);
+}, 800);
+
 function saveQuoteToFirebase(){
   const input = document.getElementById('admin-quote-input');
   const text = input.value.trim();
@@ -3005,5 +3303,67 @@ setTimeout(()=>{ try{ loadMyTopAvatar(); }catch(e){} }, 1500);
   console.log("✅ Ready - both DM's + Archived will hide, no white");
 })();
 </script>
+<!-- ===== DANKCONNECT PROFILE PAGE - PROFESSIONAL DARK BLUE CAMERA + COVER - FINAL FIXED ===== -->
+<div id="editProfilePage" style="display:none; background:#0A1931; min-height:100vh; color:white; position:fixed; top:0; left:0; width:100%; z-index:9999; overflow-y:auto;">
+  <!-- Header -->
+  <div style="display:flex; align-items:center; gap:16px; padding:14px; background:#0A1931; position:sticky; top:0; z-index:10;">
+    <div onclick="showPage('chatsPage')" style="font-size:24px; cursor:pointer; padding:4px 10px;">←</div>
+    <div style="font-size:17px; font-weight:bold;">Profile</div>
+  </div>
+
+  <!-- Banner + Avatar + COVER PHOTO -->
+  <div id="profileCoverContainer" style="position:relative; height:200px; background:#111b21; background-size:cover; background-position:center; background-color:#1f2c34;">
+    <img id="profileCoverPhoto" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
+    <div id="profileCoverPlaceholder" style="width:100%; height:100%; background:linear-gradient(135deg,#0A1931,#1A2A44);"></div>
+    
+    <!-- COVER CAMERA BUTTON - DARK BLUE PROFESSIONAL -->
+    <div onclick="document.getElementById('coverPhotoInput').click()" style="position:absolute; bottom:12px; right:12px; width:38px; height:38px; background:#0A1931; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid rgba(255,255,255,0.15); box-shadow:0 3px 10px rgba(0,0,0,0.6);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+    </div>
+
+    <div style="position:absolute; bottom:-55px; left:50%; transform:translateX(-50%);">
+      <div style="position:relative; width:120px; height:120px;">
+        <img id="profilePageAvatar" src="https://via.placeholder.com/120/1f2c34/FFFFFF?text=Dani" style="width:120px; height:120px; border-radius:50%; border:5px solid #0A1931; object-fit:cover; background:#1a2942;">
+        <!-- AVATAR CAMERA BUTTON - DARK BLUE PROFESSIONAL -->
+        <div onclick="document.getElementById('profileCloudinaryInput').click()" style="position:absolute; bottom:2px; right:2px; width:36px; height:36px; background:#0A1931; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid #0A1931; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,0.6);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Data -->
+  <div style="margin-top:75px; padding:0 20px 30px 20px;">
+    <div onclick="editProfileName()" style="display:flex; justify-content:space-between; align-items:flex-start; padding:18px 0; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer;">
+      <div style="flex:1;">
+        <div style="font-size:12px; color:#8696a0;">Name</div>
+        <div id="profilePageName" style="font-size:17px; margin-top:6px; font-weight:400;">Dani Boss</div>
+        <div style="font-size:13px; color:#8696a0; margin-top:8px; line-height:1.4;">This name will be visible to your DankConnect contacts.</div>
+      </div>
+      <div style="color:#7A8DB0; font-size:18px; margin-left:12px;">✎</div>
+    </div>
+
+    <div onclick="editProfileAbout()" style="display:flex; justify-content:space-between; align-items:flex-start; padding:18px 0; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer;">
+      <div style="flex:1;">
+        <div style="font-size:12px; color:#8696a0;">About</div>
+        <div id="profilePageAbout" style="font-size:16px; margin-top:6px;">Available</div>
+      </div>
+      <div style="color:#7A8DB0; font-size:18px; margin-left:12px;">✎</div>
+    </div>
+
+    <div onclick="editProfileDetails()" style="display:flex; justify-content:space-between; align-items:flex-start; padding:18px 0; cursor:pointer;">
+      <div style="flex:1;">
+        <div style="font-size:12px; color:#8696a0;">Details</div>
+        <div id="profilePageDetails" style="font-size:15px; margin-top:6px; line-height:1.4;">DankConnect • Entrepreneur • Accra, Ghana</div>
+        <div style="font-size:12px; color:#8696a0; margin-top:6px;">Tap to edit your bio/details</div>
+      </div>
+      <div style="color:#7A8DB0; font-size:18px; margin-left:12px;">✎</div>
+    </div>
+  </div>
+
+  <input type="file" id="profileCloudinaryInput" accept="image/*" style="display:none;" onchange="uploadProfileToCloudinary(this)">
+  <input type="file" id="profileAvatarInput" accept="image/*" style="display:none;" onchange="uploadProfileToCloudinary(this)">
+  <input type="file" id="coverPhotoInput" accept="image/*" style="display:none;" onchange="uploadCoverToCloudinary(this)">
+</div>
 </body>
 </html>
