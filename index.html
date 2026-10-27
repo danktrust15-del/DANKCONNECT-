@@ -775,7 +775,7 @@ if (statusInputEl) {
 }
 loadStatuses();
 </script>
-    <!-- Bottom nav -->
+<!-- Bottom nav -->
 <div id="bottomNav" class="sticky-bottom" style="display:flex; flex-direction:row; justify-content:space-around; align-items:center; padding:10px 0 20px; background:#0b141a; border-top:1px solid #1f2c34; width:100%;">
 <div onclick="showPage('updatesPage')" style="text-align:center; color:#8696a0; font-size:11px; cursor:pointer; padding:4px 12px;">Updates</div>
 <div onclick="showPage('callsPage')" style="text-align:center; color:#8696a0; font-size:11px; cursor:pointer; padding:4px 12px;">Calls</div>
@@ -783,6 +783,7 @@ loadStatuses();
 <div onclick="showPage('chatsPage')" style="text-align:center; color:white; font-size:11px; cursor:pointer; padding:4px 12px; font-weight:bold;">Chats</div>
 <div onclick="document.getElementById('settingsPage').style.display='block'" style="text-align:center; color:#8696a0; font-size:11px; cursor:pointer; padding:4px 12px;">Settings</div>
 </div>
+
 <script>
 function showAuth(){
   var s = document.getElementById('splash');
@@ -799,7 +800,8 @@ function showSplash(){
   var s = document.getElementById('splash');
   s.classList.remove('hidden');
   s.style.display = 'flex';
-}let isLoginMode = false;
+}
+let isLoginMode = false;
 
 function toggleAuth(){
   isLoginMode = !isLoginMode;
@@ -819,81 +821,93 @@ async function handleAuth(){
   err.innerText = '';
   if(!usernameInput || !p){ err.innerText = 'Please enter username and password'; return; }
   if(!isLoginMode && !n){ err.innerText = 'Please enter name'; return; }
-
   const fs = firebase.firestore();
   const unameRef = fs.collection('usernames').doc(usernameInput);
   const existing = await unameRef.get();
-
   if(isLoginMode){
     if(!existing.exists){ err.innerText = 'User not found. Please create account.'; return; }
     const data = existing.data();
-    // support old accounts that didn't save password
     if(data.password && data.password !== p){ err.innerText = 'Wrong password'; return; }
+    const userDoc = await fs.collection('users').doc(data.uid).get();
+    const userData = userDoc.exists ? userDoc.data() : {};
     localStorage.setItem('dank_uid', data.uid);
     localStorage.setItem('dank_username', usernameInput);
-    localStorage.setItem('dank_displayName', data.displayName || data.name || usernameInput);
+    localStorage.setItem('dank_displayName', userData.displayName || '');
+    localStorage.setItem('dank_avatar', userData.avatar || '');
+    localStorage.setItem('dank_cover', userData.cover || '');
     location.reload();
   } else {
     if(existing.exists){ err.innerText = 'User exists already. Please Log In.'; return; }
     const uid = 'uid_' + Date.now() + '_' + Math.random().toString(36).substr(2,5);
-    await unameRef.set({
-      uid: uid,
-      username: usernameInput,
-      displayName: n,
-      password: p,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    await fs.collection('users').doc(uid).set({
-      username: usernameInput,
-      displayName: n,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    await unameRef.set({ uid: uid, username: usernameInput, displayName: n, password: p, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await fs.collection('users').doc(uid).set({ uid: uid, username: usernameInput, displayName: n, avatar: '', cover: '', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     localStorage.setItem('dank_uid', uid);
     localStorage.setItem('dank_username', usernameInput);
     localStorage.setItem('dank_displayName', n);
+    localStorage.setItem('dank_avatar', '');
     location.reload();
   }
 }
-// Also add this for auto-login on page load - put it right after the function
+
+// FIXED - NOW SHOWS YOUR PROFILE, NOT DANI BOSS
+async function loadSettingsProfile() {
+  const uid = localStorage.getItem('dank_uid');
+  const nameEl = document.getElementById('settingsPageName');
+  const avatarEl = document.getElementById('settingsPageAvatar');
+  
+  // Default to YOUR PROFILE
+  if(nameEl) nameEl.innerText = 'YOUR PROFILE';
+  
+  if(!uid) return;
+  
+  try {
+    const fs = firebase.firestore();
+    const snap = await fs.collection('users').doc(uid).get();
+    if(snap.exists){
+      const u = snap.data();
+      if(nameEl) {
+        // If user has a real displayName, show it, else show YOUR PROFILE
+        if(u.displayName && u.displayName.trim() !== '') {
+          nameEl.innerText = u.displayName;
+        } else {
+          nameEl.innerText = 'YOUR PROFILE';
+        }
+      }
+      if(avatarEl && u.avatar) avatarEl.src = u.avatar;
+      localStorage.setItem('dank_displayName', u.displayName || '');
+      localStorage.setItem('dank_avatar', u.avatar || '');
+    }
+  } catch(e){ console.log(e); }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
  const savedUid = localStorage.getItem('dank_uid');
  if(savedUid){
   document.getElementById('auth').style.display = 'none';
-  var splash = document.getElementById('splash');
-  if(splash) splash.style.display = 'none';
-  var chatList = document.getElementById('chatsPage');
-  if(chatList) chatList.style.display = 'flex';
-  var bottomNav = document.getElementById('bottomNav');
-  if(bottomNav) bottomNav.style.display = 'flex';
+  var splash = document.getElementById('splash'); if(splash) splash.style.display = 'none';
+  var chatList = document.getElementById('chatsPage'); if(chatList) chatList.style.display = 'flex';
+  var bottomNav = document.getElementById('bottomNav'); if(bottomNav) bottomNav.style.display = 'flex';
+  loadSettingsProfile();
 } else {
   document.getElementById('auth').style.display = 'none';
-  var splash2 = document.getElementById('splash');
-  if(splash2) splash2.style.display = 'flex';
-  var chatList2 = document.getElementById('chatsPage');
-  if(chatList2) chatList2.style.display = 'none';
-  var bottomNav2 = document.getElementById('bottomNav');
-  if(bottomNav2) bottomNav2.style.display = 'none';
+  var splash2 = document.getElementById('splash'); if(splash2) splash2.style.display = 'flex';
+  var chatList2 = document.getElementById('chatsPage'); if(chatList2) chatList2.style.display = 'none';
+  var bottomNav2 = document.getElementById('bottomNav'); if(bottomNav2) bottomNav2.style.display = 'none';
 }
 });
 
 function logout() {
   if (!confirm('Log out of DankConnect?')) return;
-  
-localStorage.removeItem('dank_uid');
-localStorage.removeItem('dank_username');
-localStorage.removeItem('dank_displayName');
-  currentUser = null;
-  currentChatUser = null;
-  
-if (typeof unsubscribeChats !== 'undefined' && unsubscribeChats) unsubscribeChats();
-if (typeof unsubscribeMessages !== 'undefined' && unsubscribeMessages) unsubscribeMessages();
-if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscribeRequests();  
+  localStorage.clear();
+  if(typeof currentUser !== 'undefined') currentUser = null;
+  if(typeof currentChatUser !== 'undefined') currentChatUser = null;
+  if (typeof unsubscribeChats !== 'undefined' && unsubscribeChats) unsubscribeChats();
+  if (typeof unsubscribeMessages !== 'undefined' && unsubscribeMessages) unsubscribeMessages();
+  if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscribeRequests();  
   document.getElementById('chatsPage').style.display = 'none';
   document.getElementById('settingsPage').style.display = 'none';
-  document.getElementById('bottomNav').style.display = 'none'; // <-- ADD THIS LINE HERE
+  document.getElementById('bottomNav').style.display = 'none';
   document.getElementById('auth').style.display = 'flex';
-  
-  // reset to Login mode
   isLoginMode = true;
   document.getElementById('authTitle').textContent = 'Welcome Back';
   document.getElementById('authBtn').textContent = 'Log In';
@@ -903,73 +917,70 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
   document.getElementById('username').value = '';
   document.getElementById('pass').value = '';
   document.getElementById('authError').textContent = '';
+  setTimeout(() => location.reload(), 150);
 }
 </script>
-<!-- SETTINGS PAGE - CARDS EDITION - FIXED FINAL - SHOWS REAL PHOTO & NAME -->
+
+<!-- SETTINGS PAGE - EXACT LOOK AS YOUR SCREENSHOT -->
 <div id="settingsPage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0A1931; z-index:100; overflow-y:auto; padding-bottom:80px;">
 
   <div style="background:#0000FF; padding:16px; padding-top:40px; position:sticky; top:0; z-index:10;">
     <div style="display:flex; align-items:center; gap:16px;">
-     <span onclick="document.getElementById('settingsPage').style.display='none'; document.getElementById('chatsPage').style.display='block'" style="color:white; font-size:22px; cursor:pointer;">←</span>
-      <h2 style="color:white; margin:0; font-size:20px;">Settings</h2>
+     <span onclick="document.getElementById('settingsPage').style.display='none'; document.getElementById('chatsPage').style.display='block'" style="color:white; font-size:24px; cursor:pointer;">←</span>
+      <h2 style="color:white; margin:0; font-size:22px; font-weight:700;">Settings</h2>
     </div>
   </div>
 
-  <!-- PROFILE CARD - CLICKABLE - SHOWS REAL PHOTO -->
-  <div onclick="openMyProfilePage()" style="background:#111E36; margin:16px; border-radius:16px; padding:16px; display:flex; align-items:center; gap:14px; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.06);">
-    <img id="settingsPageAvatar" src="https://via.placeholder.com/100/1A2A44/FFFFFF?text=DC" style="width:52px; height:52px; border-radius:50%; object-fit:cover; background:#1A2A44; border:2px solid rgba(255,255,255,0.1);">
+  <div onclick="openMyProfilePage()" style="background:#111E36; margin:16px; border-radius:18px; padding:18px; display:flex; align-items:center; gap:14px; cursor:pointer; border:1px solid rgba(255,255,255,0.06);">
+    <img id="settingsPageAvatar" src="https://via.placeholder.com/100/1A2A44/FFFFFF?text=DC" style="width:54px; height:54px; border-radius:50%; object-fit:cover; background:#1A2A44;">
     <div style="flex:1;">
-     <div id="settingsPageName" style="color:white; font-size:17px; font-weight:600;">Your Name</div>
-      <div style="color:#7A8DB0; font-size:13px; margin-top:2px;">Let's get connected with DankConnect</div>
+     <div id="settingsPageName" style="color:white; font-size:18px; font-weight:700;">YOUR PROFILE</div>
+      <div style="color:#8A9AB8; font-size:14px; margin-top:2px; line-height:18px;">Let's get connected with<br>DankConnect</div>
     </div>
-    <div style="color:#7A8DB0; font-size:22px;">›</div>
+    <div style="color:#8A9AB8; font-size:20px;">›</div>
   </div>
 
-  <!-- ADMIN CARD -->
-  <div style="background:#111E36; margin:0 16px 12px 16px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.06); box-shadow:0 2px 10px rgba(0,0,0,0.15);">
-    <div onclick="document.getElementById('pin-modal').style.display='flex'" style="display:flex; align-items:center; gap:16px; padding:16px; cursor:pointer;">
-      <div style="width:42px; height:42px; background:#2A3A5C; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A7CFF" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+  <div style="background:#111E36; margin:0 16px 14px 16px; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.06);">
+    <div onclick="document.getElementById('pin-modal').style.display='flex'" style="display:flex; align-items:center; gap:16px; padding:18px; cursor:pointer;">
+      <div style="width:42px; height:42px; background:#24344F; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B8DEF" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
       </div>
       <div style="flex:1;">
-        <div style="color:white; font-size:15px; font-weight:500;">Admin Panel</div>
-        <div style="color:#7A8DB0; font-size:12px; margin-top:2px;">Manage quotes & users</div>
+        <div style="color:white; font-size:16px; font-weight:600;">Admin Panel</div>
+        <div style="color:#8A9AB8; font-size:13px; margin-top:2px;">Manage quotes & users</div>
       </div>
-      <div style="color:#7A8DB0;">›</div>
+      <div style="color:#8A9AB8; font-size:18px;">›</div>
     </div>
   </div>
 
-  <!-- SETTINGS GROUP CARD -->
-  <div style="background:#111E36; margin:0 16px 12px 16px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.06); box-shadow:0 2px 10px rgba(0,0,0,0.15);">
-    <div style="padding:0 16px;">
-      <div style="display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06); cursor:pointer;">
-        <div style="width:42px; height:42px; background:#E7E9FB; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+  <div style="background:#111E36; margin:0 16px 14px 16px; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.06);">
+    <div style="padding:4px 18px;">
+      <div style="display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.07); cursor:pointer;">
+        <div style="width:42px; height:42px; background:#EDEEFF; border-radius:50%; display:flex; align-items:center; justify-content:center;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </div>
-        <span style="color:white; font-size:15px; font-weight:500; flex:1;">Account</span>
-        <span style="color:#7A8DB0;">›</span>
+        <span style="color:white; font-size:16px; font-weight:500; flex:1;">Account</span>
+        <span style="color:#8A9AB8; font-size:18px;">›</span>
       </div>
-
-      <div onclick="window.open('privacy.html','_blank')" style="display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.06); cursor:pointer;">
-        <div style="width:42px; height:42px; background:#E7E9FB; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+      <div onclick="window.open('privacy.html','_blank')" style="display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.07); cursor:pointer;">
+        <div style="width:42px; height:42px; background:#EDEEFF; border-radius:50%; display:flex; align-items:center; justify-content:center;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        <span style="color:white; font-size:15px; font-weight:500; flex:1;">Privacy Policy & Terms</span>
-        <span style="color:#7A8DB0;">›</span>
+        <span style="color:white; font-size:16px; font-weight:500; flex:1;">Privacy Policy & Terms</span>
+        <span style="color:#8A9AB8; font-size:18px;">›</span>
       </div>
-
       <div style="display:flex; align-items:center; gap:16px; padding:16px 0; cursor:pointer;">
-        <div style="width:42px; height:42px; background:#E7E9FB; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+        <div style="width:42px; height:42px; background:#EDEEFF; border-radius:50%; display:flex; align-items:center; justify-content:center;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0000FF" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </div>
-        <span style="color:white; font-size:15px; font-weight:500; flex:1;">Notifications</span>
-        <span style="color:#7A8DB0;">›</span>
+        <span style="color:white; font-size:16px; font-weight:500; flex:1;">Notifications</span>
+        <span style="color:#8A9AB8; font-size:18px;">›</span>
       </div>
     </div>
   </div>
 
   <!-- LOGOUT CARD -->
-  <div style="background:#111E36; margin:0 16px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,59,48,0.15); box-shadow:0 2px 10px rgba(0,0,0,0.15);">
+    <div style="background:#111E36; margin:0 16px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,59,48,0.15); box-shadow:0 2px 10px rgba(0,0,0,0.15);">
     <div onclick="logout()" style="display:flex; align-items:center; gap:16px; padding:16px; cursor:pointer;">
       <div style="width:42px; height:42px; background:#FDE8E8; border-radius:50%; display:flex; align-items:center; justify-content:center;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -983,7 +994,7 @@ if (typeof unsubscribeRequests !== 'undefined' && unsubscribeRequests) unsubscri
   </div>
 
   <div style="text-align:center; margin-top:20px; color:#4A5A7A; font-size:12px;">
-    DankConnect v1.0 • Made in Ghana 🇬🇭
+    DankConnect v1.0 • Made by DANK-EMPIRE 🇬🇭
   </div>
 </div>
 <div id="callsPage" style="display:none; background:#0b141a; min-height:100vh; color:white;">
@@ -1059,7 +1070,7 @@ function showPage(id){
   if(splash) splash.style.display='none';
   document.body.style.background='#0A1931';
   document.documentElement.style.background='#0A1931';
-  ['chatsPage','updatesPage','callsPage','settingsPage','quotesPage','quotes-admin','pin-modal','statusViewer','editProfilePage'].forEach(p=>{
+  ['chatsPage','updatesPage','callsPage','settingsPage','quotesPage','quotes-admin','pin-modal','statusViewer','editProfilePage','privateChatProfilePage'].forEach(p=>{
     const el = document.getElementById(p);
     if(el) el.style.display='none';
   });
@@ -1072,7 +1083,7 @@ function showPage(id){
   }
   const bottomNav = document.getElementById('bottomNav');
   if(bottomNav){
-    bottomNav.style.display = (id === 'quotesPage' || id === 'quotes-admin' || id === 'editProfilePage') ? 'none' : 'flex';
+    bottomNav.style.display = (id === 'quotesPage' || id === 'quotes-admin' || id === 'editProfilePage' || id === 'privateChatProfilePage') ? 'none' : 'flex';
     const activeName = id.replace('Page','').toLowerCase();
     bottomNav.querySelectorAll('div').forEach(tab=>{
       const txt = tab.textContent.trim().toLowerCase();
@@ -1086,101 +1097,214 @@ function showPage(id){
     syncSettingsPage();
     setTimeout(syncSettingsPage, 100);
   }
+  if(id === 'editProfilePage'){
+    const mode = document.body.getAttribute('data-profile-mode');
+    if(mode !== 'other'){
+      setTimeout(syncProfilePage, 50);
+    }
+  }
 }
 
 function getMyUidSafe(){
+  const dankUid = localStorage.getItem('dank_uid');
+  if(dankUid) return dankUid;
   try{
     if(window.firebase && typeof firebase.auth === 'function' && firebase.auth().currentUser) return firebase.auth().currentUser.uid;
     if(window.firebaseAuth && firebaseAuth.currentUser) return firebaseAuth.currentUser.uid;
     if(window.auth && auth.currentUser) return auth.currentUser.uid;
-    if(window.firebase && firebase.auth && firebase.auth.currentUser) return firebase.auth.currentUser.uid;
   }catch(e){}
   return null;
 }
 
 function openMyProfilePage(){
+  document.body.setAttribute('data-profile-mode', 'my');
+  showPage('editProfilePage');
+  setTimeout(()=>{
+    document.querySelectorAll('.camera-btn').forEach(el=>{ el.style.display='flex'; });
+    document.querySelectorAll('.edit-pencil').forEach(el=>{ el.style.display='block'; });
+    document.querySelectorAll('.profile-row').forEach(row=>{ row.style.pointerEvents='auto'; row.style.cursor='pointer'; });
+    const ns = document.getElementById('nameSubtext'); if(ns) ns.style.display='block';
+    const ds = document.getElementById('detailsSubtext'); if(ds) ds.style.display='block';
+  },50);
   const profileAvatar = document.getElementById('profilePageAvatar');
-  const saved = localStorage.getItem('myPhotoURL');
+  const saved = localStorage.getItem('myPhotoURL') || localStorage.getItem('dank_avatar');
   if(saved && profileAvatar) profileAvatar.src = saved;
-  const savedCover = localStorage.getItem('myCoverPhotoURL');
+  const savedCover = localStorage.getItem('myCoverPhotoURL') || localStorage.getItem('dank_cover');
   if(savedCover){
     const coverEl = document.getElementById('profileCoverPhoto');
     const ph = document.getElementById('profileCoverPlaceholder');
     if(coverEl){ coverEl.src = savedCover; coverEl.style.display='block'; if(ph) ph.style.display='none'; }
   }
-  showPage('editProfilePage');
   loadMyProfileData();
+  syncProfilePage();
   syncSettingsPage();
 }
 
-function loadMyProfileData(){
-  const profileAvatar = document.getElementById('profilePageAvatar');
-  const savedPhoto = localStorage.getItem('myPhotoURL');
-  if(savedPhoto && profileAvatar) profileAvatar.src = savedPhoto;
-
-  // PRIORITY 1: Local name wins - survives refresh
-  const localName = localStorage.getItem('myName') || localStorage.getItem('myProfileName');
-  const localUpdatedAt = parseInt(localStorage.getItem('myNameUpdatedAt') || '0');
-  if(localName && document.getElementById('profilePageName')){
-    document.getElementById('profilePageName').innerText = localName;
-    syncSettingsPage();
+function openUserProfile(uid){
+  if(!uid) return;
+  document.body.setAttribute('data-profile-mode', 'other');
+  showPage('editProfilePage');
+  const avatarEl = document.getElementById('profilePageAvatar');
+  const usernameEl = document.getElementById('profilePageUsername');
+  const nameEl = document.getElementById('profilePageName');
+  const aboutEl = document.getElementById('profilePageAbout');
+  const detailsEl = document.getElementById('profilePageDetails');
+  const coverEl = document.getElementById('profileCoverPhoto');
+  const coverPh = document.getElementById('profileCoverPlaceholder');
+  if(coverEl){ coverEl.src=''; coverEl.style.display='none'; }
+  if(coverPh) coverPh.style.display='block';
+  document.querySelectorAll('.camera-btn').forEach(el=>{ el.style.display='none'; });
+  document.querySelectorAll('.edit-pencil').forEach(el=>{ el.style.display='none'; });
+  document.querySelectorAll('.profile-row').forEach(row=>{ row.style.pointerEvents='none'; row.style.cursor='default'; });
+  const ns = document.getElementById('nameSubtext'); if(ns) ns.style.display='none';
+  const ds = document.getElementById('detailsSubtext'); if(ds) ds.style.display='none';
+  if(nameEl) nameEl.innerText='Loading...';
+  if(aboutEl) aboutEl.innerText='Loading...';
+  if(detailsEl) detailsEl.innerText='Loading...';
+  let userData = window.allUsers && allUsers[uid] ? allUsers[uid] : null;
+  if(userData){
+    if(avatarEl && userData.photoURL) avatarEl.src=userData.photoURL;
+    if(usernameEl) usernameEl.innerText = userData.username ? (userData.username.startsWith('@') ? userData.username : '@'+userData.username) : '@user';
+    let rn = userData.displayName || userData.realName || userData.name || '';
+    if(rn && !rn.startsWith('@')) nameEl.innerText = rn; else if(userData.username) nameEl.innerText = userData.username.replace('@','');
+    if(aboutEl) aboutEl.innerText = userData.about || 'Available';
+    if(detailsEl) detailsEl.innerText = userData.details || userData.bio || 'No details yet';
+    const c = userData.coverPhotoURL || userData.cover || ''; if(c && coverEl){ coverEl.src=c; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; }
   }
+  if(firebase.firestore){
+    firebase.firestore().collection('users').doc(uid).get().then(doc=>{
+      if(doc.exists){
+        const d=doc.data();
+        if(avatarEl && d.photoURL) avatarEl.src=d.photoURL;
+        if(usernameEl) usernameEl.innerText = d.username ? (d.username.startsWith('@') ? d.username : '@'+d.username) : usernameEl.innerText;
+        let rn = d.displayName || d.realName || d.name || '';
+        if(rn && !rn.startsWith('@')) nameEl.innerText = rn;
+        if(aboutEl) aboutEl.innerText = d.about || 'Available';
+        if(detailsEl) detailsEl.innerText = d.details || d.bio || 'No details yet';
+        const c = d.coverPhotoURL || d.cover || ''; if(c){ coverEl.src=c; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; }
+      }
+    });
+  }
+}
 
+// ===== NEW FUNCTION FOR PRIVATE CHAT HEADER CLICK - SPECIAL PAGE WITH 3 BUTTONS =====
+function openPrivateChatProfile(uidOrData){
+  let data = {};
+  let uid = '';
+  if(typeof uidOrData === 'string'){ uid = uidOrData; data.userId = uid; }
+  else { data = uidOrData || {}; uid = data.userId || ''; }
+  showPage('privateChatProfilePage');
+  const avatarEl = document.getElementById('privateAvatarPhoto');
+  const coverEl = document.getElementById('privateCoverPhoto');
+  const coverPh = document.getElementById('privateCoverPlaceholder');
+  const nameEl = document.getElementById('privateDisplayName');
+  const userEl = document.getElementById('privateUsername');
+  const aboutFull = document.getElementById('privateAboutFull');
+  const detailsFull = document.getElementById('privateDetailsFull');
+  if(coverEl){ coverEl.src=''; coverEl.style.display='none'; }
+  if(coverPh) coverPh.style.display='block';
+  if(nameEl) nameEl.innerText='Loading...';
+  if(userEl) userEl.innerText='@user';
+  if(data.photoURL && avatarEl) avatarEl.src = data.photoURL;
+  if(data.username && userEl) userEl.innerText = data.username.startsWith('@') ? data.username : '@'+data.username;
+  if(data.displayName && nameEl && !data.displayName.startsWith('@')) nameEl.innerText = data.displayName;
+  let uData = null;
+  if(uid && window.allUsers && allUsers[uid]) uData = allUsers[uid];
+  else if(data.username && window.allUsers){
+    const sName = data.username.replace('@','').toLowerCase();
+    for(const k in allUsers){ if((allUsers[k].username||'').replace('@','').toLowerCase()===sName){ uData=allUsers[k]; uid=k; break; } }
+  }
+  if(uData){
+    if(avatarEl && uData.photoURL) avatarEl.src = uData.photoURL;
+    if(userEl) userEl.innerText = uData.username ? (uData.username.startsWith('@') ? uData.username : '@'+uData.username) : userEl.innerText;
+    let rn = uData.displayName || uData.realName || uData.name || '';
+    if(rn && !rn.startsWith('@')) nameEl.innerText = rn;
+    if(aboutFull) aboutFull.innerText = uData.about || 'Available';
+    if(detailsFull) detailsFull.innerText = uData.details || uData.bio || 'No details yet';
+    const c = uData.coverPhotoURL || uData.cover || ''; if(c && coverEl){ coverEl.src=c; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; }
+  }
+  if(firebase.firestore){
+    if(uid) firebase.firestore().collection('users').doc(uid).get().then(doc=>{ if(doc.exists){ const d=doc.data(); if(avatarEl && d.photoURL) avatarEl.src=d.photoURL; if(userEl) userEl.innerText = d.username ? (d.username.startsWith('@') ? d.username : '@'+d.username) : userEl.innerText; let rn=d.displayName||d.realName||d.name||''; if(rn && !rn.startsWith('@')) nameEl.innerText=rn; if(aboutFull) aboutFull.innerText=d.about||'Available'; if(detailsFull) detailsFull.innerText=d.details||d.bio||'No details yet'; const c=d.coverPhotoURL||d.cover||''; if(c){ coverEl.src=c; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; } } });
+    const uname = (data.username||'').replace('@','').toLowerCase();
+    if(uname){
+      firebase.firestore().collection('users').where('username','==','@'+uname).get().then(snap=>{ if(!snap.empty){ snap.forEach(doc=>{ const d=doc.data(); let rn=d.displayName||d.realName||d.name||''; if(rn && !rn.startsWith('@')) nameEl.innerText=rn; if(aboutFull) aboutFull.innerText=d.about||'Available'; if(detailsFull) detailsFull.innerText=d.details||d.bio||'No details yet'; const c=d.coverPhotoURL||d.cover||''; if(c){ coverEl.src=c; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; } if(avatarEl && d.photoURL) avatarEl.src=d.photoURL; }); } });
+      firebase.firestore().collection('users').where('username','==',uname).get().then(snap=>{ if(!snap.empty){ snap.forEach(doc=>{ const d=doc.data(); let rn=d.displayName||d.realName||d.name||''; if(rn && !rn.startsWith('@')) nameEl.innerText=rn; if(aboutFull) aboutFull.innerText=d.about||'Available'; if(detailsFull) detailsFull.innerText=d.details||d.bio||'No details yet'; const c=d.coverPhotoURL||d.cover||''; if(c){ coverEl.src=c; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; } }); } });
+    }
+  }
+}
+
+function syncProfilePage(){
+  if(document.body.getAttribute('data-profile-mode') === 'other') return;
+  const uid = getMyUidSafe();
+  const username = localStorage.getItem('dank_username') || localStorage.getItem('myUsername') || '';
+  const realName = localStorage.getItem('myName') || localStorage.getItem('dank_realName') || localStorage.getItem('dank_displayName') || '';
+  const photo = localStorage.getItem('myPhotoURL') || localStorage.getItem('dank_avatar') || '';
+  const avatarEl = document.getElementById('profilePageAvatar');
+  const usernameEl = document.getElementById('profilePageUsername');
+  const nameField = document.getElementById('profilePageName');
+  if(avatarEl && photo) avatarEl.src = photo;
+  if(usernameEl){
+    usernameEl.style.color = '#FFFFFF';
+    if(username) usernameEl.innerText = username.startsWith('@') ? username : '@' + username;
+    else if(window.allUsers && uid && allUsers[uid]){
+      const u = allUsers[uid].username || '';
+      usernameEl.innerText = u ? (u.startsWith('@') ? u : '@'+u) : '';
+    }
+  }
+  if(nameField){
+    if(realName && realName.trim() !== '' && !realName.trim().startsWith('@') && realName !== 'Dani Boss') nameField.innerText = realName.trim();
+    else nameField.innerText = 'YOUR PROFILE';
+  }
+}
+
+function loadMyProfileData(){
+  if(document.body.getAttribute('data-profile-mode') === 'other') return;
+  const profileAvatar = document.getElementById('profilePageAvatar');
+  const savedPhoto = localStorage.getItem('myPhotoURL') || localStorage.getItem('dank_avatar');
+  if(savedPhoto && profileAvatar) profileAvatar.src = savedPhoto;
+  const localName = localStorage.getItem('myName') || localStorage.getItem('myProfileName') || localStorage.getItem('dank_realName') || localStorage.getItem('dank_displayName');
+  const localUpdatedAt = parseInt(localStorage.getItem('myNameUpdatedAt') || '0');
+  if(localName && localName !== 'Dani Boss' && !localName.startsWith('@') && document.getElementById('profilePageName')) document.getElementById('profilePageName').innerText = localName;
+  else if(document.getElementById('profilePageName')) document.getElementById('profilePageName').innerText = 'YOUR PROFILE';
   const savedCover = localStorage.getItem('myCoverPhotoURL');
   if(savedCover){
     const coverEl = document.getElementById('profileCoverPhoto');
     const ph = document.getElementById('profileCoverPlaceholder');
     if(coverEl){ coverEl.src = savedCover; coverEl.style.display='block'; if(ph) ph.style.display='none'; }
   }
-  syncSettingsPage();
-
-  const uid = getMyUidSafe();
-  if(!uid) return;
+  syncProfilePage(); syncSettingsPage();
+  const uid = getMyUidSafe(); if(!uid) return;
   try{
     if(firebase.firestore){
       firebase.firestore().collection('users').doc(uid).get().then(doc=>{
         if(doc.exists){
           const data = doc.data();
-          const firebaseName = data.name || data.displayName || data.username;
+          const firebaseName = data.displayName || data.realName || data.name;
           const firebaseTime = data.updatedAt ? data.updatedAt.toMillis() : 0;
-
-          if(firebaseName){
+          if(firebaseName && firebaseName !== 'Dani Boss' && !firebaseName.startsWith('@')){
             const shouldUseFirebase = !localName || (firebaseTime > localUpdatedAt && firebaseTime !== 0);
             if(shouldUseFirebase){
               document.getElementById('profilePageName').innerText = firebaseName;
               localStorage.setItem('myName', firebaseName);
-              localStorage.setItem('myProfileName', firebaseName);
-              syncSettingsPage();
-            } else if(localName) {
-              // Local newer - push to Firebase to fix it
-              firebase.firestore().collection('users').doc(uid).set({
-                name: localName,
-                displayName: localName,
-                searchName: localName.toLowerCase(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-              }, { merge: true });
+              localStorage.setItem('dank_realName', firebaseName);
+              syncProfilePage(); syncSettingsPage();
             }
           }
-
+          if(data.username && !localStorage.getItem('dank_username')){ localStorage.setItem('dank_username', data.username); syncProfilePage(); }
           if(data.about && document.getElementById('profilePageAbout')) document.getElementById('profilePageAbout').innerText = data.about;
           if((data.details || data.bio) && document.getElementById('profilePageDetails')) document.getElementById('profilePageDetails').innerText = data.details || data.bio;
           if(data.photoURL && profileAvatar){
             if(!savedPhoto || data.photoURL !== savedPhoto){
               profileAvatar.src = data.photoURL;
               localStorage.setItem('myPhotoURL', data.photoURL);
-              syncTopAvatarForce();
-              syncSettingsPage();
+              localStorage.setItem('dank_avatar', data.photoURL);
+              syncTopAvatarForce(); syncSettingsPage();
             }
           }
           if(data.coverPhotoURL){
             const coverEl = document.getElementById('profileCoverPhoto');
             const ph = document.getElementById('profileCoverPlaceholder');
-            if(coverEl){
-              coverEl.src = data.coverPhotoURL;
-              coverEl.style.display='block';
-              if(ph) ph.style.display='none';
-              localStorage.setItem('myCoverPhotoURL', data.coverPhotoURL);
-            }
+            if(coverEl){ coverEl.src = data.coverPhotoURL; coverEl.style.display='block'; if(ph) ph.style.display='none'; localStorage.setItem('myCoverPhotoURL', data.coverPhotoURL); }
           }
         }
       });
@@ -1189,162 +1313,209 @@ function loadMyProfileData(){
 }
 
 async function uploadProfileToCloudinary(input){
-  const file = input.files[0];
-  if(!file) return;
-  const CLOUD_NAME = 'aqx4n0dz';
-  const UPLOAD_PRESET = 'dank_profile';
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', UPLOAD_PRESET);
-  const avatarEl = document.getElementById('profilePageAvatar');
-  if(avatarEl) avatarEl.style.opacity = '0.5';
+  const file = input.files[0]; if(!file) return;
+  const CLOUD_NAME = 'aqx4n0dz'; const UPLOAD_PRESET = 'dank_profile';
+  const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', UPLOAD_PRESET);
+  const avatarEl = document.getElementById('profilePageAvatar'); if(avatarEl) avatarEl.style.opacity = '0.5';
   try{
     const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method:'POST', body:formData });
-    const data = await res.json();
-    if(!data.secure_url) throw new Error('Upload failed: ' + JSON.stringify(data));
-    const newUrl = data.secure_url;
-    if(avatarEl){ avatarEl.src = newUrl; avatarEl.style.opacity = '1'; }
-    localStorage.setItem('myPhotoURL', newUrl);
-    try{
-      const uid = getMyUidSafe();
-      if(uid && firebase.firestore){
-        await firebase.firestore().collection('users').doc(uid).set({ photoURL: newUrl, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-      }
-    }catch(fe){}
-    syncTopAvatarForce();
-    syncSettingsPage();
-    setTimeout(()=>{ syncTopAvatarForce(); syncSettingsPage(); }, 200);
-    alert('Profile photo updated!');
-  }catch(e){
-    alert('Upload failed: '+e.message);
-    if(avatarEl) avatarEl.style.opacity = '1';
-  }
+    const data = await res.json(); if(!data.secure_url) throw new Error('Upload failed');
+    const newUrl = data.secure_url; if(avatarEl){ avatarEl.src = newUrl; avatarEl.style.opacity = '1'; }
+    localStorage.setItem('myPhotoURL', newUrl); localStorage.setItem('dank_avatar', newUrl);
+    try{ const uid = getMyUidSafe(); if(uid && firebase.firestore) await firebase.firestore().collection('users').doc(uid).set({ photoURL: newUrl, avatar: newUrl, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }); }catch(fe){}
+    syncTopAvatarForce(); syncSettingsPage(); setTimeout(()=>{ syncTopAvatarForce(); syncSettingsPage(); }, 200); alert('Profile photo updated!');
+  }catch(e){ alert('Upload failed: '+e.message); if(avatarEl) avatarEl.style.opacity = '1'; }
 }
 
 async function uploadCoverToCloudinary(input){
-  const file = input.files[0];
-  if(!file) return;
-  const CLOUD_NAME = 'aqx4n0dz';
-  const UPLOAD_PRESET = 'dank_profile';
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', UPLOAD_PRESET);
-  const coverEl = document.getElementById('profileCoverPhoto');
-  const placeholder = document.getElementById('profileCoverPlaceholder');
-  if(coverEl) coverEl.style.opacity = '0.5';
+  const file = input.files[0]; if(!file) return;
+  const CLOUD_NAME = 'aqx4n0dz'; const UPLOAD_PRESET = 'dank_profile';
+  const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', UPLOAD_PRESET);
+  const coverEl = document.getElementById('profileCoverPhoto'); const placeholder = document.getElementById('profileCoverPlaceholder'); if(coverEl) coverEl.style.opacity = '0.5';
   try{
     const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method:'POST', body:formData });
-    const data = await res.json();
-    if(!data.secure_url) throw new Error('Upload failed');
-    const newUrl = data.secure_url;
-    if(coverEl){
-      coverEl.src = newUrl;
-      coverEl.style.display = 'block';
-      coverEl.style.opacity = '1';
-    }
-    if(placeholder) placeholder.style.display = 'none';
-    localStorage.setItem('myCoverPhotoURL', newUrl);
-    const uid = getMyUidSafe();
-    if(uid && firebase.firestore){
-      await firebase.firestore().collection('users').doc(uid).set({ coverPhotoURL: newUrl, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-    }
+    const data = await res.json(); if(!data.secure_url) throw new Error('Upload failed');
+    const newUrl = data.secure_url; if(coverEl){ coverEl.src = newUrl; coverEl.style.display = 'block'; coverEl.style.opacity = '1'; } if(placeholder) placeholder.style.display = 'none';
+    localStorage.setItem('myCoverPhotoURL', newUrl); localStorage.setItem('dank_cover', newUrl);
+    const uid = getMyUidSafe(); if(uid && firebase.firestore) await firebase.firestore().collection('users').doc(uid).set({ coverPhotoURL: newUrl, cover: newUrl, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
     alert('Cover photo updated!');
-  }catch(e){
-    alert('Cover upload failed: '+e.message);
-    if(coverEl) coverEl.style.opacity = '1';
-  }
+  }catch(e){ alert('Cover upload failed: '+e.message); if(coverEl) coverEl.style.opacity = '1'; }
 }
 
-function editProfileName(){
-  const current = document.getElementById('profilePageName')?.innerText || localStorage.getItem('myName') || '';
-  const newName = prompt('Enter new name:', current);
-  if(!newName || !newName.trim()) return;
-  const trimmed = newName.trim();
-  
-  // Save locally FIRST - survives refresh
-  localStorage.setItem('myName', trimmed);
-  localStorage.setItem('myProfileName', trimmed);
-  localStorage.setItem('myNameUpdatedAt', Date.now().toString());
-  
-  document.getElementById('profilePageName').innerText = trimmed;
-  const sName = document.getElementById('settingsPageName');
-  if(sName) sName.innerText = trimmed;
-
-  function pushNameToFirebase(retries = 3){
-    const uid = getMyUidSafe();
-    if(!uid){
-      if(retries > 0) setTimeout(()=> pushNameToFirebase(retries - 1), 1000);
-      return;
-    }
+async function editProfileName(){
+  const current = localStorage.getItem('myName') || localStorage.getItem('dank_realName') || '';
+  const displayCurrent = current === 'YOUR PROFILE' ? '' : current;
+  const newName = prompt('Enter your real name (shows in Profile & Settings):', displayCurrent);
+  if(!newName || !newName.trim()) return; const trimmed = newName.trim();
+  if(trimmed === 'Dani Boss') { alert('Cannot use Dani Boss'); return; }
+  if(trimmed.startsWith('@')){ alert('Real name should NOT start with @'); return; }
+  const oldName = localStorage.getItem('myName') || localStorage.getItem('dank_realName') || 'Someone';
+  localStorage.setItem('myName', trimmed); localStorage.setItem('dank_realName', trimmed); localStorage.setItem('myProfileName', trimmed); localStorage.setItem('dank_displayName', trimmed); localStorage.setItem('myNameUpdatedAt', Date.now().toString());
+  document.getElementById('profilePageName').innerText = trimmed; syncProfilePage(); syncSettingsPage();
+  async function pushNameToFirebase(retries = 3){
+    const uid = getMyUidSafe(); if(!uid){ if(retries > 0) setTimeout(()=> pushNameToFirebase(retries - 1), 1000); return; }
     if(firebase.firestore){
-      firebase.firestore().collection('users').doc(uid).set({
-        name: trimmed,
-        displayName: trimmed,
-        searchName: trimmed.toLowerCase(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(()=>{
-        if(retries > 0) setTimeout(()=> pushNameToFirebase(retries - 1), 2000);
-      });
+      try {
+        await firebase.firestore().collection('users').doc(uid).set({ name: trimmed, displayName: trimmed, realName: trimmed, searchName: trimmed.toLowerCase(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        const username = localStorage.getItem('dank_username'); if(username) await firebase.firestore().collection('usernames').doc(username).set({ displayName: trimmed }, { merge: true });
+        if(oldName !== trimmed && oldName !== 'YOUR PROFILE' && oldName !== 'Someone'){
+          const chatsSnap = await firebase.firestore().collection('chats').where('participants', 'array-contains', uid).get();
+          const batch = firebase.firestore().batch();
+          chatsSnap.forEach(chatDoc => { const msgRef = firebase.firestore().collection('chats').doc(chatDoc.id).collection('messages').doc(); batch.set(msgRef, { senderId: 'system', text: `${oldName} changed name to ${trimmed}`, type: 'system', timestamp: firebase.firestore.FieldValue.serverTimestamp(), createdAt: Date.now() }); });
+          await batch.commit();
+        }
+      } catch(e){ if(retries > 0) setTimeout(()=> pushNameToFirebase(retries - 1), 2000); }
     }
   }
-  pushNameToFirebase();
-  
-  syncSettingsPage();
-  syncTopAvatarForce();
-  alert('Name updated to: ' + trimmed);
+  pushNameToFirebase(); alert('Name updated to: ' + trimmed);
 }
 
 function editProfileDetails(){
-  const el = document.getElementById('profilePageDetails');
-  const current = el ? el.innerText : '';
-  const newDetails = prompt('Enter your details/bio:', current);
-  if(!newDetails || !newDetails.trim()) return;
-  const trimmed = newDetails.trim();
-  document.getElementById('profilePageDetails').innerText = trimmed;
-  localStorage.setItem('myDetails', trimmed);
-  const uid = getMyUidSafe();
-  if(uid && firebase.firestore) firebase.firestore().collection('users').doc(uid).set({ details: trimmed, bio: trimmed, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(()=>{});
+  const el = document.getElementById('profilePageDetails'); const current = el ? el.innerText : '';
+  const newDetails = prompt('Enter your details/bio:', current); if(!newDetails || !newDetails.trim()) return; const trimmed = newDetails.trim();
+  document.getElementById('profilePageDetails').innerText = trimmed; localStorage.setItem('myDetails', trimmed);
+  const uid = getMyUidSafe(); if(uid && firebase.firestore) firebase.firestore().collection('users').doc(uid).set({ details: trimmed, bio: trimmed, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(()=>{});
 }
 
 function editProfileAbout(){
-  const el = document.getElementById('profilePageAbout');
-  const current = el ? el.innerText : 'Available';
-  const newAbout = prompt('Enter About:', current);
-  if(!newAbout || !newAbout.trim()) return;
-  const trimmed = newAbout.trim();
-  document.getElementById('profilePageAbout').innerText = trimmed;
-  localStorage.setItem('myAbout', trimmed);
-  const uid = getMyUidSafe();
-  if(uid && firebase.firestore) firebase.firestore().collection('users').doc(uid).set({ about: trimmed, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(()=>{});
+  const el = document.getElementById('profilePageAbout'); const current = el ? el.innerText : 'Available';
+  const newAbout = prompt('Enter About:', current); if(!newAbout || !newAbout.trim()) return; const trimmed = newAbout.trim();
+  document.getElementById('profilePageAbout').innerText = trimmed; localStorage.setItem('myAbout', trimmed);
+  const uid = getMyUidSafe(); if(uid && firebase.firestore) firebase.firestore().collection('users').doc(uid).set({ about: trimmed, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(()=>{});
 }
 
 function syncTopAvatarForce(){
-  const url = localStorage.getItem('myPhotoURL');
-  if(!url) return;
+  const url = localStorage.getItem('myPhotoURL') || localStorage.getItem('dank_avatar'); if(!url) return;
   const allImgs = [...document.querySelectorAll('img')];
-  const topCandidates = allImgs.filter(img=>{
-    const r = img.getBoundingClientRect();
-    return r.top < 150 && r.left > window.innerWidth - 200 && r.width >= 28 && r.width <= 70 && r.height >= 28 && r.height <= 70;
-  });
+  const topCandidates = allImgs.filter(img=>{ const r = img.getBoundingClientRect(); return r.top < 150 && r.left > window.innerWidth - 200 && r.width >= 28 && r.width <= 70 && r.height >= 28 && r.height <= 70; });
   topCandidates.sort((a,b)=> b.getBoundingClientRect().left - a.getBoundingClientRect().left);
-  if(topCandidates[0] && topCandidates[0].src !== url){
-    topCandidates[0].src = url;
-    topCandidates[0].style.objectFit = 'cover';
-    topCandidates[0].style.borderRadius = '50%';
-  }
+  if(topCandidates[0] && topCandidates[0].src !== url){ topCandidates[0].src = url; topCandidates[0].style.objectFit = 'cover'; topCandidates[0].style.borderRadius = '50%'; }
 }
 
 function syncSettingsPage(){
-  const photo = localStorage.getItem('myPhotoURL');
-  const name = localStorage.getItem('myName') || localStorage.getItem('myProfileName') || document.getElementById('profilePageName')?.innerText || '';
-  const sAvatar = document.getElementById('settingsPageAvatar');
-  const sName = document.getElementById('settingsPageName');
-  if(sAvatar && photo){
-    sAvatar.src = photo;
-    sAvatar.style.objectFit = 'cover';
+  const photo = localStorage.getItem('myPhotoURL') || localStorage.getItem('dank_avatar');
+  let name = localStorage.getItem('myName') || localStorage.getItem('dank_realName') || localStorage.getItem('dank_displayName') || '';
+  const sAvatar = document.getElementById('settingsPageAvatar'); const sName = document.getElementById('settingsPageName');
+  if(sAvatar && photo){ sAvatar.src = photo; sAvatar.style.objectFit = 'cover'; }
+  if(sName){ if(name && name.trim() && name !== 'Your Name' && name !== 'Dani Boss' && name !== '' && !name.trim().startsWith('@')) sName.innerText = name.trim(); else sName.innerText = 'YOUR PROFILE'; }
+}
+
+let currentPopupUserId = null;
+let currentPopupData = null;
+
+function showAvatarPopup(userId, photoURL, username, displayName){
+  currentPopupUserId = userId;
+  currentPopupData = { userId, photoURL, username, displayName };
+  let popup = document.getElementById('avatarPopup');
+  if(popup) popup.remove();
+  popup = document.createElement('div');
+  popup.id = 'avatarPopup';
+  popup.style.cssText = 'display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center; flex-direction:column;';
+  popup.innerHTML = `
+    <div style="position:relative; text-align:center; z-index:10001;">
+      <img id="avatarPopupImg" src="${photoURL || 'https://via.placeholder.com/280'}" style="width:280px; height:280px; border-radius:50%; object-fit:cover; border:3px solid white;">
+      <div id="avatarPopupName" style="margin-top:16px; color:white; font-size:20px; font-weight:bold;">${displayName || username || 'User'}</div>
+      <div id="avatarPopupUsername" style="color:#8b9bb4; font-size:14px; margin-top:4px;">${username ? (username.startsWith('@') ? username : '@'+username) : ''}</div>
+      <button id="viewDetailsBtn" style="margin-top:20px; background:#1a3a5f; color:white; border:none; padding:12px 24px; border-radius:25px; font-size:15px; cursor:pointer; z-index:10002; position:relative;">👤 View Details</button>
+    </div>
+    <span id="closePopupX" style="position:absolute; top:20px; right:20px; color:white; font-size:30px; cursor:pointer; z-index:10002;">&times;</span>
+  `;
+  document.body.appendChild(popup);
+  document.getElementById('viewDetailsBtn').onclick = function(e){
+    e.stopPropagation();
+    viewUserDetailsFromPopup();
+  };
+  document.getElementById('closePopupX').onclick = closeAvatarPopup;
+  popup.onclick = function(e){
+    if(e.target.id === 'avatarPopup') closeAvatarPopup();
+  };
+}
+
+function closeAvatarPopup(){ 
+  const popup = document.getElementById('avatarPopup'); 
+  if(popup) popup.style.display = 'none'; 
+}
+
+function viewUserDetailsFromPopup(){
+  if(!currentPopupData) return;
+  const myUid = getMyUidSafe();
+  const uid = currentPopupData.userId;
+  closeAvatarPopup();
+  if(myUid && uid && uid === myUid){
+    openMyProfilePage();
+    return;
   }
-  if(sName && name && name.trim() && name !== 'Your Name'){
-    sName.innerText = name.trim();
+  if(uid){
+    openUserProfile(uid);
+  } else {
+    openUserProfileWithData(currentPopupData);
+  }
+}
+
+function openUserProfileWithData(data){
+  document.body.setAttribute('data-profile-mode', 'other');
+  showPage('editProfilePage');
+  const avatarEl = document.getElementById('profilePageAvatar');
+  const usernameEl = document.getElementById('profilePageUsername');
+  const nameEl = document.getElementById('profilePageName');
+  const aboutEl = document.getElementById('profilePageAbout');
+  const detailsEl = document.getElementById('profilePageDetails');
+  const coverEl = document.getElementById('profileCoverPhoto');
+  const coverPh = document.getElementById('profileCoverPlaceholder');
+  document.querySelectorAll('.camera-btn').forEach(el=>{ el.style.display='none'; });
+  document.querySelectorAll('.edit-pencil').forEach(el=>{ el.style.display='none'; });
+  document.querySelectorAll('.profile-row').forEach(row=>{ row.style.pointerEvents='none'; row.style.cursor='default'; });
+  const ns = document.getElementById('nameSubtext'); if(ns) ns.style.display='none';
+  const ds = document.getElementById('detailsSubtext'); if(ds) ds.style.display='none';
+  if(coverEl){ coverEl.src=''; coverEl.style.display='none'; }
+  if(coverPh) coverPh.style.display='block';
+  if(avatarEl && data.photoURL) avatarEl.src = data.photoURL;
+  if(usernameEl) usernameEl.innerText = data.username ? (data.username.startsWith('@') ? data.username : '@'+data.username) : '@user';
+  let initialReal = data.displayName || '';
+  if(initialReal && !initialReal.startsWith('@')) nameEl.innerText = initialReal; else nameEl.innerText = 'Loading...';
+  if(aboutEl) aboutEl.innerText = data.about || 'Available';
+  if(detailsEl) detailsEl.innerText = data.details || data.bio || 'Loading...';
+  let foundUid = data.userId || '';
+  if(window.allUsers){
+    const searchName = (data.username || '').replace('@','').toLowerCase();
+    for(const key in allUsers){
+      const u = allUsers[key];
+      const uName = (u.username || '').replace('@','').toLowerCase();
+      if(uName === searchName || u.photoURL === data.photoURL){
+        foundUid = key;
+        if(avatarEl && u.photoURL) avatarEl.src = u.photoURL;
+        if(usernameEl && u.username) usernameEl.innerText = u.username.startsWith('@') ? u.username : '@'+u.username;
+        let rn = u.displayName || u.realName || u.name || '';
+        if(rn && !rn.startsWith('@')) nameEl.innerText = rn;
+        if(aboutEl) aboutEl.innerText = u.about || 'Available';
+        if(detailsEl) detailsEl.innerText = u.details || u.bio || 'No details yet';
+        const userCover = u.coverPhotoURL || u.cover || '';
+        if(coverEl && userCover){ coverEl.src=userCover; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; }
+        break;
+      }
+    }
+  }
+  if(firebase.firestore){
+    const uname = (data.username || '').replace('@','').toLowerCase();
+    const fetchByQuery = (field, value) => {
+      firebase.firestore().collection('users').where(field,'==',value).get().then(snap=>{
+        if(!snap.empty){
+          snap.forEach(doc=>{
+            const d=doc.data();
+            let rn = d.displayName || d.realName || d.name || '';
+            if(rn && !rn.startsWith('@')) nameEl.innerText = rn;
+            if(aboutEl) aboutEl.innerText = d.about || 'Available';
+            if(detailsEl) detailsEl.innerText = d.details || d.bio || 'No details yet';
+            const c = d.coverPhotoURL || d.cover || '';
+            if(c){ coverEl.src=c; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; }
+            if(avatarEl && d.photoURL) avatarEl.src = d.photoURL;
+          });
+        }
+      });
+    };
+    if(foundUid) firebase.firestore().collection('users').doc(foundUid).get().then(doc=>{ if(doc.exists){ const d=doc.data(); let rn=d.displayName||d.realName||d.name||''; if(rn && !rn.startsWith('@')) nameEl.innerText=rn; if(aboutEl) aboutEl.innerText=d.about||'Available'; if(detailsEl) detailsEl.innerText=d.details||d.bio||'No details yet'; const c=d.coverPhotoURL||d.cover||''; if(c){ coverEl.src=c; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; } } });
+    fetchByQuery('username','@'+uname);
+    fetchByQuery('username',uname);
   }
 }
 
@@ -1354,22 +1525,51 @@ setTimeout(()=>{
     if(t.tagName === 'IMG'){
       const r = t.getBoundingClientRect();
       if(r.top < 150 && r.left > window.innerWidth - 200 && r.width >= 28 && r.width <= 70){
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        openMyProfilePage();
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); 
+        openMyProfilePage(); 
+        return false;
+      }
+      if(r.left < 200 && r.width >= 30 && r.width <= 75 && r.top > 100){
+        e.preventDefault(); e.stopPropagation();
+        const clickedPhoto = t.src;
+        let parent = t.parentElement;
+        let username = '';
+        for(let i=0; i<4; i++){
+          if(!parent) break;
+          const txt = parent.innerText || '';
+          const m = txt.match(/@\w+/);
+          if(m){ username = m[0]; break; }
+          parent = parent.parentElement;
+        }
+        let foundUid = '';
+        let foundUser = null;
+        if(window.allUsers && username){
+          const clean = username.replace('@','').toLowerCase();
+          for(const uid in allUsers){
+            const u = allUsers[uid];
+            if((u.username || '').replace('@','').toLowerCase() === clean){
+              foundUid = uid; foundUser = u; break;
+            }
+          }
+        }
+        const displayName = foundUser ? (foundUser.displayName || foundUser.realName || username) : username;
+        const finalUsername = foundUser ? foundUser.username : username;
+        showAvatarPopup(foundUid, clickedPhoto, finalUsername, displayName);
         return false;
       }
     }
   }, true);
-  syncTopAvatarForce();
-  syncSettingsPage();
-  setInterval(()=>{
-    syncTopAvatarForce();
-    syncSettingsPage();
+  syncTopAvatarForce(); syncSettingsPage(); 
+  if(document.body.getAttribute('data-profile-mode') !== 'other') syncProfilePage();
+  setInterval(()=>{ 
+    if(document.body.getAttribute('data-profile-mode') !== 'other'){
+      syncTopAvatarForce(); syncSettingsPage(); 
+    }
+    const el = document.getElementById('profilePageUsername'); 
+    if(el) el.style.color = '#FFFFFF'; 
   }, 1000);
-  const saved = localStorage.getItem('myPhotoURL');
-  if(saved) setTimeout(()=>{ syncTopAvatarForce(); syncSettingsPage(); }, 300);
+  const saved = localStorage.getItem('myPhotoURL') || localStorage.getItem('dank_avatar');
+  if(saved) setTimeout(()=>{ syncTopAvatarForce(); syncSettingsPage(); if(document.body.getAttribute('data-profile-mode') !== 'other') syncProfilePage(); }, 300);
 }, 800);
 
 function saveQuoteToFirebase(){
@@ -1785,7 +1985,7 @@ function openChat(chatId, otherName = 'Chat'){
     div.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100vh;background:#0b141a url(https://res.cloudinary.com/aqx4n0dz/image/upload/IMG-20261013-WA0025.jpg) center/cover no-repeat;z-index:10000;display:flex;flex-direction:column;color:white;';
 div.innerHTML = `
 <div style="background:#1900B3;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-<div onclick="closePrivateChat()" style="cursor:pointer;font-size:24px;">></div>
+<div onclick="closePrivateChat()" style="cursor:pointer;font-size:26px; font-weight:bold; padding-right:6px;">&lt;</div>
 <img id="privateChatAvatar" src="https://via.placeholder.com/36/ffffff/1900B3?text=@" style="width:36px;height:36px;border-radius:50%;object-fit:cover;background:white;border:2px solid white;cursor:pointer;">
 <div id="privateChatTitle" style="font-weight:700;flex:1;cursor:pointer;"></div>
 </div>
@@ -1847,7 +2047,8 @@ if (window.unreadBelow > 0) {
   }
  }
 }
-  pmContainer.addEventListener('scroll', window.updateScrollBtn);scrollBtn.addEventListener('click', () => {
+  pmContainer.addEventListener('scroll', window.updateScrollBtn);
+  scrollBtn.addEventListener('click', () => {
   pmContainer.scrollTo({ top: pmContainer.scrollHeight, behavior: 'smooth' });
   window.unreadBelow = 0;
   scrollBadge.style.display = 'none';
@@ -1910,7 +2111,7 @@ window.cancelPrivateReply = () => {
 const ta = document.getElementById('privateMsgInput');
 const btn = document.getElementById('privateSendBtn');
 const micSVG = '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2H3v2a9 9 0 0 0 8 8.94V22h2v-1.06A9 9 0 0 0 21 12v-2h-2z"/></svg>';
-    const sendSVG = `<svg width="22" height="22" viewBox="0 0 24 24" fill="#1900B3"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>`;
+const sendSVG = `<svg width="22" height="22" viewBox="0 0 24 24" fill="#1900B3"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>`;
 ta.addEventListener('input', () => {
   ta.style.height = 'auto';
   ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
@@ -2030,13 +2231,15 @@ async function sendVoiceNote(){
         let otherUid = (cData.participants||[]).find(id=>id!==myUid) || cData.otherUid || null;
         if(otherUid){
           window.currentChatOtherUid = otherUid;
-          avatarEl.onclick = () => openChatProfile(otherUid);
-          if(titleEl) titleEl.onclick = () => openChatProfile(otherUid);
+          avatarEl.onclick = () => openPrivateChatProfile(otherUid);
+          if(titleEl) titleEl.onclick = () => openPrivateChatProfile(otherUid);
+          window.currentChatUserData = { userId: otherUid, username: otherName, photoURL: avatarEl.src, displayName: otherName };
           db.collection('users').doc(otherUid).get().then(uDoc=>{
-            if(uDoc.exists && uDoc.data().photoURL){
-              avatarEl.src = uDoc.data().photoURL;
-            } else if(uDoc.exists && uDoc.data().avatar){
-              avatarEl.src = uDoc.data().avatar;
+            if(uDoc.exists){
+              const ud = uDoc.data();
+              if(ud.photoURL) avatarEl.src = ud.photoURL;
+              else if(ud.avatar) avatarEl.src = ud.avatar;
+              window.currentChatUserData = { userId: otherUid, username: ud.username || otherName, photoURL: ud.photoURL || ud.avatar, displayName: ud.displayName || ud.realName || otherName, about: ud.about, details: ud.details || ud.bio, coverPhotoURL: ud.coverPhotoURL || ud.cover };
             }
           });
         }
@@ -2073,6 +2276,7 @@ async function sendVoiceNote(){
   });
   loadPrivateMessages();
 }
+
 function closePrivateChat(){
   const v = document.getElementById('privateChatView');
   if(v) v.style.display = 'none';
@@ -2080,6 +2284,64 @@ function closePrivateChat(){
   if(messagesUnsub){ messagesUnsub(); messagesUnsub = null; }
   activeChatId = null;
 }
+
+function openPrivateChatProfile(uidOrData){
+  const chatView = document.getElementById('privateChatView');
+  if(chatView) chatView.style.display = 'none';
+  let data = {}; let uid = '';
+  if(typeof uidOrData === 'string'){ uid = uidOrData; data.userId = uid; }
+  else { data = uidOrData || {}; uid = data.userId || window.currentChatOtherUid || ''; }
+  const profilePage = document.getElementById('privateChatProfilePage');
+  if(profilePage){
+    profilePage.style.display = 'block';
+    profilePage.style.zIndex = '10002';
+    profilePage.style.background = '#0A1931';
+  }
+  const avatarEl = document.getElementById('privateAvatarPhoto');
+  const coverEl = document.getElementById('privateCoverPhoto');
+  const coverPh = document.getElementById('privateCoverPlaceholder');
+  const nameEl = document.getElementById('privateDisplayName');
+  const userEl = document.getElementById('privateUsername');
+  const aboutFull = document.getElementById('privateAboutFull');
+  const detailsFull = document.getElementById('privateDetailsFull');
+  if(coverEl){ coverEl.src=''; coverEl.style.display='none'; }
+  if(coverPh) coverPh.style.display='block';
+  if(nameEl) nameEl.innerText='Loading...';
+  if(window.currentChatUserData){
+    if(avatarEl && window.currentChatUserData.photoURL) avatarEl.src = window.currentChatUserData.photoURL;
+    if(userEl) userEl.innerText = window.currentChatUserData.username ? (window.currentChatUserData.username.startsWith('@') ? window.currentChatUserData.username : '@'+window.currentChatUserData.username) : '@user';
+    if(nameEl && window.currentChatUserData.displayName && !window.currentChatUserData.displayName.startsWith('@')) nameEl.innerText = window.currentChatUserData.displayName;
+    if(aboutFull && window.currentChatUserData.about) aboutFull.innerText = window.currentChatUserData.about;
+    if(detailsFull && window.currentChatUserData.details) detailsFull.innerText = window.currentChatUserData.details;
+    const c = window.currentChatUserData.coverPhotoURL || '';
+    if(c && coverEl){ coverEl.src=c; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; }
+  }
+  if(uid && window.db){
+    db.collection('users').doc(uid).get().then(doc=>{
+      if(doc.exists){
+        const d = doc.data();
+        if(avatarEl && d.photoURL) avatarEl.src = d.photoURL;
+        if(userEl) userEl.innerText = d.username ? (d.username.startsWith('@') ? d.username : '@'+d.username) : userEl.innerText;
+        let rn = d.displayName || d.realName || d.name || '';
+        if(rn && !rn.startsWith('@')) nameEl.innerText = rn;
+        if(aboutFull) aboutFull.innerText = d.about || 'Available';
+        if(detailsFull) detailsFull.innerText = d.details || d.bio || 'No details yet';
+        const c = d.coverPhotoURL || d.cover || '';
+        if(c){ coverEl.src=c; coverEl.style.display='block'; if(coverPh) coverPh.style.display='none'; }
+      }
+    });
+  }
+}
+
+function closePrivateProfile(){
+  const profilePage = document.getElementById('privateChatProfilePage');
+  if(profilePage) profilePage.style.display = 'none';
+  const chatView = document.getElementById('privateChatView');
+  if(chatView) chatView.style.display = 'flex';
+}
+
+function openChatProfile(uid){ openPrivateChatProfile(uid); }
+
 function getPlayableAudioUrl(url) {
   if (!url) return url;
   if (url.includes('/video/upload/f_mp3/')) return url;
@@ -2090,418 +2352,129 @@ function getPlayableAudioUrl(url) {
   }
   return url;
 }
+
 function loadPrivateMessages(){
-    let lastMsgCount = 0;
-    let firstPmLoad = true;
+    let lastMsgCount = 0; let firstPmLoad = true;
   const box = document.getElementById('privateMessages');
   const myUid = localStorage.getItem('dank_uid');
-  messagesUnsub = firebase.firestore().collection('chats').doc(activeChatId).collection('messages')
-.orderBy('createdAt')
-.onSnapshot(snap => {
+  messagesUnsub = firebase.firestore().collection('chats').doc(activeChatId).collection('messages').orderBy('createdAt').onSnapshot(snap => {
   const wasNearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 150;
-  const newCount = snap.size;
-  box.innerHTML = '';
+  const newCount = snap.size; box.innerHTML = '';
   snap.forEach(d => {
-  const m = d.data();
-    if (m.hiddenFor && m.hiddenFor.includes(myUid)) return;
-  const msgId = d.id;
-  const isMe = m.senderId === myUid;
-  if (!isMe) {
-  if (!m.delivered) d.ref.update({ delivered: true });
-  if (!m.read) d.ref.update({ read: true });
-}
+  const m = d.data(); if (m.hiddenFor && m.hiddenFor.includes(myUid)) return;
+  const msgId = d.id; const isMe = m.senderId === myUid;
+  if (!isMe) { if (!m.delivered) d.ref.update({ delivered: true }); if (!m.read) d.ref.update({ read: true }); }
   const b = document.createElement('div');
   b.style.cssText = `max-width:75%;padding:10px 14px;border-radius:16px;${isMe?'align-self:flex-end;background:#1900B3;':'align-self:flex-start;background:#1f2c34;'}`;
-  b.dataset.msgId = d.id;
-  b.dataset.msgText = (m.text || '').substring(0,120);
-b.dataset.msgImage = (m.type==='image' && m.url)? m.url : '';
-if(m.isStatusReply && m.statusMediaUrl){
-  const qData = { id: m.replyToStatusId || m.statusId, mediaUrl: m.statusMediaUrl, url: m.statusMediaUrl, type: m.statusMediaType || 'image' };
-  const qJson = JSON.stringify(qData).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
-  if(m.statusMediaType === "video"){
-    b.innerHTML += `<video src="${m.statusMediaUrl}" style="max-width:200px;border-radius:10px;margin-bottom:6px;cursor:pointer;" onclick='openQuotedStatus(JSON.parse(this.getAttribute("data-q")))' data-q="${qJson}" muted></video>`;
-  } else {
-    b.innerHTML += `<img src="${m.statusMediaUrl}" style="max-width:200px;border-radius:10px;margin-bottom:6px;cursor:pointer;" onclick='openQuotedStatus(JSON.parse(this.getAttribute("data-q")))' data-q="${qJson}">`;
+  b.dataset.msgId = d.id; b.dataset.msgText = (m.text || '').substring(0,120); b.dataset.msgImage = (m.type==='image' && m.url)? m.url : '';
+  if(m.isStatusReply && m.statusMediaUrl){
+    const qData = { id: m.replyToStatusId || m.statusId, mediaUrl: m.statusMediaUrl, url: m.statusMediaUrl, type: m.statusMediaType || 'image' };
+    const qJson = JSON.stringify(qData).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+    if(m.statusMediaType === "video"){ b.innerHTML += `<video src="${m.statusMediaUrl}" style="max-width:200px;border-radius:10px;margin-bottom:6px;cursor:pointer;" onclick='openQuotedStatus(JSON.parse(this.getAttribute("data-q")))' data-q="${qJson}" muted></video>`; }
+    else { b.innerHTML += `<img src="${m.statusMediaUrl}" style="max-width:200px;border-radius:10px;margin-bottom:6px;cursor:pointer;" onclick='openQuotedStatus(JSON.parse(this.getAttribute("data-q")))' data-q="${qJson}">`; }
+    b.innerHTML += `<div style="font-size:11px;opacity:0.7;margin-bottom:4px;">Replied to status</div>`;
   }
-  b.innerHTML += `<div style="font-size:11px;opacity:0.7;margin-bottom:4px;">Replied to status</div>`;
-}
-if(m.type === 'voice' && m.audioUrl){
-b.innerHTML += '<audio controls preload="auto" src="'+getPlayableAudioUrl(m.audioUrl)+'" style="max-width:200px;"></audio>' ;
-} else if(m.type === 'image' && m.url){
-b.innerHTML += '<img src="'+m.url+'" style="max-width:200px;border-radius:10px;cursor:pointer;" onclick="window.open(\''+m.url+'\')">';
-} else {
-if(m.replyToImage){
-  b.innerHTML += '<div style="background:rgba(255,255,255,0.15);border-left:3px solid #1a8cff;padding:4px;border-radius:6px;margin-bottom:6px;"><img src="'+m.replyToImage+'" style="width:60px;height:60px;object-fit:cover;border-radius:4px;"></div>';
-} else if(m.replyToText){
-  b.innerHTML += '<div style="background:rgba(255,255,255,0.15);border-left:3px solid #1a8cff;padding:6px 8px;border-radius:6px;font-size:12px;opacity:0.9;margin-bottom:6px;">'+m.replyToText.replace(/</g,'&lt;')+'</div>';
-}
-const div = document.createElement('div');
-  div.textContent = m.text || '';
-  b.appendChild(div);
-const td = m.createdAt && m.createdAt.toDate? m.createdAt.toDate() : new Date();
-let h = td.getHours(); const ap = h >= 12? 'PM' : 'AM'; h = h % 12 || 12;
-const min = String(td.getMinutes()).padStart(2,'0');
-const metaRow = document.createElement('div');
-metaRow.style.cssText = 'display:flex;justify-content:flex-end;align-items:center;gap:4px;margin-top:4px;line-height:1;';
-const timeSpan = document.createElement('span');
-timeSpan.style.cssText = 'font-size:10px;opacity:0.7;';
-timeSpan.textContent = h + ':' + min + ' ' + ap;
-metaRow.appendChild(timeSpan);
-if (isMe) {
-  const tickSpan = document.createElement('span');
-  tickSpan.style.cssText = 'font-size:14px;font-weight:700;letter-spacing:-1px;line-height:1;margin-left:4px;';
-if (m.read) {
-  tickSpan.textContent = '✓✓';
-  tickSpan.style.color = '#53bdeb';
-} else if (m.delivered) {
-  tickSpan.textContent = '✓✓';
-  tickSpan.style.color = 'rgba(255,255,255,0.7)';
-} else {
-  tickSpan.textContent = '✓';
-  tickSpan.style.color = 'rgba(255,255,255,0.7)';
-}
-metaRow.appendChild(tickSpan);
-}
-b.appendChild(metaRow);
-}
-  let msgPressTimer = null;
-  const showMsgMenu = () => {
-    const old = document.getElementById('msgMenuOverlay');
-    if (old) old.remove();
-    const overlay = document.createElement('div');
-    overlay.id = 'msgMenuOverlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10001;';
-    overlay.innerHTML = `
-      <div style="background:#1f1f1f;border-radius:12px;width:70%;max-width:250px;overflow:hidden;">
-        ${isMe? `<div id="msgEditBtn" style="padding:15px;color:white;font-size:15px;border-bottom:1px solid #2a2a2a;cursor:pointer;">✏️ Edit</div>` : ``}
-        <div id="msgDeleteBtn" style="padding:15px;color:#ff4444;font-size:15px;cursor:pointer;">🗑️ Delete</div>
-        <div id="msgCancelBtn" style="padding:15px;color:#8696a0;font-size:15px;border-top:1px solid #2a2a2a;cursor:pointer;text-align:center;">Cancel</div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    const close = () => overlay.remove();
-    overlay.onclick = (e) => { if (e.target === overlay) close(); };
-    document.getElementById('msgCancelBtn').onclick = close;
-document.getElementById('msgDeleteBtn').onclick = async () => {
-  close();
-const choice = await window.customDeleteChoice();
-  if (!choice) return;
-  const myUid = localStorage.getItem('dank_uid');
-  if (choice === 'everyone') {
-    await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').doc(msgId).delete();
-  } else {
-    await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').doc(msgId).update({
-      hiddenFor: firebase.firestore.FieldValue.arrayUnion(myUid)
-    });
+  if(m.type === 'voice' && m.audioUrl){ b.innerHTML += '<audio controls preload="auto" src="'+getPlayableAudioUrl(m.audioUrl)+'" style="max-width:200px;"></audio>' ; }
+  else if(m.type === 'image' && m.url){ b.innerHTML += '<img src="'+m.url+'" style="max-width:200px;border-radius:10px;cursor:pointer;" onclick="window.open(\''+m.url+'\')">'; }
+  else {
+    if(m.replyToImage){ b.innerHTML += '<div style="background:rgba(255,255,255,0.15);border-left:3px solid #1a8cff;padding:4px;border-radius:6px;margin-bottom:6px;"><img src="'+m.replyToImage+'" style="width:60px;height:60px;object-fit:cover;border-radius:4px;"></div>'; }
+    else if(m.replyToText){ b.innerHTML += '<div style="background:rgba(255,255,255,0.15);border-left:3px solid #1a8cff;padding:6px 8px;border-radius:6px;font-size:12px;opacity:0.9;margin-bottom:6px;">'+m.replyToText.replace(/</g,'&lt;')+'</div>'; }
+    const div = document.createElement('div'); div.textContent = m.text || ''; b.appendChild(div);
+    const td = m.createdAt && m.createdAt.toDate? m.createdAt.toDate() : new Date(); let h = td.getHours(); const ap = h >= 12? 'PM' : 'AM'; h = h % 12 || 12; const min = String(td.getMinutes()).padStart(2,'0');
+    const metaRow = document.createElement('div'); metaRow.style.cssText = 'display:flex;justify-content:flex-end;align-items:center;gap:4px;margin-top:4px;line-height:1;';
+    const timeSpan = document.createElement('span'); timeSpan.style.cssText = 'font-size:10px;opacity:0.7;'; timeSpan.textContent = h + ':' + min + ' ' + ap; metaRow.appendChild(timeSpan);
+    if (isMe) { const tickSpan = document.createElement('span'); tickSpan.style.cssText = 'font-size:14px;font-weight:700;letter-spacing:-1px;line-height:1;margin-left:4px;'; if (m.read) { tickSpan.textContent = '✓✓'; tickSpan.style.color = '#53bdeb'; } else if (m.delivered) { tickSpan.textContent = '✓✓'; tickSpan.style.color = 'rgba(255,255,255,0.7)'; } else { tickSpan.textContent = '✓'; tickSpan.style.color = 'rgba(255,255,255,0.7)'; } metaRow.appendChild(tickSpan); } b.appendChild(metaRow);
   }
-};
-      if (isMe) {
-document.getElementById('msgEditBtn').onclick = () => {
-  close();
-  const input = document.querySelector('input[placeholder="Message"], textarea[placeholder="Message"]');
-  if (input) {
-    input.value = m.text;
-    input.focus();
-    window.editingMsgId = msgId;
-  }
-};
-}
+  let msgPressTimer = null; const showMsgMenu = () => {
+    const old = document.getElementById('msgMenuOverlay'); if (old) old.remove();
+    const overlay = document.createElement('div'); overlay.id = 'msgMenuOverlay'; overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10001;';
+    overlay.innerHTML = `<div style="background:#1f1f1f;border-radius:12px;width:70%;max-width:250px;overflow:hidden;">${isMe? `<div id="msgEditBtn" style="padding:15px;color:white;font-size:15px;border-bottom:1px solid #2a2a2a;cursor:pointer;">✏️ Edit</div>` : ``}<div id="msgDeleteBtn" style="padding:15px;color:#ff4444;font-size:15px;cursor:pointer;">🗑️ Delete</div><div id="msgCancelBtn" style="padding:15px;color:#8696a0;font-size:15px;border-top:1px solid #2a2a2a;cursor:pointer;text-align:center;">Cancel</div></div>`;
+    document.body.appendChild(overlay); const close = () => overlay.remove(); overlay.onclick = (e) => { if (e.target === overlay) close(); }; document.getElementById('msgCancelBtn').onclick = close;
+    document.getElementById('msgDeleteBtn').onclick = async () => { close(); const choice = await window.customDeleteChoice(); if (!choice) return; const myUid = localStorage.getItem('dank_uid'); if (choice === 'everyone') { await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').doc(msgId).delete(); } else { await firebase.firestore().collection('chats').doc(activeChatId).collection('messages').doc(msgId).update({ hiddenFor: firebase.firestore.FieldValue.arrayUnion(myUid) }); } };
+    if (isMe) { document.getElementById('msgEditBtn').onclick = () => { close(); const input = document.querySelector('input[placeholder="Message"], textarea[placeholder="Message"]'); if (input) { input.value = m.text; input.focus(); window.editingMsgId = msgId; } }; }
   };
-  b.addEventListener('touchstart', () => { msgPressTimer = setTimeout(showMsgMenu, 600); });
-  b.addEventListener('touchend', () => { if (msgPressTimer) clearTimeout(msgPressTimer); });
-  b.addEventListener('touchmove', () => { if (msgPressTimer) clearTimeout(msgPressTimer); });
-  b.addEventListener('contextmenu', (e) => { e.preventDefault(); showMsgMenu(); });
-  box.appendChild(b);
-});
-if (firstPmLoad) {
-    box.scrollTo({ top: box.scrollHeight });
-    firstPmLoad = false;
-  } else if (!wasNearBottom && newCount > lastMsgCount) {
-    unreadBelow += (newCount - lastMsgCount);
-    updateScrollBtn();
-  } else if (wasNearBottom) {
-    box.scrollTo({ top: box.scrollHeight });
-    updateScrollBtn();
-  }
-  lastMsgCount = newCount;
-});
+  b.addEventListener('touchstart', () => { msgPressTimer = setTimeout(showMsgMenu, 600); }); b.addEventListener('touchend', () => { if (msgPressTimer) clearTimeout(msgPressTimer); }); b.addEventListener('touchmove', () => { if (msgPressTimer) clearTimeout(msgPressTimer); }); b.addEventListener('contextmenu', (e) => { e.preventDefault(); showMsgMenu(); }); box.appendChild(b);
+  });
+  if (firstPmLoad) { box.scrollTo({ top: box.scrollHeight }); firstPmLoad = false; } else if (!wasNearBottom && newCount > lastMsgCount) { unreadBelow += (newCount - lastMsgCount); updateScrollBtn(); } else if (wasNearBottom) { box.scrollTo({ top: box.scrollHeight }); updateScrollBtn(); } lastMsgCount = newCount;
+  });
 }
+
 function sendPrivateMessage(){
-  const inp = document.getElementById('privateMsgInput');
-  const text = inp.value.trim();
-  if(!text ||!activeChatId) return;
-    if (window.editingMsgId) {
-  firebase.firestore().collection('chats').doc(activeChatId).collection('messages').doc(window.editingMsgId).update({
-    text: text,
-    edited: true
-  });
-  window.editingMsgId = null;
-  inp.value = '';
-  return;
-}
+  const inp = document.getElementById('privateMsgInput'); const text = inp.value.trim(); if(!text ||!activeChatId) return;
+  if (window.editingMsgId) { firebase.firestore().collection('chats').doc(activeChatId).collection('messages').doc(window.editingMsgId).update({ text: text, edited: true }); window.editingMsgId = null; inp.value = ''; return; }
   const myUid = localStorage.getItem('dank_uid');
-  firebase.firestore().collection('chats').doc(activeChatId).collection('messages').add({
-    text: text,
-    senderId: myUid,
-    replyTo: replyToId || null,
-    replyToText: replyToText || null,
-    replyToImage: window.replyToImage || null,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      delivered: false,
-      read: false
-  });
-  firebase.firestore().collection('chats').doc(activeChatId).update({
-    lastMessage: text,
-    lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
-    lastMessageLocal: Date.now()
-  });
-  inp.value = '';
-  cancelPrivateReply();
+  firebase.firestore().collection('chats').doc(activeChatId).collection('messages').add({ text: text, senderId: myUid, replyTo: replyToId || null, replyToText: replyToText || null, replyToImage: window.replyToImage || null, createdAt: firebase.firestore.FieldValue.serverTimestamp(), delivered: false, read: false });
+  firebase.firestore().collection('chats').doc(activeChatId).update({ lastMessage: text, lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(), lastMessageLocal: Date.now() });
+  inp.value = ''; cancelPrivateReply();
 }
 
 function loadMyChats(){
-  const myUid = localStorage.getItem('dank_uid');
-  const list = document.getElementById('chatsList');
-  if(!list) return;
-  if(window.chatsUnsub) window.chatsUnsub();
-  window.lastChatsData = window.lastChatsData || {};
-  window.chatsUnsub = firebase.firestore().collection('chats')
-.where('participants','array-contains', myUid)
-.onSnapshot(async snap => {
-      if(snap.empty){
-        list.innerHTML = '<div style="text-align:center;color:#888;margin-top:40px;">No chats yet<br>Tap + to start one</div>';
-        return;
-      }
-      let chats = [];
-      snap.forEach(doc => chats.push({id: doc.id,...doc.data()}));
-      chats.sort((a,b) => {
-        const aTime = a.lastMessageAt? a.lastMessageAt.toMillis() : (a.lastMessageLocal||0);
-        const bTime = b.lastMessageAt? b.lastMessageAt.toMillis() : (b.lastMessageLocal||0);
-        return bTime - aTime;
-      });
-      let uniqueChats = [];
-      let seenUids = new Set();
-      for(let c of chats){
-        let ou = c.participants.find(u=> u!==myUid);
-        if(!ou) continue;
-        if(seenUids.has(ou)) continue;
-        seenUids.add(ou);
-        uniqueChats.push(c);
-      }
-      chats = uniqueChats;
-      let otherUids = chats.map(c=> c.participants.find(u=> u!==myUid)).filter(Boolean);
-      await Promise.all(otherUids.map(uid=> resolveUserPhoto(uid)));
-
-      let onlyTypingChanged = true;
-      let newDataSig = {};
-      chats.forEach(c=>{
-        newDataSig[c.id] = (c.lastMessage||'') + '|' + (c.lastMessageAt? c.lastMessageAt.toMillis():c.lastMessageLocal||0);
-        if(window.lastChatsData[c.id]!== newDataSig[c.id]) onlyTypingChanged = false;
-      });
+  const myUid = localStorage.getItem('dank_uid'); const list = document.getElementById('chatsList'); if(!list) return;
+  if(window.chatsUnsub) window.chatsUnsub(); window.lastChatsData = window.lastChatsData || {};
+  window.chatsUnsub = firebase.firestore().collection('chats').where('participants','array-contains', myUid).onSnapshot(async snap => {
+      if(snap.empty){ list.innerHTML = '<div style="text-align:center;color:#888;margin-top:40px;">No chats yet<br>Tap + to start one</div>'; return; }
+      let chats = []; snap.forEach(doc => chats.push({id: doc.id,...doc.data()})); chats.sort((a,b) => { const aTime = a.lastMessageAt? a.lastMessageAt.toMillis() : (a.lastMessageLocal||0); const bTime = b.lastMessageAt? b.lastMessageAt.toMillis() : (b.lastMessageLocal||0); return bTime - aTime; });
+      let uniqueChats = []; let seenUids = new Set(); for(let c of chats){ let ou = c.participants.find(u=> u!==myUid); if(!ou) continue; if(seenUids.has(ou)) continue; seenUids.add(ou); uniqueChats.push(c); } chats = uniqueChats;
+      let otherUids = chats.map(c=> c.participants.find(u=> u!==myUid)).filter(Boolean); await Promise.all(otherUids.map(uid=> resolveUserPhoto(uid)));
+      let onlyTypingChanged = true; let newDataSig = {}; chats.forEach(c=>{ newDataSig[c.id] = (c.lastMessage||'') + '|' + (c.lastMessageAt? c.lastMessageAt.toMillis():c.lastMessageLocal||0); if(window.lastChatsData[c.id]!== newDataSig[c.id]) onlyTypingChanged = false; });
       if(Object.keys(newDataSig).length!== Object.keys(window.lastChatsData).length) onlyTypingChanged = false;
       if(onlyTypingChanged && document.getElementById('chat_item_'+chats[0].id)){
         chats.forEach(chat=>{
-          const otherUid = chat.participants.find(u=> u!==myUid);
-          let otherTyping = false;
-          if(otherUid && chat['typing_'+otherUid]===true){
-            let typingAtMs = 0;
-            if(chat.typingAt){
-              typingAtMs = chat.typingAt.toMillis? chat.typingAt.toMillis() : chat.typingAt;
-            }
-            const age = Date.now() - typingAtMs;
-            if(typingAtMs===0 || age < 5000) otherTyping = true;
-          }
-          const lastEl = document.getElementById('last_'+chat.id);
-          if(lastEl && otherTyping){
-            if(!lastEl.dataset.original) lastEl.dataset.original = chat.lastMessage||'';
-            lastEl.innerHTML = '<i style="color:#7a8bff;">typing...</i>';
-          } else if(lastEl && otherTyping===false){
-            if(lastEl.dataset.original){
-              lastEl.textContent = lastEl.dataset.original;
-              delete lastEl.dataset.original;
-            } else {
-              lastEl.textContent = chat.lastMessage||'';
-            }
-          }
-        });
-        return;
+          const otherUid = chat.participants.find(u=> u!==myUid); let otherTyping = false;
+          if(otherUid && chat['typing_'+otherUid]===true){ let typingAtMs = 0; if(chat.typingAt){ typingAtMs = chat.typingAt.toMillis? chat.typingAt.toMillis() : chat.typingAt; } const age = Date.now() - typingAtMs; if(typingAtMs===0 || age < 5000) otherTyping = true; }
+          const lastEl = document.getElementById('last_'+chat.id); if(lastEl && otherTyping){ if(!lastEl.dataset.original) lastEl.dataset.original = chat.lastMessage||''; lastEl.innerHTML = '<i style="color:#7a8bff;">typing...</i>'; } else if(lastEl && otherTyping===false){ if(lastEl.dataset.original){ lastEl.textContent = lastEl.dataset.original; delete lastEl.dataset.original; } else { lastEl.textContent = chat.lastMessage||''; } }
+        }); return;
       }
-      window.lastChatsData = newDataSig;
-
-      list.innerHTML = '';
-      const fragment = document.createDocumentFragment();
+      window.lastChatsData = newDataSig; list.innerHTML = ''; const fragment = document.createDocumentFragment();
       chats.forEach(chat => {
-        const chatId = chat.id;
-        const otherUid = chat.participants.find(u => u!== myUid);
-        const otherName = (chat.usernames && chat.usernames[otherUid]) || (chat.names && chat.names[otherUid]) || 'Chat';
-        const otherPhoto = window.userPhotoCache[otherUid] || null;
-        const avatarHtml = otherPhoto? `<img src="${otherPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : otherName.charAt(0).toUpperCase();
-        const timeText = formatChatTime(chat.lastMessageAt, chat.lastMessageLocal);
-        const otherUidForTyping = otherUid;
-        let otherTyping = false;
-        if(otherUidForTyping && chat['typing_'+otherUidForTyping]===true){
-          let typingAtMs = 0;
-          if(chat.typingAt){
-            typingAtMs = chat.typingAt.toMillis? chat.typingAt.toMillis() : chat.typingAt;
-          }
-          const age = Date.now() - typingAtMs;
-          if(typingAtMs===0 || age < 5000) otherTyping = true;
-          else {
-            firebase.firestore().collection('chats').doc(chatId).update({['typing_'+otherUidForTyping]: false}).catch(()=>{});
-          }
-        }
+        const chatId = chat.id; const otherUid = chat.participants.find(u => u!== myUid); const otherName = (chat.usernames && chat.usernames[otherUid]) || (chat.names && chat.names[otherUid]) || 'Chat';
+        const otherPhoto = window.userPhotoCache[otherUid] || null; const avatarHtml = otherPhoto? `<img src="${otherPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : otherName.charAt(0).toUpperCase();
+        const timeText = formatChatTime(chat.lastMessageAt, chat.lastMessageLocal); const otherUidForTyping = otherUid; let otherTyping = false;
+        if(otherUidForTyping && chat['typing_'+otherUidForTyping]===true){ let typingAtMs = 0; if(chat.typingAt){ typingAtMs = chat.typingAt.toMillis? chat.typingAt.toMillis() : chat.typingAt; } const age = Date.now() - typingAtMs; if(typingAtMs===0 || age < 5000) otherTyping = true; else { firebase.firestore().collection('chats').doc(chatId).update({['typing_'+otherUidForTyping]: false}).catch(()=>{}); } }
         const previewText = otherTyping? '<i style="color:#7a8bff;">typing...</i>' : (chat.lastMessage||'').replace(/</g,'&lt;');
-        const item = document.createElement('div');
-        item.id = 'chat_item_' + chatId;
-        item.style.cssText = 'padding:14px 12px;border-bottom:1px solid #1f2c34;cursor:pointer;display:flex;align-items:center;gap:12px;';
-        item.innerHTML = `
-          <div style="width:48px;height:48px;border-radius:50%;background:#1900B3;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;overflow:hidden;flex-shrink:0;">${avatarHtml}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-              <div style="font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="name_${chatId}">${otherName}</div>
-              <div style="color:#8696a0;font-size:11px;flex-shrink:0;" id="time_${chatId}">${timeText}</div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:2px;">
-              <div style="color:#888;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" id="last_${chatId}">${previewText}</div>
-              <div id="badge_${chatId}"></div>
-            </div>
-          </div>
-        `;
-        item.onclick = () => {
-          openChat(chatId, otherName);
-          const badgeEl = document.getElementById('badge_'+chatId);
-          if(badgeEl) badgeEl.innerHTML = '';
-          const nameEl = document.getElementById('name_'+chatId);
-          if(nameEl) nameEl.style.fontWeight = '600';
-        };
-        fragment.appendChild(item);
-      });
-      list.appendChild(fragment);
-
+        const item = document.createElement('div'); item.id = 'chat_item_' + chatId; item.style.cssText = 'padding:14px 12px;border-bottom:1px solid #1f2c34;cursor:pointer;display:flex;align-items:center;gap:12px;';
+        item.innerHTML = `<div style="width:48px;height:48px;border-radius:50%;background:#1900B3;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;overflow:hidden;flex-shrink:0;">${avatarHtml}</div><div style="flex:1;min-width:0;"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><div style="font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="name_${chatId}">${otherName}</div><div style="color:#8696a0;font-size:11px;flex-shrink:0;" id="time_${chatId}">${timeText}</div></div><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:2px;"><div style="color:#888;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" id="last_${chatId}">${previewText}</div><div id="badge_${chatId}"></div></div></div>`;
+        item.onclick = () => { openChat(chatId, otherName); const badgeEl = document.getElementById('badge_'+chatId); if(badgeEl) badgeEl.innerHTML = ''; const nameEl = document.getElementById('name_'+chatId); if(nameEl) nameEl.style.fontWeight = '600'; }; fragment.appendChild(item);
+      }); list.appendChild(fragment);
       chats.forEach(async (chat) => {
-        const chatId = chat.id;
-        let unreadCount = 0;
-        try{
-          const snapMsg = await firebase.firestore().collection('chats').doc(chatId).collection('messages').get();
-          snapMsg.forEach(d=>{
-            const md = d.data();
-            if(md.senderId!== myUid && md.read===false &&!(md.hiddenFor && md.hiddenFor.includes(myUid))){
-              unreadCount++;
-            }
-          });
-        }catch(e){}
-        if(unreadCount > 0){
-          const badgeEl = document.getElementById('badge_'+chatId);
-          const timeEl = document.getElementById('time_'+chatId);
-          const nameEl = document.getElementById('name_'+chatId);
-          const lastEl = document.getElementById('last_'+chatId);
-          if(badgeEl){
-            badgeEl.innerHTML = `<div style="background:#1900B3;color:white;min-width:22px;height:22px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;padding:0 6px;">${unreadCount>99?'99+':unreadCount}</div>`;
-          }
-          if(timeEl){
-            timeEl.style.color = '#7a8bff';
-            timeEl.style.fontWeight = '700';
-          }
-          if(nameEl) nameEl.style.fontWeight = '800';
-          if(lastEl &&!lastEl.innerHTML.includes('typing')){
-            lastEl.style.color = 'white';
-            lastEl.style.fontWeight = '600';
-          }
-        }
+        const chatId = chat.id; let unreadCount = 0; try{ const snapMsg = await firebase.firestore().collection('chats').doc(chatId).collection('messages').get(); snapMsg.forEach(d=>{ const md = d.data(); if(md.senderId!== myUid && md.read===false &&!(md.hiddenFor && md.hiddenFor.includes(myUid))){ unreadCount++; } }); }catch(e){}
+        if(unreadCount > 0){ const badgeEl = document.getElementById('badge_'+chatId); const timeEl = document.getElementById('time_'+chatId); const nameEl = document.getElementById('name_'+chatId); const lastEl = document.getElementById('last_'+chatId); if(badgeEl){ badgeEl.innerHTML = `<div style="background:#1900B3;color:white;min-width:22px;height:22px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;padding:0 6px;">${unreadCount>99?'99+':unreadCount}</div>`; } if(timeEl){ timeEl.style.color = '#7a8bff'; timeEl.style.fontWeight = '700'; } if(nameEl) nameEl.style.fontWeight = '800'; if(lastEl &&!lastEl.innerHTML.includes('typing')){ lastEl.style.color = 'white'; lastEl.style.fontWeight = '600'; } }
       });
-
       chats.forEach(chat=>{
-        const chatId = chat.id;
-        const otherUid = chat.participants.find(u => u!== myUid);
-        const otherName = (chat.usernames && chat.usernames[otherUid]) || (chat.names && chat.names[otherUid]) || 'Chat';
-        const el = document.getElementById('chat_item_'+chatId);
-        if(!el) return;
-        let pressTimer = null;
-        function customConfirm(message) {
-          return new Promise((resolve) => {
-            const old = document.getElementById('customConfirmOverlay'); if (old) old.remove();
-            const overlay = document.createElement('div'); overlay.id = 'customConfirmOverlay';
-            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;';
-            overlay.innerHTML = `<div style="background:#1f1f1f;color:white;padding:20px;border-radius:12px;width:85%;max-width:320px;"><div style="font-size:16px;margin-bottom:20px;line-height:1.4;">${message}</div><div style="display:flex;justify-content:flex-end;gap:10px;"><button id="ccCancel" style="background:#2a2a2a;color:white;border:none;padding:10px 20px;border-radius:20px;font-size:14px;cursor:pointer;">Cancel</button><button id="ccOk" style="background:#1900B3;color:white;border:none;padding:10px 24px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;">Delete</button></div></div>`;
-            document.body.appendChild(overlay);
-            document.getElementById('ccCancel').onclick = () => { overlay.remove(); resolve(false); };
-            document.getElementById('ccOk').onclick = () => { overlay.remove(); resolve(true); };
-            overlay.onclick = (e) => { if (e.target === overlay) { overlay.remove(); resolve(false); } };
-          });
-        }
-        const askDelete = async () => {
-          const yes = await customConfirm(`Delete chat with ${otherName}?<br><span style="color:#8696a0;font-size:13px;">This will delete all messages too.</span>`);
-          if (!yes) return;
-          try {
-            const chatRef = firebase.firestore().collection('chats').doc(chatId);
-            const msgsSnap = await chatRef.collection('messages').get();
-            const batch = firebase.firestore().batch();
-            msgsSnap.forEach(doc => batch.delete(doc.ref));
-            await batch.commit(); await chatRef.delete();
-          } catch(e) { alert('Delete failed: ' + e.message); }
-        };
-        el.addEventListener('touchstart', () => { pressTimer = setTimeout(askDelete, 600); });
-        el.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
-        el.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); });
-        el.addEventListener('contextmenu', (e) => { e.preventDefault(); askDelete(); });
+        const chatId = chat.id; const otherUid = chat.participants.find(u => u!== myUid); const otherName = (chat.usernames && chat.usernames[otherUid]) || (chat.names && chat.names[otherUid]) || 'Chat'; const el = document.getElementById('chat_item_'+chatId); if(!el) return; let pressTimer = null;
+        function customConfirm(message) { return new Promise((resolve) => { const old = document.getElementById('customConfirmOverlay'); if (old) old.remove(); const overlay = document.createElement('div'); overlay.id = 'customConfirmOverlay'; overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;'; overlay.innerHTML = `<div style="background:#1f1f1f;color:white;padding:20px;border-radius:12px;width:85%;max-width:320px;"><div style="font-size:16px;margin-bottom:20px;line-height:1.4;">${message}</div><div style="display:flex;justify-content:flex-end;gap:10px;"><button id="ccCancel" style="background:#2a2a2a;color:white;border:none;padding:10px 20px;border-radius:20px;font-size:14px;cursor:pointer;">Cancel</button><button id="ccOk" style="background:#1900B3;color:white;border:none;padding:10px 24px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;">Delete</button></div></div>`; document.body.appendChild(overlay); document.getElementById('ccCancel').onclick = () => { overlay.remove(); resolve(false); }; document.getElementById('ccOk').onclick = () => { overlay.remove(); resolve(true); }; overlay.onclick = (e) => { if (e.target === overlay) { overlay.remove(); resolve(false); } }; }); }
+        const askDelete = async () => { const yes = await customConfirm(`Delete chat with ${otherName}?<br><span style="color:#8696a0;font-size:13px;">This will delete all messages too.</span>`); if (!yes) return; try { const chatRef = firebase.firestore().collection('chats').doc(chatId); const msgsSnap = await chatRef.collection('messages').get(); const batch = firebase.firestore().batch(); msgsSnap.forEach(doc => batch.delete(doc.ref)); await batch.commit(); await chatRef.delete(); } catch(e) { alert('Delete failed: ' + e.message); } };
+        el.addEventListener('touchstart', () => { pressTimer = setTimeout(askDelete, 600); }); el.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); }); el.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); }); el.addEventListener('contextmenu', (e) => { e.preventDefault(); askDelete(); });
       });
     });
 }
-var loadChats = loadMyChats;
-window.loadChats = loadMyChats;
-loadMyChats();
+var loadChats = loadMyChats; window.loadChats = loadMyChats; loadMyChats();
 
 document.getElementById('statusInput').onchange = async function() {
   const file = this.files[0]; if(!file) return;
   const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', 'dank_status');
   const res = await fetch('https://api.cloudinary.com/v1_1/aqx4n0dz/auto/upload', {method:'POST', body:fd});
   const data = await res.json();
-  await db.collection('statuses').add({
-    userId: localStorage.getItem('dank_uid'),
-    username: localStorage.getItem('dank_username') || 'Me',
-    mediaUrl: data.secure_url,
-    type: data.resource_type === 'image'? 'image' : 'video',
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    expiresAt: Date.now() + 24*60*60*1000
-  });
+  await db.collection('statuses').add({ userId: localStorage.getItem('dank_uid'), username: localStorage.getItem('dank_username') || 'Me', mediaUrl: data.secure_url, type: data.resource_type === 'image'? 'image' : 'video', createdAt: firebase.firestore.FieldValue.serverTimestamp(), expiresAt: Date.now() + 24*60*60*1000 });
   loadStatuses();
 };
+
 async function loadStatuses() {
-  const now = Date.now(); const myUid = localStorage.getItem('dank_uid');
-  const allowedIds = new Set();
-  try {
-    const chatsSnap = await db.collection('chats').where('participants', 'array-contains', myUid).get();
-    chatsSnap.forEach(doc => { const parts = doc.data().participants || []; parts.forEach(id => { if (id!== myUid) allowedIds.add(id); }); });
-  } catch(e) {}
-  const snap = await db.collection('statuses').where('expiresAt', '>', now).get();
-  const byUser = {};
-  snap.forEach(doc => {
-    const d = doc.data();
-    if (d.userId!== myUid &&!allowedIds.has(d.userId)) return;
-    if (!byUser[d.userId]) byUser[d.userId] = [];
-    byUser[d.userId].push({id: doc.id,...d});
-  });
-  const container = document.getElementById('statusRings'); if (!container) return;
-  container.innerHTML = '';
-  const myItems = byUser[myUid] || [];
-  myItems.sort((a,b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+  const now = Date.now(); const myUid = localStorage.getItem('dank_uid'); const allowedIds = new Set();
+  try { const chatsSnap = await db.collection('chats').where('participants', 'array-contains', myUid).get(); chatsSnap.forEach(doc => { const parts = doc.data().participants || []; parts.forEach(id => { if (id!== myUid) allowedIds.add(id); }); }); } catch(e) {}
+  const snap = await db.collection('statuses').where('expiresAt', '>', now).get(); const byUser = {};
+  snap.forEach(doc => { const d = doc.data(); if (d.userId!== myUid &&!allowedIds.has(d.userId)) return; if (!byUser[d.userId]) byUser[d.userId] = []; byUser[d.userId].push({id: doc.id,...d}); });
+  const container = document.getElementById('statusRings'); if (!container) return; container.innerHTML = '';
+  const myItems = byUser[myUid] || []; myItems.sort((a,b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
   const myDiv = document.createElement('div'); myDiv.style.textAlign = 'center'; myDiv.style.cursor = 'pointer';
-  if (myItems.length > 0) {
-    const first = myItems[0];
-    myDiv.innerHTML = `<div style="position:relative;width:64px;height:64px;margin:0 auto;"><div style="width:64px;height:64px;border-radius:50%;border:3px solid #1900B3;padding:2px"><img src="${first.mediaUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div><div onclick="event.stopPropagation(); addStatus()" style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:#1E90FF;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid #0b141a;cursor:pointer;">+</div></div><div style="font-size:12px;margin-top:6px;color:white">My Status</div>`;
-    myDiv.onclick = () => openStatusList(myItems, 0);
-  } else {
-    myDiv.innerHTML = `<div style="width:64px;height:64px;border-radius:50%;border:2px dashed #1E90FF;display:flex;align-items:center;justify-content:center;font-size:28px;color:#1E90FF;background:#0F2447;">+</div><div style="font-size:12px;margin-top:6px;color:white">My Status</div>`;
-    myDiv.onclick = () => addStatus();
-  }
+  if (myItems.length > 0) { const first = myItems[0]; myDiv.innerHTML = `<div style="position:relative;width:64px;height:64px;margin:0 auto;"><div style="width:64px;height:64px;border-radius:50%;border:3px solid #1900B3;padding:2px"><img src="${first.mediaUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div><div onclick="event.stopPropagation(); addStatus()" style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:#1E90FF;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid #0b141a;cursor:pointer;">+</div></div><div style="font-size:12px;margin-top:6px;color:white">My Status</div>`; myDiv.onclick = () => openStatusList(myItems, 0); }
+  else { myDiv.innerHTML = `<div style="width:64px;height:64px;border-radius:50%;border:2px dashed #1E90FF;display:flex;align-items:center;justify-content:center;font-size:28px;color:#1E90FF;background:#0F2447;">+</div><div style="font-size:12px;margin-top:6px;color:white">My Status</div>`; myDiv.onclick = () => addStatus(); }
   container.appendChild(myDiv);
   Object.keys(byUser).forEach(uid => {
-    if (uid === myUid) return;
-    const items = byUser[uid]; const first = items[0];
+    if (uid === myUid) return; const items = byUser[uid]; const first = items[0];
     const div = document.createElement('div'); div.style.textAlign = 'center'; div.style.cursor = 'pointer';
     div.innerHTML = `<div style="width:64px;height:64px;border-radius:50%;border:3px solid #1E9FFF;padding:2px"><img src="${first.mediaUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div><div style="font-size:12px;margin-top:6px;color:white">${first.username}</div>`;
-    div.onclick = () => openStatusList(items, 0);
-    container.appendChild(div);
+    div.onclick = () => openStatusList(items, 0); container.appendChild(div);
   });
 }
 loadStatuses();
@@ -3303,67 +3276,91 @@ setTimeout(()=>{ try{ loadMyTopAvatar(); }catch(e){} }, 1500);
   console.log("✅ Ready - both DM's + Archived will hide, no white");
 })();
 </script>
-<!-- ===== DANKCONNECT PROFILE PAGE - PROFESSIONAL DARK BLUE CAMERA + COVER - FINAL FIXED ===== -->
+<!-- ===== DANKCONNECT PROFILE PAGE - MY PROFILE (editProfilePage) - FIXED FOR @lucy ===== -->
 <div id="editProfilePage" style="display:none; background:#0A1931; min-height:100vh; color:white; position:fixed; top:0; left:0; width:100%; z-index:9999; overflow-y:auto;">
-  <!-- Header -->
   <div style="display:flex; align-items:center; gap:16px; padding:14px; background:#0A1931; position:sticky; top:0; z-index:10;">
-    <div onclick="showPage('chatsPage')" style="font-size:24px; cursor:pointer; padding:4px 10px;">←</div>
+    <div onclick="showPage('chatsPage')" style="font-size:26px; cursor:pointer; padding:4px 10px; font-weight:bold;">&lt;</div>
     <div style="font-size:17px; font-weight:bold;">Profile</div>
   </div>
-
-  <!-- Banner + Avatar + COVER PHOTO -->
   <div id="profileCoverContainer" style="position:relative; height:200px; background:#111b21; background-size:cover; background-position:center; background-color:#1f2c34;">
     <img id="profileCoverPhoto" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
     <div id="profileCoverPlaceholder" style="width:100%; height:100%; background:linear-gradient(135deg,#0A1931,#1A2A44);"></div>
-    
-    <!-- COVER CAMERA BUTTON - DARK BLUE PROFESSIONAL -->
-    <div onclick="document.getElementById('coverPhotoInput').click()" style="position:absolute; bottom:12px; right:12px; width:38px; height:38px; background:#0A1931; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid rgba(255,255,255,0.15); box-shadow:0 3px 10px rgba(0,0,0,0.6);">
+    <div id="coverCameraBtn" class="camera-btn" onclick="document.getElementById('coverPhotoInput').click()" style="position:absolute; bottom:12px; right:12px; width:38px; height:38px; background:#0A1931; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid rgba(255,255,255,0.15); box-shadow:0 3px 10px rgba(0,0,0,0.6);">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
     </div>
-
-    <div style="position:absolute; bottom:-55px; left:50%; transform:translateX(-50%);">
-      <div style="position:relative; width:120px; height:120px;">
+    <div style="position:absolute; bottom:-55px; left:50%; transform:translateX(-50%); text-align:center;">
+      <div style="position:relative; width:120px; height:120px; margin:0 auto;">
         <img id="profilePageAvatar" src="https://via.placeholder.com/120/1f2c34/FFFFFF?text=Dani" style="width:120px; height:120px; border-radius:50%; border:5px solid #0A1931; object-fit:cover; background:#1a2942;">
-        <!-- AVATAR CAMERA BUTTON - DARK BLUE PROFESSIONAL -->
-        <div onclick="document.getElementById('profileCloudinaryInput').click()" style="position:absolute; bottom:2px; right:2px; width:36px; height:36px; background:#0A1931; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid #0A1931; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,0.6);">
+        <div id="avatarCameraBtn" class="camera-btn" onclick="document.getElementById('profileCloudinaryInput').click()" style="position:absolute; bottom:2px; right:2px; width:36px; height:36px; background:#0A1931; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid #0A1931; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,0.6);">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
         </div>
       </div>
+      <div id="profilePageUsername" style="margin-top:10px; font-size:16px; color:#FFFFFF; font-weight:700; text-align:center; white-space:nowrap;">@user</div>
     </div>
   </div>
-
-  <!-- Profile Data -->
-  <div style="margin-top:75px; padding:0 20px 30px 20px;">
-    <div onclick="editProfileName()" style="display:flex; justify-content:space-between; align-items:flex-start; padding:18px 0; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer;">
-      <div style="flex:1;">
-        <div style="font-size:12px; color:#8696a0;">Name</div>
-        <div id="profilePageName" style="font-size:17px; margin-top:6px; font-weight:400;">Dani Boss</div>
-        <div style="font-size:13px; color:#8696a0; margin-top:8px; line-height:1.4;">This name will be visible to your DankConnect contacts.</div>
-      </div>
-      <div style="color:#7A8DB0; font-size:18px; margin-left:12px;">✎</div>
+  <div style="margin-top:85px; padding:0 20px 30px 20px;">
+    <div id="nameRow" class="profile-row" onclick="editProfileName()" style="display:flex; justify-content:space-between; align-items:flex-start; padding:18px 0; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer;">
+      <div style="flex:1;"><div style="font-size:12px; color:#8696a0;">Name</div><div id="profilePageName" style="font-size:17px; margin-top:6px; font-weight:400;">YOUR PROFILE</div><div id="nameSubtext" style="font-size:13px; color:#8696a0; margin-top:8px; line-height:1.4;">This name will be visible to your DankConnect contacts.</div></div><div class="edit-pencil" style="color:#7A8DB0; font-size:18px; margin-left:12px;">✎</div>
     </div>
-
-    <div onclick="editProfileAbout()" style="display:flex; justify-content:space-between; align-items:flex-start; padding:18px 0; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer;">
-      <div style="flex:1;">
-        <div style="font-size:12px; color:#8696a0;">About</div>
-        <div id="profilePageAbout" style="font-size:16px; margin-top:6px;">Available</div>
-      </div>
-      <div style="color:#7A8DB0; font-size:18px; margin-left:12px;">✎</div>
+    <div id="aboutRow" class="profile-row" onclick="editProfileAbout()" style="display:flex; justify-content:space-between; align-items:flex-start; padding:18px 0; border-bottom:1px solid rgba(255,255,255,0.08); cursor:pointer;">
+      <div style="flex:1;"><div style="font-size:12px; color:#8696a0;">About</div><div id="profilePageAbout" style="font-size:16px; margin-top:6px;">Available</div></div><div class="edit-pencil" style="color:#7A8DB0; font-size:18px; margin-left:12px;">✎</div>
     </div>
-
-    <div onclick="editProfileDetails()" style="display:flex; justify-content:space-between; align-items:flex-start; padding:18px 0; cursor:pointer;">
-      <div style="flex:1;">
-        <div style="font-size:12px; color:#8696a0;">Details</div>
-        <div id="profilePageDetails" style="font-size:15px; margin-top:6px; line-height:1.4;">DankConnect • Entrepreneur • Accra, Ghana</div>
-        <div style="font-size:12px; color:#8696a0; margin-top:6px;">Tap to edit your bio/details</div>
-      </div>
-      <div style="color:#7A8DB0; font-size:18px; margin-left:12px;">✎</div>
+    <div id="detailsRow" class="profile-row" onclick="editProfileDetails()" style="display:flex; justify-content:space-between; align-items:flex-start; padding:18px 0; cursor:pointer;">
+      <div style="flex:1;"><div style="font-size:12px; color:#8696a0;">Details</div><div id="profilePageDetails" style="font-size:15px; margin-top:6px; line-height:1.4;">Tap to edit your bio/details</div><div id="detailsSubtext" style="font-size:12px; color:#8696a0; margin-top:6px;">Tap to edit your bio/details</div></div><div class="edit-pencil" style="color:#7A8DB0; font-size:18px; margin-left:12px;">✎</div>
     </div>
   </div>
-
   <input type="file" id="profileCloudinaryInput" accept="image/*" style="display:none;" onchange="uploadProfileToCloudinary(this)">
   <input type="file" id="profileAvatarInput" accept="image/*" style="display:none;" onchange="uploadProfileToCloudinary(this)">
   <input type="file" id="coverPhotoInput" accept="image/*" style="display:none;" onchange="uploadCoverToCloudinary(this)">
+</div>
+
+<!-- ===== NEW SPECIAL PROFILE PAGE FOR PRIVATE CHAT HEADER CLICK - FIXED WITH < ARROW ===== -->
+<div id="privateChatProfilePage" style="display:none; background:#0A1931; min-height:100vh; color:white; position:fixed; top:0; left:0; width:100%; z-index:10002; overflow-y:auto;">
+  <div style="display:flex; align-items:center; gap:16px; padding:14px; background:#0A1931; position:sticky; top:0; z-index:10;">
+    <div onclick="closePrivateProfile()" style="font-size:26px; cursor:pointer; padding:4px 10px; font-weight:bold;">&lt;</div>
+    <div style="font-size:17px; font-weight:bold;">Profile</div>
+  </div>
+  <div id="privateCoverContainer" style="position:relative; height:240px; background:#111b21; background-size:cover; background-position:center;">
+    <img id="privateCoverPhoto" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
+    <div id="privateCoverPlaceholder" style="width:100%; height:100%; background:linear-gradient(135deg,#0A1931,#1A2A44);"></div>
+    <div style="position:absolute; bottom:-60px; left:50%; transform:translateX(-50%); text-align:center;">
+      <img id="privateAvatarPhoto" src="https://via.placeholder.com/120/1f2c34/FFFFFF?text=U" style="width:120px; height:120px; border-radius:50%; border:5px solid #0A1931; object-fit:cover; background:#1a2942; box-shadow:0 4px 20px rgba(0,0,0,0.6);">
+    </div>
+  </div>
+  <div style="margin-top:75px; text-align:center; padding:0 20px;">
+    <div id="privateDisplayName" style="font-size:22px; font-weight:700;">Lucy Calm</div>
+    <div id="privateUsername" style="font-size:14px; color:#7A8DB0; margin-top:4px;">@lucy</div>
+  </div>
+  <div style="display:flex; justify-content:center; gap:22px; margin-top:22px;">
+    <div onclick="alert('Video call coming soon')" style="text-align:center; cursor:pointer;">
+      <div style="width:54px; height:54px; background:#1a3a5f; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="23 7 13 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg></div>
+      <div style="font-size:11px; color:#7A8DB0; margin-top:6px;">Video</div>
+    </div>
+    <div onclick="alert('Voice call coming soon')" style="text-align:center; cursor:pointer;">
+      <div style="width:54px; height:54px; background:#1a3a5f; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div>
+      <div style="font-size:11px; color:#7A8DB0; margin-top:6px;">Audio</div>
+    </div>
+    <div onclick="closePrivateProfile()" style="text-align:center; cursor:pointer;">
+      <div style="width:54px; height:54px; background:#1a3a5f; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
+      <div style="font-size:11px; color:#7A8DB0; margin-top:6px;">Message</div>
+    </div>
+  </div>
+  <div style="margin-top:28px; padding:0 16px 30px 16px;">
+    <div style="background:rgba(255,255,255,0.06); border-radius:12px; padding:16px; margin-bottom:12px;"><div style="font-size:12px; color:#7A8DB0; margin-bottom:6px;">About</div><div id="privateAboutFull" style="font-size:15px;">Available</div></div>
+    <div style="background:rgba(255,255,255,0.06); border-radius:12px; padding:16px;"><div style="font-size:12px; color:#7A8DB0; margin-bottom:6px;">Details</div><div id="privateDetailsFull" style="font-size:15px; line-height:1.4;">DankConnect • Entrepreneur • Accra, Ghana</div></div>
+  </div>
+</div>
+
+<div id="avatarPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center; flex-direction:column;">
+  <div style="position:relative; text-align:center; z-index:10001;">
+    <img id="avatarPopupImg" src="" style="width:280px; height:280px; border-radius:50%; object-fit:cover; border:3px solid white;">
+    <div id="avatarPopupName" style="margin-top:16px; color:white; font-size:20px; font-weight:bold;"></div>
+    <div id="avatarPopupUsername" style="color:#8b9bb4; font-size:14px; margin-top:4px;"></div>
+    <button onclick="viewUserDetailsFromPopup()" style="margin-top:20px; background:#1a3a5f; color:white; border:none; padding:12px 24px; border-radius:25px; font-size:15px; display:flex; align-items:center; gap:8px; margin-left:auto; margin-right:auto; cursor:pointer;">
+      <span style="font-size:18px;">👤</span> View Details
+    </button>
+  </div>
+  <span onclick="closeAvatarPopup()" style="position:absolute; top:20px; right:20px; color:white; font-size:30px; cursor:pointer; z-index:10002;">&times;</span>
 </div>
 </body>
 </html>
