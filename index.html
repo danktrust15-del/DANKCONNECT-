@@ -1187,7 +1187,6 @@ function openUserProfile(uid){
   }
 }
 
-// ===== NEW FUNCTION FOR PRIVATE CHAT HEADER CLICK - SPECIAL PAGE WITH 3 BUTTONS =====
 function openPrivateChatProfile(uidOrData){
   let data = {};
   let uid = '';
@@ -1576,13 +1575,10 @@ function saveQuoteToFirebase(){
   const input = document.getElementById('admin-quote-input');
   const text = input.value.trim();
   if(!text){ alert('Type a quote first'); return; }
-
-  // Check Firebase is loaded
   if(typeof firebase === 'undefined' || !firebase.firestore){
     alert('Firebase not initialized');
     return;
   }
-
   firebase.firestore().collection('quotes').add({
     text: text,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1595,11 +1591,11 @@ function saveQuoteToFirebase(){
     alert('Error: ' + e.message);
   });
 }
+
 function openQuotes(){
   showPage('quotesPage');
   const list = document.getElementById('quotesList');
   list.innerHTML = '<p style="text-align:center;">Loading...</p>';
-
   firebase.firestore().collection("quotes")
     .orderBy("createdAt", "desc")
     .onSnapshot((snapshot)=>{
@@ -1607,57 +1603,492 @@ function openQuotes(){
       if(snapshot.empty){
         list.innerHTML = '<p style="text-align:center;">No quotes yet.</p>';
         return;
-}
-snapshot.forEach((doc)=>{
-  const q = doc.data();
-  let dateStr = '';
-  try { const d = q.createdAt?.toDate(); if(d) dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){}
-  const amenCount = q.amenCount || 0;
-  
-  const div = document.createElement('div');
-  div.className = 'quote-card';
-  div.style.cssText = 'position:relative;padding:18px;margin-bottom:14px;border-radius:14px;background:linear-gradient(135deg,#1c2942,#141d32);color:white;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);';
-  
-  div.innerHTML = 
-    '<div style="position:absolute;top:14px;right:14px;background:#c9a86a;color:#1a2333;font-size:11px;font-weight:bold;padding:4px 10px;border-radius:20px;">'+ dateStr +'</div>' +
-    '<div style="font-weight:700;font-size:17px;padding-right:70px;line-height:1.3;">'+ (q.title || 'Untitled') +'</div>' +
-    '<div class="tap-hint" style="font-size:11px;letter-spacing:1px;opacity:0.5;margin-top:8px;text-transform:uppercase;">Tap to read +</div>' +
-    '<div class="quote-full" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">' +
-      '<div style="white-space:pre-wrap;line-height:1.7;font-size:15px;opacity:0.95;">'+ q.text +'</div>' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-top:16px;">' +
-        '<button class="amen-btn" style="background:#c9a86a;border:none;padding:8px 16px;border-radius:20px;font-weight:bold;cursor:pointer;color:#1a2333;">🙏 Amen</button>' +
-        '<span class="amen-count" style="font-size:13px;opacity:0.7;">'+ amenCount +' amens</span>' +
-      '</div>' +
-    '</div>';
-  
-  div.onclick = function(){ 
-    const f = this.querySelector('.quote-full'); 
-    const hint = this.querySelector('.tap-hint');
-    const isHidden = f.style.display==='none'; 
-    f.style.display = isHidden ? 'block' : 'none'; 
-    hint.textContent = isHidden ? 'Tap to hide -' : 'Tap to read +';
-    this.style.borderColor = isHidden ? '#c9a86a' : 'rgba(255,255,255,0.08)';
-  };
-
-  const amenBtn = div.querySelector('.amen-btn');
-  amenBtn.onclick = function(e){
-    e.stopPropagation();
-    firebase.firestore().collection("quotes").doc(doc.id).update({
-      amenCount: firebase.firestore.FieldValue.increment(1)
-    });
-  };
-
-  list.appendChild(div);
-})
-}, (err)=>{
+      }
+      snapshot.forEach((doc)=>{
+        const q = doc.data();
+        let dateStr = '';
+        try { const d = q.createdAt?.toDate(); if(d) dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){}
+        const amenCount = q.amenCount || 0;
+        const div = document.createElement('div');
+        div.className = 'quote-card';
+        div.style.cssText = 'position:relative;padding:18px;margin-bottom:14px;border-radius:14px;background:linear-gradient(135deg,#1c2942,#141d32);color:white;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);';
+        div.innerHTML = 
+          '<div style="position:absolute;top:14px;right:14px;background:#c9a86a;color:#1a2333;font-size:11px;font-weight:bold;padding:4px 10px;border-radius:20px;">'+ dateStr +'</div>' +
+          '<div style="font-weight:700;font-size:17px;padding-right:70px;line-height:1.3;">'+ (q.title || 'Untitled') +'</div>' +
+          '<div class="tap-hint" style="font-size:11px;letter-spacing:1px;opacity:0.5;margin-top:8px;text-transform:uppercase;">Tap to read +</div>' +
+          '<div class="quote-full" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">' +
+            '<div style="white-space:pre-wrap;line-height:1.7;font-size:15px;opacity:0.95;">'+ q.text +'</div>' +
+            '<div style="display:flex;align-items:center;gap:10px;margin-top:16px;">' +
+              '<button class="amen-btn" style="background:#c9a86a;border:none;padding:8px 16px;border-radius:20px;font-weight:bold;cursor:pointer;color:#1a2333;">🙏 Amen</button>' +
+              '<span class="amen-count" style="font-size:13px;opacity:0.7;">'+ amenCount +' amens</span>' +
+            '</div>' +
+          '</div>';
+        div.onclick = function(){ 
+          const f = this.querySelector('.quote-full'); 
+          const hint = this.querySelector('.tap-hint');
+          const isHidden = f.style.display==='none'; 
+          f.style.display = isHidden ? 'block' : 'none'; 
+          hint.textContent = isHidden ? 'Tap to hide -' : 'Tap to read +';
+          this.style.borderColor = isHidden ? '#c9a86a' : 'rgba(255,255,255,0.08)';
+        };
+        const amenBtn = div.querySelector('.amen-btn');
+        amenBtn.onclick = function(e){
+          e.stopPropagation();
+          firebase.firestore().collection("quotes").doc(doc.id).update({
+            amenCount: firebase.firestore.FieldValue.increment(1)
+          });
+        };
+        list.appendChild(div);
+      })
+    }, (err)=>{
       list.innerHTML = '<p style="text-align:center;">Error loading: '+err.message+'</p>';
     });
 }
-let myStatuses = [];
-let channels = [{name:"Dank Updates", followers:"1.2k"}];
 
+let myStatuses = [];
+let channels = [{name:"Dank Updates", followers:"0"}];
+
+// ===== DANK DOCK v14 - DEEP MALE VOICE + COCOMAN PICTURES =====
+function initAskDankDockV2(){
+  const BLUE = '#2D0FFF';
+  const DARK_BLUE = '#0A1433';
+  const IMG = 'https://res.cloudinary.com/aqx4n0dz/image/upload/v1793244234/WA_1793244177082.jpg';
+  const WAKE_WORDS = ['hey dank','hello dank','hi dank','hey dang','hello dang','dank'];
+
+  document.querySelectorAll('#askDankDock, #dankListeningBar, #dankListeningStyles, #dankWaves, #dankChatPanel, #dankMicStatus').forEach(e=>e.remove());
+  
+  const css=document.createElement('style');
+  css.id='dankListeningStyles';
+  css.textContent=`
+    #askDankDock{position:fixed;right:12px;bottom:78px;z-index:99999;display:none;flex-direction:column;align-items:center;gap:3px;cursor:pointer;user-select:none;transition:transform 0.2s}
+    #askDankDock.show{ display:flex !important; }
+    #askDankDock.hide{ display:none !important; }
+    #askDankDock:active{transform:scale(0.95)}
+    #askDankDock .dank-circle{width:42px;height:42px;border-radius:50%;background:#fff;border:2.5px solid #2D0FFF;box-shadow:0 4px 12px rgba(45,15,255,0.3);overflow:hidden;display:flex;align-items:center;justify-content:center}
+    #askDankDock .dank-circle img{width:100%;height:100%;object-fit:contain;display:block;padding:2px}
+    #askDankDock .dank-pill{background:#2D0FFF;color:#fff;font-size:7px;font-weight:800;padding:2px 6px;border-radius:999px;font-family:system-ui;letter-spacing:0.4px}
+    #askDankDock.always-on .dank-circle{box-shadow:0 0 0 3px rgba(45,15,255,0.25)}
+    #askDankDock.listening .dank-circle{animation:dankPulse 0.8s infinite}
+    @keyframes dankPulse{0%{box-shadow:0 0 0 0 rgba(45,15,255,0.7)}70%{box-shadow:0 0 0 12px rgba(45,15,255,0)}100%{box-shadow:0 0 0 0 rgba(45,15,255,0)}}
+    #dankWaves{position:fixed;inset:0;z-index:99997;pointer-events:none;display:none}
+    #dankWaves.active{display:block}
+    #dankWaves .wave{position:absolute;left:50%;top:50%;border:3px solid #2D0FFF;border-radius:50%;transform:translate(-50%,-50%);animation:waveExpand 2.5s ease-out forwards}
+    @keyframes waveExpand{0%{width:0;height:0;opacity:1}100%{width:350vw;height:350vw;opacity:0}}
+    #dankListeningBar{position:fixed;bottom:0;left:0;right:0;height:72px;background:${BLUE};display:none;align-items:center;justify-content:center;color:#fff;z-index:99998;font-weight:600;font-family:system-ui;gap:8px;flex-direction:column}
+    #dankListeningBar .dots{display:flex;gap:3px}
+    #dankListeningBar .dots span{width:6px;height:6px;background:#fff;border-radius:50%;animation:dankBounce 1.4s infinite}
+    #dankListeningBar .dots span:nth-child(2){animation-delay:0.2s}
+    #dankListeningBar .dots span:nth-child(3){animation-delay:0.4s}
+    @keyframes dankBounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+    #dankChatPanel{position:fixed;inset:0;z-index:99996;background:#050A1A;display:none;flex-direction:column}
+    #dankChatPanel.open{display:flex}
+    #dankChatPanel .chat-header{height:56px;background:${BLUE};display:flex;align-items:center;padding:0 16px;color:#fff;font-weight:700;font-family:system-ui;justify-content:space-between}
+    #dankChatPanel .chat-body{flex:1;padding:20px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+    #dankChatPanel .dank-bubble{background:${DARK_BLUE};border:1px solid ${BLUE};color:#fff;padding:18px 22px;border-radius:18px 18px 18px 4px;max-width:85%;font-size:15px;line-height:1.5;box-shadow:0 4px 24px rgba(45,15,255,0.3)}
+    #dankChatPanel .dank-bubble img{width:100%;border-radius:12px;margin-top:10px;display:block}
+    #dankChatPanel .user-bubble{background:${BLUE};color:#fff;padding:12px 16px;border-radius:18px 18px 4px 18px;max-width:85%;align-self:flex-end}
+    #dankChatPanel .chat-input{height:64px;background:#0A1433;border-top:1px solid rgba(45,15,255,0.3);display:flex;align-items:center;padding:0 16px;gap:10px}
+    #dankChatPanel .chat-input input{flex:1;height:40px;border-radius:20px;border:1px solid rgba(45,15,255,0.4);padding:0 16px;background:#050A1A;color:#fff;outline:none}
+  `;
+  document.head.appendChild(css);
+
+  const dock=document.createElement('div');
+  dock.id='askDankDock';
+  dock.classList.add('hide');
+  dock.innerHTML=`<div class="dank-circle"><img src="${IMG}" alt="ASK DANK"></div><div class="dank-pill">ASK DANK</div>`;
+  document.body.appendChild(dock);
+
+  const waves=document.createElement('div');
+  waves.id='dankWaves';
+  document.body.appendChild(waves);
+
+  const bar=document.createElement('div');
+  bar.id='dankListeningBar';
+  bar.innerHTML=`<div class="dots"><span></span><span></span><span></span></div><span id="dankBarText">Listening... Say HEY DANK</span>`;
+  document.body.appendChild(bar);
+
+  const chat=document.createElement('div');
+  chat.id='dankChatPanel';
+  chat.innerHTML=`
+    <div class="chat-header"><span>ASK DANK</span><span id="dankClose" style="cursor:pointer;font-size:24px">×</span></div>
+    <div class="chat-body" id="dankChatBody">
+      <div class="dank-bubble">HEY! I'm DANK ASSISTANT. How may I help you?</div>
+    </div>
+    <div class="chat-input"><input id="dankInput" placeholder="Ask Dank anything..."><button id="dankSend" style="background:${BLUE};color:#fff;border:none;padding:8px 16px;border-radius:20px;font-weight:700;cursor:pointer">Send</button></div>
+  `;
+  document.body.appendChild(chat);
+
+  let recognition=null;
+  let isListening=false;
+  let isListeningCommand=false;
+  let permissionGranted=false;
+  let micBlocked=false;
+  let userEnabledVoice=false;
+
+  if(window.__DANK_CURRENT_SCREEN__ === 'other') window.__DANK_CURRENT_SCREEN__ = null;
+
+  function isChatPanelOpen(){ return chat.classList.contains('open'); }
+
+  function hasVisibleText(search){
+    const els = document.querySelectorAll('div, span, p, h1, h2, h3, button, input');
+    for(const el of els){
+      if(el.offsetParent === null) continue;
+      const rect = el.getBoundingClientRect();
+      if(rect.width === 0 || rect.height === 0) continue;
+      if(el.children.length === 0 && el.textContent && el.textContent.includes(search)) return true;
+      if(el.tagName === 'INPUT' && el.placeholder && el.placeholder.includes(search)) return true;
+    }
+    return false;
+  }
+
+  function isAuthScreen(){
+    const txt = document.body.innerText || '';
+    if(txt.includes('Join DankConnect securely')) return true;
+    if(hasVisibleText('Create Account') && hasVisibleText('Username') && !hasVisibleText('Archived')) return true;
+    return false;
+  }
+
+  function isSettingsPage(){
+    if(window.__DANK_CURRENT_SCREEN__ === 'settings') return true;
+    if(window.__DANK_CURRENT_SCREEN__ === 'chats') return false;
+    const settingsWords = ['Edit Profile','Change Password','Blocked Users','Log out','Log Out','Delete Account','My Profile'];
+    for(const w of settingsWords){
+      if(hasVisibleText(w)) return true;
+    }
+    return false;
+  }
+
+  function isPrivateChat(){
+    if(window.__DANK_CURRENT_SCREEN__ === 'private' || window.__DANK_CURRENT_SCREEN__ === 'private-chat') return true;
+    if(window.__DANK_CURRENT_SCREEN__ === 'chats') return false;
+    const inputs = Array.from(document.querySelectorAll('input, textarea'));
+    let bottomInputFound = false;
+    for(const inp of inputs){
+      if(inp.id === 'dankInput') continue;
+      if(inp.id === 'dankChatBody') continue;
+      if(inp.offsetParent === null) continue;
+      const r = inp.getBoundingClientRect();
+      if(r.width < 100) continue;
+      if(r.top > window.innerHeight - 110){
+        const ph = (inp.placeholder || '').toLowerCase();
+        if(ph.includes('search')) continue;
+        bottomInputFound = true;
+      }
+    }
+    if(bottomInputFound){
+      const hasBottomNav = Array.from(document.querySelectorAll('div, span, button')).some(el => {
+        if(el.offsetParent === null) return false;
+        const r = el.getBoundingClientRect();
+        return r.top > window.innerHeight - 90 && el.children.length===0 && el.textContent.trim() === 'Chats';
+      });
+      if(!hasBottomNav) return true;
+      if(hasVisibleText('Online') || hasVisibleText('last seen') || hasVisibleText('Last seen')) return true;
+      for(const inp of inputs){
+        if(inp.id === 'dankInput') continue;
+        if(inp.offsetParent === null) continue;
+        const r = inp.getBoundingClientRect();
+        if(r.top > window.innerHeight - 110){
+          const ph = (inp.placeholder || '').toLowerCase();
+          if(ph.includes('message') || ph.includes('type')) return true;
+        }
+      }
+    }
+    const privateEls = document.querySelectorAll('[data-screen="private-chat"], #privateChat');
+    for(const el of privateEls){
+      if(el.offsetParent !== null && el.getBoundingClientRect().height > 200) return true;
+    }
+    return false;
+  }
+
+  function isChatListScreen(){
+    if(isChatPanelOpen()) return false;
+    if(isAuthScreen()) return false;
+    if(isSettingsPage()) return false;
+    if(isPrivateChat()) return false;
+    if(window.__DANK_CURRENT_SCREEN__){
+      return window.__DANK_CURRENT_SCREEN__ === 'chats';
+    }
+    const hasArchived = hasVisibleText('Archived');
+    const hasDM = hasVisibleText("DM") || hasVisibleText("DM's");
+    const hasSearch = hasVisibleText('Search real users');
+    if(hasArchived && (hasDM || hasSearch)) return true;
+    return false;
+  }
+
+  function updateDockVisibility(){
+    if(isSettingsPage() || isPrivateChat()){
+      dock.classList.remove('show'); dock.classList.add('hide'); return;
+    }
+    if(isChatPanelOpen()){
+      dock.classList.remove('show'); dock.classList.add('hide'); return;
+    }
+    if(isChatListScreen()){
+      dock.classList.remove('hide'); dock.classList.add('show');
+    } else {
+      dock.classList.remove('show'); dock.classList.add('hide');
+    }
+  }
+
+  window.updateDankDock = updateDockVisibility;
+  window.showDankDock = ()=>{ dock.classList.remove('hide'); dock.classList.add('show'); };
+  window.hideDankDock = ()=>{ dock.classList.remove('show'); dock.classList.add('hide'); };
+  window.setDankScreen = (name)=>{ window.__DANK_CURRENT_SCREEN__ = name; updateDockVisibility(); };
+
+  // ===== DEEP MALE VOICE V14 - LOCKED =====
+  function getMasculineVoice(){
+    const voices = window.speechSynthesis.getVoices();
+    if(!voices.length) return null;
+    const deepPriority = [
+      'Google UK English Male',
+      'Microsoft Ryan',
+      'Microsoft Christopher',
+      'Microsoft Guy',
+      'Microsoft David',
+      'Microsoft Mark',
+      'Microsoft Brian',
+      'Microsoft Eric',
+      'Daniel',
+      'Google US English Male',
+      'Alex',
+      'Fred',
+      'en-GB Male'
+    ];
+    for(const name of deepPriority){
+      const v = voices.find(v=> v.name.toLowerCase().includes(name.toLowerCase()));
+      if(v) return v;
+    }
+    const maleHint = voices.find(v => {
+      const n = v.name.toLowerCase();
+      return (n.includes('male') || n.includes('daniel') || n.includes('david') || n.includes('guy') || n.includes('ryan') || n.includes('christopher') || n.includes('brian')) && v.lang.includes('en');
+    });
+    if(maleHint) return maleHint;
+    const notFemale = voices.find(v => v.lang.includes('en-GB') && !v.name.toLowerCase().includes('female') && !v.name.toLowerCase().includes('samantha') && !v.name.toLowerCase().includes('zira') && !v.name.toLowerCase().includes('karen'));
+    return notFemale || voices.find(v=>v.lang.includes('en')) || voices[0];
+  }
+
+  function dankSpeak(text){
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g,' ').trim();
+    const utter = new SpeechSynthesisUtterance(cleanText);
+    utter.rate = 0.92;
+    utter.pitch = 0.55;
+    utter.volume = 1;
+    const preferred = getMasculineVoice();
+    if(preferred) utter.voice = preferred;
+    window.speechSynthesis.speak(utter);
+    const body=document.getElementById('dankChatBody');
+    body.innerHTML+=`<div class="dank-bubble">${text}</div>`;
+    body.scrollTop=body.scrollHeight;
+  }
+  if(window.speechSynthesis){
+    window.speechSynthesis.onvoiceschanged = ()=>{ getMasculineVoice(); };
+    window.speechSynthesis.getVoices();
+  }
+
+  // ===== BRAIN V13 - WITH COCOMAN PICTURES + PRICE RULE - LOCKED =====
+  const COCOMAN_IMGS = {
+    "cocoman-blue-standard": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477774/IMG-20261112-WA0008.jpg",
+    "cocoman-blue-premium": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477760/IMG-20261112-WA0014.jpg",
+    "cocoman-blue-supreme": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477769/IMG-20261112-WA0010.jpg",
+    "cocoman-green-standard": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477771/IMG-20261112-WA0009.jpg",
+    "cocoman-green-premium": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477765/IMG-20261112-WA0012.jpg",
+    "cocoman-green-supreme": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477759/IMG-20261112-WA0016.jpg",
+    "cocoman-creamer-standard": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477766/IMG-20261112-WA0011.jpg",
+    "cocoman-creamer-premium": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477761/IMG-20261112-WA0013.jpg",
+    "cocoman-creamer-supreme": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477759/IMG-20261112-WA0015.jpg"
+  };
+  function cocomanCard(key, title){
+    return `${title}<br><img src="${COCOMAN_IMGS[key]}" style="width:100%;border-radius:12px;margin-top:10px;display:block">`;
+  }
+
+  async function askDankAI(command){
+    const cmd=command.toLowerCase().trim();
+    if(cmd.includes("price") || cmd.includes("cost") || cmd.includes("how much") || cmd.includes("ghc") || cmd.includes("cedi") || cmd.includes("pricing")){
+      return "For current Cocoman prices, please visit our website or chat with Order Admin for the latest price list. Dank Assistant is always here to assist you!";
+    }
+    if(cmd.includes("cocoman") || cmd.includes("pure") || cmd.includes("herba") || cmd.includes("creamer")){
+      if(cmd.includes("blue") && cmd.includes("standard")) return cocomanCard("cocoman-blue-standard", "Here is cocoman-blue-standard - Pure 320ml, 100% natural coconut water:");
+      if(cmd.includes("blue") && cmd.includes("premium")) return cocomanCard("cocoman-blue-premium", "Here is cocoman-blue-premium - Pure + 50g shredded coconut meat:");
+      if(cmd.includes("blue") && cmd.includes("supreme")) return cocomanCard("cocoman-blue-supreme", "Here is cocoman-blue-supreme - Pure + meat + crunchy chips, total 370g:");
+      if(cmd.includes("green") && cmd.includes("standard")) return cocomanCard("cocoman-green-standard", "Here is cocoman-green-standard - Herba 320ml medicinal drink:");
+      if(cmd.includes("green") && cmd.includes("premium")) return cocomanCard("cocoman-green-premium", "Here is cocoman-green-premium - Herba + shredded meat:");
+      if(cmd.includes("green") && cmd.includes("supreme")) return cocomanCard("cocoman-green-supreme", "Here is cocoman-green-supreme - Herba + meat + crunchy chips:");
+      if(cmd.includes("creamer") && cmd.includes("standard")) return cocomanCard("cocoman-creamer-standard", "Here is cocoman-creamer-standard - Creamed coconut water 320ml:");
+      if(cmd.includes("creamer") && cmd.includes("premium")) return cocomanCard("cocoman-creamer-premium", "Here is cocoman-creamer-premium - Creamed water + 50g shredded meat:");
+      if(cmd.includes("creamer") && cmd.includes("supreme")) return cocomanCard("cocoman-creamer-supreme", "Here is cocoman-creamer-supreme - Creamed water + meat + crunchy chips:");
+      if(cmd.includes("show") || cmd.includes("picture") || cmd.includes("pic") || cmd.includes("image") || cmd.includes("see") || cmd.includes("view") || cmd.includes("all")){
+        if(cmd.includes("blue")) return `BLUE PACKS - Pure:<br><img src="${COCOMAN_IMGS["cocoman-blue-standard"]}"><img src="${COCOMAN_IMGS["cocoman-blue-premium"]}"><img src="${COCOMAN_IMGS["cocoman-blue-supreme"]}">Standard, Premium, Supreme in Blue. For prices, please visit our website or chat Order Admin.`;
+        if(cmd.includes("green") || cmd.includes("herba")) return `GREEN PACKS - Herba:<br><img src="${COCOMAN_IMGS["cocoman-green-standard"]}"><img src="${COCOMAN_IMGS["cocoman-green-premium"]}"><img src="${COCOMAN_IMGS["cocoman-green-supreme"]}">Standard, Premium, Supreme in Green. For prices, please visit our website or chat Order Admin.`;
+        if(cmd.includes("creamer") || cmd.includes("cream")) return `CREAMER PACKS:<br><img src="${COCOMAN_IMGS["cocoman-creamer-standard"]}"><img src="${COCOMAN_IMGS["cocoman-creamer-premium"]}"><img src="${COCOMAN_IMGS["cocoman-creamer-supreme"]}">Standard, Premium, Supreme in Creamer. For prices, please visit our website or chat Order Admin.`;
+        return `Here are all 9 Cocoman Drinks - Blue, Green, Creamer x Standard, Premium, Supreme:<br><img src="${COCOMAN_IMGS["cocoman-blue-standard"]}"><img src="${COCOMAN_IMGS["cocoman-blue-premium"]}"><img src="${COCOMAN_IMGS["cocoman-blue-supreme"]}"><img src="${COCOMAN_IMGS["cocoman-green-standard"]}"><img src="${COCOMAN_IMGS["cocoman-green-premium"]}"><img src="${COCOMAN_IMGS["cocoman-green-supreme"]}"><img src="${COCOMAN_IMGS["cocoman-creamer-standard"]}"><img src="${COCOMAN_IMGS["cocoman-creamer-premium"]}"><img src="${COCOMAN_IMGS["cocoman-creamer-supreme"]}">Say "show blue premium" to see one big. For prices, visit website or chat Order Admin.`;
+      }
+      if(cmd.includes("creamer")){
+        if(cmd.includes("supreme")) return cocomanCard("cocoman-creamer-supreme", "Cocoman Creamer Supreme is the cream pack. It is creamed coconut water plus shredded coconut meat plus crunchy coconut chips. 320ml creamed water, 50 grams meat, 50 grams chips.");
+        if(cmd.includes("premium")) return cocomanCard("cocoman-creamer-premium", "Cocoman Creamer Premium is the cream pack. Creamed coconut water plus 50 grams shredded coconut meat.");
+        return cocomanCard("cocoman-creamer-standard", "Cocoman Creamer is the cream pack. Creamed coconut water 320ml. Standard is only the drink. Premium adds shredded meat. Supreme adds meat and crunchy chips.");
+      }
+      if(cmd.includes("herba") || cmd.includes("green")){
+        if(cmd.includes("supreme")) return cocomanCard("cocoman-green-supreme", "Cocoman Herba Supreme is the green pack. Medicinal drink plus shredded meat plus crunchy chips. 320ml, 50 grams meat, 50 grams chips. Supports healthy lifestyle.");
+        if(cmd.includes("premium")) return cocomanCard("cocoman-green-premium", "Cocoman Herba Premium is the green pack. Medicinal drink plus shredded coconut meat.");
+        return cocomanCard("cocoman-green-standard", "Cocoman Herba is the green pack. Medicinal drink in cup that supports healthy lifestyle. Standard is 320ml only. Premium adds meat. Supreme adds meat and chips.");
+      }
+      if(cmd.includes("pure") || cmd.includes("blue")){
+        if(cmd.includes("supreme")) return cocomanCard("cocoman-blue-supreme", "Cocoman Pure Supreme is the blue pack. Pure coconut water plus shredded meat plus crunchy chips. 320ml water, 50 grams meat, 50 grams chips, total 370 grams.");
+        if(cmd.includes("premium")) return cocomanCard("cocoman-blue-premium", "Cocoman Pure Premium Combo is the blue pack. Pure coconut water plus 50 grams shredded coconut meat.");
+        return cocomanCard("cocoman-blue-standard", "Cocoman Pure is the blue pack. 100 percent natural coconut water. Standard is only the drink 320ml. Premium adds shredded meat. Supreme adds meat and chips.");
+      }
+      return "Cocoman Drinks is a product of Dankan Empire Group. Not a project. We have 3 types: Pure in blue pack, natural coconut water. Herba in green pack, medicinal drink for healthy lifestyle. Creamer in cream pack, creamed coconut water. Each has Standard, Premium and Supreme. Say 'show cocoman blue premium' to see picture. For prices, please visit our website or chat Order Admin.";
+    }
+    if(cmd.includes("dankconnect")){
+      if(cmd.includes("username")||cmd.includes("recreate")) return "To recreate a new username on DankConnect, go to your profile, tap edit, and you can create a new username. Is there more you would want to know? Dank Assistant is always here to assist you!";
+      if(cmd.includes("profile")||cmd.includes("upload")||cmd.includes("picture")||cmd.includes("photo")) return "To upload a new profile on DankConnect, go to your profile, tap on your profile picture, choose a new photo and upload it. Is there more you would want to know? Dank Assistant is always here to assist you!";
+      if(cmd.includes("message")||cmd.includes("send")||cmd.includes("chat")) return "To send messages on DankConnect, go to chat, select the person you want to connect with globally, type your message and send. Is there more you would want to know? Dank Assistant is always here to assist you!";
+      if(cmd.includes("how")&&cmd.includes("use")) return "Can you be a little more specific? Do you want to recreate a new username? Do you want to upload a new profile? Do you want to send messages? Can you tell me exactly what you want to know more about the usage of DankConnect?";
+      return "DankConnect is a chat app that connects individuals globally. Is there more you would want to know? Dank Assistant is always here to assist you!";
+    }
+    if(cmd.includes("dktv")||cmd.includes("studio")){
+      if(cmd.includes("studio a")) return "DKTV Online Studio A is a project of Dankan Empire Group. More details coming soon. Is there more you would want to know? Dank Assistant is always here to assist you!";
+      if(cmd.includes("studio b")) return "DKTV Online Studio B is a project of Dankan Empire Group. More details coming soon. Is there more you would want to know? Dank Assistant is always here to assist you!";
+      return "DKTV is a project of Dankan Empire Group. We have DKTV Online Studio A and DKTV Online Studio B. Is there more you would want to know? Dank Assistant is always here to assist you!";
+    }
+    if(cmd.includes("good morning")) return "Good morning, welcome. This is Dank Assistant, your assistant from Dank Empire. How may I help you today?";
+    if(cmd.includes("good afternoon")) return "Good afternoon, welcome. I am Dank Assistant. How may I be of service to you?";
+    if(cmd.includes("good evening")) return "Good evening, welcome. I am Dank Assistant. Hope your day went well. How may I help you?";
+    if(cmd.includes("how are you")) return "I am doing great, thank you for asking. I am Dank Assistant, ready to serve you. How may I help you?";
+    if(cmd.includes("thank you")||cmd.includes("thanks")) return "You are always welcome. I am Dank Assistant and I am here for you.";
+    if(cmd.includes("bye")||cmd.includes("goodbye")) return "Goodbye, thank you for your time. I am Dank Assistant and I will always be here for you.";
+    if(cmd.includes("who are you")||cmd.includes("your name")) return "I am Dank Assistant, your assistant from Dank Empire. How may I help you?";
+    if(cmd.includes("who made you")||cmd.includes("who created you")||cmd.includes("who built you")) return "I am Dank Assistant. I was built by the founder of Dank Empire, to assist him and all of his cherished users.";
+    if(cmd.includes("dank empire")||cmd.includes("dankan empire")){
+      if(cmd.includes("group")) return "For Dankan Empire Group, the Executives are: CLE, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo. I can list Executives, Ambassadors and Projects, but I can't go deeper into their profiles for security reasons.";
+      return "If you talk about Dank Empire or Dankan Empire, you are talking about the founder himself. He is the Dank Empire. So, do you want to rather talk about Dank Empire Group or Dankan Empire Group?";
+    }
+    if(cmd.includes("executive")||cmd.includes("ambassador")||cmd.includes("cle")||cmd.includes("ceo")) return "For Dankan Empire Group, the Executives are: CLE, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo.";
+    if(cmd.includes("project")) return "The projects of Dankan Empire Group are: DankConnect, DKTV Online Studio A and DKTV Online Studio B, plus other confidential projects for 2030. Cocoman Drinks is not a project, it is a product.";
+    if(cmd.includes("product")) return "The product of Dankan Empire Group is Cocoman Drinks. It has Pure, Herba and Creamer. Each has Standard, Premium and Supreme.";
+    if(cmd.includes("hello")||cmd==="hi") return "Hello, I am Dank Assistant, your assistant from Dank Empire. How may I help you?";
+    if(cmd.includes("time")) return "It's " + new Date().toLocaleTimeString() + " in Accra right now.";
+    if(cmd.includes("anabel")) return "Anabel's last message was: Dear did you tell her she texted on 18 Oct. Want me to open it?";
+    if(cmd.includes("quashigah")) return "Quashigahbijoux said Oww okay at 1:04 AM.";
+    return "You said: " + command + ". Is there more you would want to know? Dank Assistant is always here to assist you!";
+  }
+
+  function triggerWaves(){
+    waves.innerHTML=''; waves.classList.add('active');
+    for(let i=0;i<4;i++){
+      const w=document.createElement('div'); w.className='wave'; w.style.animationDelay=i*0.35+'s'; waves.appendChild(w);
+    }
+    setTimeout(()=>{waves.classList.remove('active'); waves.innerHTML='';},3000);
+    if(navigator.vibrate) navigator.vibrate([120,60,120]);
+  }
+
+  function startWakeListening(){
+    if(micBlocked) return;
+    if(!userEnabledVoice) return;
+    if(isAuthScreen()) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR) return;
+    if(isListening) return;
+    try{
+      recognition=new SR();
+      recognition.continuous=true; recognition.interimResults=true; recognition.lang='en-US';
+      recognition.onstart=()=>{ isListening=true; permissionGranted=true; dock.classList.add('always-on'); };
+      recognition.onresult=(e)=>{
+        if(isListeningCommand) return;
+        const transcript=Array.from(e.results).map(r=>r[0].transcript).join(' ').toLowerCase();
+        for(const w of WAKE_WORDS){
+          if(transcript.includes(w)){
+            isListeningCommand=true; isListening=false; dock.classList.remove('always-on');
+            try{recognition.stop()}catch(e){}
+            triggerWaves(); chat.classList.add('open'); updateDockVisibility();
+            document.getElementById('dankChatBody').innerHTML=`<div class="dank-bubble">HEY! I'm DANK ASSISTANT. How may I help you?</div>`;
+            bar.style.display='flex'; document.getElementById('dankBarText').textContent='Yes? I\'m listening...';
+            dankSpeak("Hey! I'm Dank Assistant. How may I help you?");
+            setTimeout(()=>startCommandListening(), 600); return;
+          }
+        }
+      };
+      recognition.onend=()=>{
+        isListening=false;
+        if(permissionGranted && !isListeningCommand && !isAuthScreen() && userEnabledVoice && !micBlocked){
+          setTimeout(()=>startWakeListening(), 800);
+        }
+      };
+      recognition.onerror=(e)=>{
+        if(e.error==='not-allowed' || e.error==='service-not-allowed'){
+          permissionGranted=false; micBlocked=true; isListening=false;
+          try{ localStorage.setItem('dank_mic_blocked','1'); }catch(err){}
+          return;
+        }
+        isListening=false;
+      };
+      recognition.start();
+    }catch(err){}
+  }
+
+  function startCommandListening(){
+    if(micBlocked) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR) return;
+    try{
+      const cmdRec=new SR(); cmdRec.continuous=false; cmdRec.interimResults=false; cmdRec.lang='en-US';
+      cmdRec.onstart=()=>{ isListeningCommand=true; bar.style.display='flex'; document.getElementById('dankBarText').textContent='Go ahead, I\'m listening...'; };
+      cmdRec.onresult=async (e)=>{
+        const command=e.results[0][0].transcript;
+        const body=document.getElementById('dankChatBody');
+        body.innerHTML+=`<div class="user-bubble">🎤 ${command}</div>`; body.scrollTop=body.scrollHeight;
+        bar.style.display='none'; isListeningCommand=false;
+        const answer=await askDankAI(command); dankSpeak(answer);
+        setTimeout(()=>startWakeListening(), 1200);
+      };
+      cmdRec.onend=()=>{ isListeningCommand=false; bar.style.display='none'; if(permissionGranted && !isAuthScreen() && userEnabledVoice && !micBlocked) setTimeout(()=>startWakeListening(), 800); };
+      cmdRec.onerror=(e)=>{ if(e.error==='not-allowed'){ micBlocked=true; } };
+      cmdRec.start();
+      setTimeout(()=>{ if(isListeningCommand){ try{cmdRec.stop()}catch(e){} } }, 7000);
+    }catch(err){}
+  }
+
+  try{ if(localStorage.getItem('dank_mic_blocked')==='1') micBlocked=true; }catch(e){}
+
+  setInterval(()=>{ updateDockVisibility(); }, 300);
+  const observer = new MutationObserver(()=> updateDockVisibility());
+  observer.observe(document.body, {childList:true, subtree:true, characterData:true});
+  updateDockVisibility();
+  setTimeout(updateDockVisibility, 500);
+  setTimeout(updateDockVisibility, 1000);
+
+  dock.onclick=()=>{
+    userEnabledVoice=true; micBlocked=false;
+    try{ localStorage.removeItem('dank_mic_blocked'); }catch(e){}
+    startWakeListening();
+    triggerWaves();
+    const body=document.getElementById('dankChatBody');
+    body.innerHTML=`<div class="dank-bubble">HEY! I'm DANK ASSISTANT. How may I help you?</div>`;
+    chat.classList.add('open'); updateDockVisibility();
+    dankSpeak("Hey! I'm Dank Assistant. How may I help you?");
+  };
+
+  document.getElementById('dankClose').onclick=()=>{
+    chat.classList.remove('open'); bar.style.display='none'; window.speechSynthesis.cancel(); isListeningCommand=false;
+    updateDockVisibility();
+    if(userEnabledVoice && !micBlocked && !isAuthScreen()) startWakeListening();
+  };
+
+  document.getElementById('dankSend').onclick=async ()=>{
+    const inp=document.getElementById('dankInput'); const val=inp.value.trim(); if(!val) return;
+    const body=document.getElementById('dankChatBody');
+    body.innerHTML+=`<div class="user-bubble">${val}</div>`; body.scrollTop=body.scrollHeight; inp.value='';
+    const answer=await askDankAI(val); dankSpeak(answer);
+  };
+  
+  document.getElementById('dankInput').addEventListener('keypress',(e)=>{
+    if(e.key==='Enter') document.getElementById('dankSend').click();
+  });
+}
+initAskDankDockV2();
+    
 function renderStatus(){
-  const el = document.getElementById('statusList');
+    const el = document.getElementById('statusList');
   if(!el) return;
     let html = `<div onclick="addStatus()" style="min-width:70px; text-align:center; cursor:pointer;">
     <div style="width:60px; height:60px; border-radius:50%; background:#00a884; display:flex; align-items:center; justify-content:center; color:white; font-size:30px; font-weight:bold;">+</div>
