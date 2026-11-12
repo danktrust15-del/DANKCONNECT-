@@ -1648,7 +1648,7 @@ function openQuotes(){
 let myStatuses = [];
 let channels = [{name:"Dank Updates", followers:"0"}];
 
-// ===== DANK DOCK v14 - DEEP MALE VOICE + COCOMAN PICTURES =====
+// ===== DANK DOCK v15 - NATURAL DEEP VOICE (iPhone Daniel + Android Google) + COCOMAN PICTURES =====
 function initAskDankDockV2(){
   const BLUE = '#2D0FFF';
   const DARK_BLUE = '#0A1433';
@@ -1834,44 +1834,40 @@ function initAskDankDockV2(){
   window.hideDankDock = ()=>{ dock.classList.remove('show'); dock.classList.add('hide'); };
   window.setDankScreen = (name)=>{ window.__DANK_CURRENT_SCREEN__ = name; updateDockVisibility(); };
 
-  // ===== DEEP MALE VOICE V14 - LOCKED =====
+  // ===== NATURAL DEEP MALE VOICE V15 - iPhone Daniel + Android Google - NO ROBOT =====
   function getMasculineVoice(){
     const voices = window.speechSynthesis.getVoices();
     if(!voices.length) return null;
-    const deepPriority = [
-      'Google UK English Male',
-      'Microsoft Ryan',
-      'Microsoft Christopher',
-      'Microsoft Guy',
-      'Microsoft David',
-      'Microsoft Mark',
-      'Microsoft Brian',
-      'Microsoft Eric',
-      'Daniel',
-      'Google US English Male',
-      'Alex',
-      'Fred',
-      'en-GB Male'
-    ];
-    for(const name of deepPriority){
-      const v = voices.find(v=> v.name.toLowerCase().includes(name.toLowerCase()));
-      if(v) return v;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    if(isIOS){
+      // iPhone: Daniel is deep natural, Fred is robot - never pick Fred
+      const iosPriority = ['Daniel', 'Alex'];
+      for(const name of iosPriority){
+        const v = voices.find(v=> v.name.includes(name) && v.lang.includes('en'));
+        if(v) return v;
+      }
+    } else {
+      // Android / Windows: natural Google voices
+      const androidPriority = ['Google US English','Google UK English Male','Microsoft Guy Online','Microsoft Ryan Online','Microsoft Guy','Microsoft Ryan','Microsoft Christopher'];
+      for(const name of androidPriority){
+        const v = voices.find(v=> v.name.toLowerCase().includes(name.toLowerCase()));
+        if(v) return v;
+      }
     }
-    const maleHint = voices.find(v => {
-      const n = v.name.toLowerCase();
-      return (n.includes('male') || n.includes('daniel') || n.includes('david') || n.includes('guy') || n.includes('ryan') || n.includes('christopher') || n.includes('brian')) && v.lang.includes('en');
-    });
-    if(maleHint) return maleHint;
-    const notFemale = voices.find(v => v.lang.includes('en-GB') && !v.name.toLowerCase().includes('female') && !v.name.toLowerCase().includes('samantha') && !v.name.toLowerCase().includes('zira') && !v.name.toLowerCase().includes('karen'));
-    return notFemale || voices.find(v=>v.lang.includes('en')) || voices[0];
+    // Fallback: never female, never Fred (robot)
+    const anyMale = voices.find(v => v.lang.includes('en') && !v.name.toLowerCase().includes('female') && !v.name.toLowerCase().includes('samantha') && !v.name.toLowerCase().includes('zira') && !v.name.toLowerCase().includes('karen') && !v.name.toLowerCase().includes('fred'));
+    return anyMale || voices[0];
   }
 
   function dankSpeak(text){
     window.speechSynthesis.cancel();
     const cleanText = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g,' ').trim();
     const utter = new SpeechSynthesisUtterance(cleanText);
-    utter.rate = 0.92;
-    utter.pitch = 0.55;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    // Natural settings - 0.55 was robot, 0.85-0.9 is natural deep
+    utter.rate = isIOS ? 0.95 : 0.96;
+    utter.pitch = isIOS ? 0.85 : 0.9;
     utter.volume = 1;
     const preferred = getMasculineVoice();
     if(preferred) utter.voice = preferred;
