@@ -1648,12 +1648,13 @@ function openQuotes(){
 let myStatuses = [];
 let channels = [{name:"Dank Updates", followers:"0"}];
 
-// ===== DANK DOCK v15 - NATURAL DEEP VOICE (iPhone Daniel + Android Google) + COCOMAN PICTURES =====
+// ===== DANK DOCK v16.3 - GROQ ONLY - NO WIKI - FIXED MODEL =====
 function initAskDankDockV2(){
   const BLUE = '#2D0FFF';
   const DARK_BLUE = '#0A1433';
   const IMG = 'https://res.cloudinary.com/aqx4n0dz/image/upload/v1793244234/WA_1793244177082.jpg';
   const WAKE_WORDS = ['hey dank','hello dank','hi dank','hey dang','hello dang','dank'];
+  const DANK_AI_KEY = "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"; // <-- PASTE YOUR NEW KEY HERE - inside quotes - your gsk_... key
 
   document.querySelectorAll('#askDankDock, #dankListeningBar, #dankListeningStyles, #dankWaves, #dankChatPanel, #dankMicStatus').forEach(e=>e.remove());
   
@@ -1834,28 +1835,23 @@ function initAskDankDockV2(){
   window.hideDankDock = ()=>{ dock.classList.remove('show'); dock.classList.add('hide'); };
   window.setDankScreen = (name)=>{ window.__DANK_CURRENT_SCREEN__ = name; updateDockVisibility(); };
 
-  // ===== NATURAL DEEP MALE VOICE V15 - iPhone Daniel + Android Google - NO ROBOT =====
   function getMasculineVoice(){
     const voices = window.speechSynthesis.getVoices();
     if(!voices.length) return null;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
     if(isIOS){
-      // iPhone: Daniel is deep natural, Fred is robot - never pick Fred
       const iosPriority = ['Daniel', 'Alex'];
       for(const name of iosPriority){
         const v = voices.find(v=> v.name.includes(name) && v.lang.includes('en'));
         if(v) return v;
       }
     } else {
-      // Android / Windows: natural Google voices
       const androidPriority = ['Google US English','Google UK English Male','Microsoft Guy Online','Microsoft Ryan Online','Microsoft Guy','Microsoft Ryan','Microsoft Christopher'];
       for(const name of androidPriority){
         const v = voices.find(v=> v.name.toLowerCase().includes(name.toLowerCase()));
         if(v) return v;
       }
     }
-    // Fallback: never female, never Fred (robot)
     const anyMale = voices.find(v => v.lang.includes('en') && !v.name.toLowerCase().includes('female') && !v.name.toLowerCase().includes('samantha') && !v.name.toLowerCase().includes('zira') && !v.name.toLowerCase().includes('karen') && !v.name.toLowerCase().includes('fred'));
     return anyMale || voices[0];
   }
@@ -1865,7 +1861,6 @@ function initAskDankDockV2(){
     const cleanText = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g,' ').trim();
     const utter = new SpeechSynthesisUtterance(cleanText);
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    // Natural settings - 0.55 was robot, 0.85-0.9 is natural deep
     utter.rate = isIOS ? 0.95 : 0.96;
     utter.pitch = isIOS ? 0.85 : 0.9;
     utter.volume = 1;
@@ -1881,7 +1876,6 @@ function initAskDankDockV2(){
     window.speechSynthesis.getVoices();
   }
 
-  // ===== BRAIN V13 - WITH COCOMAN PICTURES + PRICE RULE - LOCKED =====
   const COCOMAN_IMGS = {
     "cocoman-blue-standard": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477774/IMG-20261112-WA0008.jpg",
     "cocoman-blue-premium": "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794477760/IMG-20261112-WA0014.jpg",
@@ -1897,8 +1891,42 @@ function initAskDankDockV2(){
     return `${title}<br><img src="${COCOMAN_IMGS[key]}" style="width:100%;border-radius:12px;margin-top:10px;display:block">`;
   }
 
+  // --- GROQ ONLY - NO WIKI - FIXED MODEL 2026 ---
+  async function askGroqAI(question){
+    if(!DANK_AI_KEY || DANK_AI_KEY === "REPLACE_KEY_HERE" || DANK_AI_KEY.length < 20){
+      return "__NO_KEY__";
+    }
+    try{
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${DANK_AI_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-20b",
+          messages: [
+            { role: "system", content: "You are Dank Assistant, assistant from Dank Empire. Answer ALL questions short, friendly, helpful. For Cocoman prices say visit website or chat Order Admin. For executives only list CLE Miss Quashigah and CEO Nana Boadu Moses, Ambassadors Quartey Beatrice Naa Kwarkor Ghana, Arum Emmanuel Chidera Nigeria, Hounkpetor Kodzovi D. Togo." },
+            { role: "user", content: question }
+          ],
+          temperature: 0.7,
+          max_tokens: 500
+        })
+      });
+      const data = await res.json();
+      console.log("DANK GROQ:", data);
+      if(data.choices && data.choices[0]) return data.choices[0].message.content;
+      if(data.error) return "__GROQ_ERROR__: " + data.error.message;
+      return "__GROQ_ERROR__: unknown";
+    }catch(e){ return "__GROQ_ERROR__: " + e.message; }
+  }
+
   async function askDankAI(command){
     const cmd=command.toLowerCase().trim();
+
+    // Small talk - fix "ok" bug
+    if(cmd === "ok" || cmd === "okay" || cmd === "k" || cmd === "alright" || cmd === "yes" || cmd === "yeah" || cmd === "cool" || cmd === "thanks" || cmd === "thank you"){
+      if(cmd.includes("thank")) return "You are always welcome. I am Dank Assistant and I am here for you.";
+      return "Got it. What else do you want to know? Dank Assistant is always here to assist you!";
+    }
+
     if(cmd.includes("price") || cmd.includes("cost") || cmd.includes("how much") || cmd.includes("ghc") || cmd.includes("cedi") || cmd.includes("pricing")){
       return "For current Cocoman prices, please visit our website or chat with Order Admin for the latest price list. Dank Assistant is always here to assist you!";
     }
@@ -1918,45 +1946,26 @@ function initAskDankDockV2(){
         if(cmd.includes("creamer") || cmd.includes("cream")) return `CREAMER PACKS:<br><img src="${COCOMAN_IMGS["cocoman-creamer-standard"]}"><img src="${COCOMAN_IMGS["cocoman-creamer-premium"]}"><img src="${COCOMAN_IMGS["cocoman-creamer-supreme"]}">Standard, Premium, Supreme in Creamer. For prices, please visit our website or chat Order Admin.`;
         return `Here are all 9 Cocoman Drinks - Blue, Green, Creamer x Standard, Premium, Supreme:<br><img src="${COCOMAN_IMGS["cocoman-blue-standard"]}"><img src="${COCOMAN_IMGS["cocoman-blue-premium"]}"><img src="${COCOMAN_IMGS["cocoman-blue-supreme"]}"><img src="${COCOMAN_IMGS["cocoman-green-standard"]}"><img src="${COCOMAN_IMGS["cocoman-green-premium"]}"><img src="${COCOMAN_IMGS["cocoman-green-supreme"]}"><img src="${COCOMAN_IMGS["cocoman-creamer-standard"]}"><img src="${COCOMAN_IMGS["cocoman-creamer-premium"]}"><img src="${COCOMAN_IMGS["cocoman-creamer-supreme"]}">Say "show blue premium" to see one big. For prices, visit website or chat Order Admin.`;
       }
-      if(cmd.includes("creamer")){
-        if(cmd.includes("supreme")) return cocomanCard("cocoman-creamer-supreme", "Cocoman Creamer Supreme is the cream pack. It is creamed coconut water plus shredded coconut meat plus crunchy coconut chips. 320ml creamed water, 50 grams meat, 50 grams chips.");
-        if(cmd.includes("premium")) return cocomanCard("cocoman-creamer-premium", "Cocoman Creamer Premium is the cream pack. Creamed coconut water plus 50 grams shredded coconut meat.");
-        return cocomanCard("cocoman-creamer-standard", "Cocoman Creamer is the cream pack. Creamed coconut water 320ml. Standard is only the drink. Premium adds shredded meat. Supreme adds meat and crunchy chips.");
-      }
-      if(cmd.includes("herba") || cmd.includes("green")){
-        if(cmd.includes("supreme")) return cocomanCard("cocoman-green-supreme", "Cocoman Herba Supreme is the green pack. Medicinal drink plus shredded meat plus crunchy chips. 320ml, 50 grams meat, 50 grams chips. Supports healthy lifestyle.");
-        if(cmd.includes("premium")) return cocomanCard("cocoman-green-premium", "Cocoman Herba Premium is the green pack. Medicinal drink plus shredded coconut meat.");
-        return cocomanCard("cocoman-green-standard", "Cocoman Herba is the green pack. Medicinal drink in cup that supports healthy lifestyle. Standard is 320ml only. Premium adds meat. Supreme adds meat and chips.");
-      }
-      if(cmd.includes("pure") || cmd.includes("blue")){
-        if(cmd.includes("supreme")) return cocomanCard("cocoman-blue-supreme", "Cocoman Pure Supreme is the blue pack. Pure coconut water plus shredded meat plus crunchy chips. 320ml water, 50 grams meat, 50 grams chips, total 370 grams.");
-        if(cmd.includes("premium")) return cocomanCard("cocoman-blue-premium", "Cocoman Pure Premium Combo is the blue pack. Pure coconut water plus 50 grams shredded coconut meat.");
-        return cocomanCard("cocoman-blue-standard", "Cocoman Pure is the blue pack. 100 percent natural coconut water. Standard is only the drink 320ml. Premium adds shredded meat. Supreme adds meat and chips.");
-      }
       return "Cocoman Drinks is a product of Dankan Empire Group. Not a project. We have 3 types: Pure in blue pack, natural coconut water. Herba in green pack, medicinal drink for healthy lifestyle. Creamer in cream pack, creamed coconut water. Each has Standard, Premium and Supreme. Say 'show cocoman blue premium' to see picture. For prices, please visit our website or chat Order Admin.";
     }
     if(cmd.includes("dankconnect")){
       if(cmd.includes("username")||cmd.includes("recreate")) return "To recreate a new username on DankConnect, go to your profile, tap edit, and you can create a new username. Is there more you would want to know? Dank Assistant is always here to assist you!";
       if(cmd.includes("profile")||cmd.includes("upload")||cmd.includes("picture")||cmd.includes("photo")) return "To upload a new profile on DankConnect, go to your profile, tap on your profile picture, choose a new photo and upload it. Is there more you would want to know? Dank Assistant is always here to assist you!";
       if(cmd.includes("message")||cmd.includes("send")||cmd.includes("chat")) return "To send messages on DankConnect, go to chat, select the person you want to connect with globally, type your message and send. Is there more you would want to know? Dank Assistant is always here to assist you!";
-      if(cmd.includes("how")&&cmd.includes("use")) return "Can you be a little more specific? Do you want to recreate a new username? Do you want to upload a new profile? Do you want to send messages? Can you tell me exactly what you want to know more about the usage of DankConnect?";
       return "DankConnect is a chat app that connects individuals globally. Is there more you would want to know? Dank Assistant is always here to assist you!";
     }
     if(cmd.includes("dktv")||cmd.includes("studio")){
-      if(cmd.includes("studio a")) return "DKTV Online Studio A is a project of Dankan Empire Group. More details coming soon. Is there more you would want to know? Dank Assistant is always here to assist you!";
-      if(cmd.includes("studio b")) return "DKTV Online Studio B is a project of Dankan Empire Group. More details coming soon. Is there more you would want to know? Dank Assistant is always here to assist you!";
       return "DKTV is a project of Dankan Empire Group. We have DKTV Online Studio A and DKTV Online Studio B. Is there more you would want to know? Dank Assistant is always here to assist you!";
     }
     if(cmd.includes("good morning")) return "Good morning, welcome. This is Dank Assistant, your assistant from Dank Empire. How may I help you today?";
     if(cmd.includes("good afternoon")) return "Good afternoon, welcome. I am Dank Assistant. How may I be of service to you?";
     if(cmd.includes("good evening")) return "Good evening, welcome. I am Dank Assistant. Hope your day went well. How may I help you?";
     if(cmd.includes("how are you")) return "I am doing great, thank you for asking. I am Dank Assistant, ready to serve you. How may I help you?";
-    if(cmd.includes("thank you")||cmd.includes("thanks")) return "You are always welcome. I am Dank Assistant and I am here for you.";
     if(cmd.includes("bye")||cmd.includes("goodbye")) return "Goodbye, thank you for your time. I am Dank Assistant and I will always be here for you.";
     if(cmd.includes("who are you")||cmd.includes("your name")) return "I am Dank Assistant, your assistant from Dank Empire. How may I help you?";
     if(cmd.includes("who made you")||cmd.includes("who created you")||cmd.includes("who built you")) return "I am Dank Assistant. I was built by the founder of Dank Empire, to assist him and all of his cherished users.";
     if(cmd.includes("dank empire")||cmd.includes("dankan empire")){
-      if(cmd.includes("group")) return "For Dankan Empire Group, the Executives are: CLE, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo. I can list Executives, Ambassadors and Projects, but I can't go deeper into their profiles for security reasons.";
+      if(cmd.includes("group")) return "For Dankan Empire Group, the Executives are: CLE, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo.";
       return "If you talk about Dank Empire or Dankan Empire, you are talking about the founder himself. He is the Dank Empire. So, do you want to rather talk about Dank Empire Group or Dankan Empire Group?";
     }
     if(cmd.includes("executive")||cmd.includes("ambassador")||cmd.includes("cle")||cmd.includes("ceo")) return "For Dankan Empire Group, the Executives are: CLE, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo.";
@@ -1964,9 +1973,13 @@ function initAskDankDockV2(){
     if(cmd.includes("product")) return "The product of Dankan Empire Group is Cocoman Drinks. It has Pure, Herba and Creamer. Each has Standard, Premium and Supreme.";
     if(cmd.includes("hello")||cmd==="hi") return "Hello, I am Dank Assistant, your assistant from Dank Empire. How may I help you?";
     if(cmd.includes("time")) return "It's " + new Date().toLocaleTimeString() + " in Accra right now.";
-    if(cmd.includes("anabel")) return "Anabel's last message was: Dear did you tell her she texted on 18 Oct. Want me to open it?";
-    if(cmd.includes("quashigah")) return "Quashigahbijoux said Oww okay at 1:04 AM.";
-    return "You said: " + command + ". Is there more you would want to know? Dank Assistant is always here to assist you!";
+
+    // --- GROQ ONLY ---
+    const groqAnswer = await askGroqAI(command);
+    if(groqAnswer === "__NO_KEY__") return "Dank AI is not connected yet. Please add your Groq key in the code at the top. Dank Assistant is always here to assist you!";
+    if(groqAnswer && groqAnswer.startsWith("__GROQ_ERROR__")) return "Groq error: " + groqAnswer.replace("__GROQ_ERROR__: ","") + " Please check your key. If key is invalid, create a new one in Groq.";
+    if(groqAnswer) return groqAnswer;
+    return "I didn't get that. Can you ask again? Dank Assistant is always here to assist you!";
   }
 
   function triggerWaves(){
