@@ -1648,7 +1648,7 @@ function openQuotes(){
 let myStatuses = [];
 let channels = [{name:"Dank Updates", followers:"0"}];
 
-// ===== DANK DOCK v16.3 - GROQ ONLY - NO WIKI - FIXED MODEL =====
+// ===== DANK DOCK v16.4 - GROQ ONLY - FOUNDER LOCKED - NO WIKI =====
 function initAskDankDockV2(){
   const BLUE = '#2D0FFF';
   const DARK_BLUE = '#0A1433';
@@ -1903,7 +1903,7 @@ function initAskDankDockV2(){
         body: JSON.stringify({
           model: "openai/gpt-oss-20b",
           messages: [
-            { role: "system", content: "You are Dank Assistant, assistant from Dank Empire. Answer ALL questions short, friendly, helpful. For Cocoman prices say visit website or chat Order Admin. For executives only list CLE Miss Quashigah and CEO Nana Boadu Moses, Ambassadors Quartey Beatrice Naa Kwarkor Ghana, Arum Emmanuel Chidera Nigeria, Hounkpetor Kodzovi D. Togo." },
+            { role: "system", content: "You are Dank Assistant, assistant from Dank Empire. Answer ALL questions short, friendly, helpful. Founder of Dank Empire and Dankan Empire Group is Stephen Nana Kankam Asiedu also known as Steve Dankan. CLO/CLE is Miss Quashigah. CEO is Nana Boadu Moses. For Cocoman prices say visit website or chat Order Admin. For executives only list CLO Miss Quashigah and CEO Nana Boadu Moses, Ambassadors Quartey Beatrice Naa Kwarkor Ghana, Arum Emmanuel Chidera Nigeria, Hounkpetor Kodzovi D. Togo." },
             { role: "user", content: question }
           ],
           temperature: 0.7,
@@ -1925,6 +1925,17 @@ function initAskDankDockV2(){
     if(cmd === "ok" || cmd === "okay" || cmd === "k" || cmd === "alright" || cmd === "yes" || cmd === "yeah" || cmd === "cool" || cmd === "thanks" || cmd === "thank you"){
       if(cmd.includes("thank")) return "You are always welcome. I am Dank Assistant and I am here for you.";
       return "Got it. What else do you want to know? Dank Assistant is always here to assist you!";
+    }
+
+    // --- FOUNDER / CLO / CEO - LOCKED V16.4 - MUST BE FIRST ---
+    if(cmd.includes("founder") || cmd.includes("who owns") || cmd.includes("who started") || cmd.includes("steve dankan") || cmd.includes("stephen") || cmd.includes("kankam") || cmd.includes("asiedu") || cmd.includes("who is dank empire") || cmd.includes("who is dankan")){
+      return "The founder of Dank Empire and Dankan Empire Group is Stephen Nana Kankam Asiedu, also popularly known as Steve Dankan. He is the visionary behind DankConnect, DKTV and Cocoman Drinks. Dank Assistant is always here to assist you!";
+    }
+    if(cmd.includes("clo") || cmd.includes("cle") || cmd.includes("chief liaison") || cmd.includes("quashigah") || cmd.includes("anabel") || cmd.includes("miss quashigah")){
+      return "The CLO, Chief Liaison Executive of Dankan Empire Group is Miss Quashigah. She is the Chief Liaison Executive working with the founder Steve Dankan. Dank Assistant is always here to assist you!";
+    }
+    if(cmd.includes("ceo") || cmd.includes("chief executive") || cmd.includes("nana boadu") || cmd.includes("boadu moses")){
+      return "The CEO, Chief Executive Officer of Dankan Empire Group is Nana Boadu Moses. He works with the founder Steve Dankan and CLO Miss Quashigah. Dank Assistant is always here to assist you!";
     }
 
     if(cmd.includes("price") || cmd.includes("cost") || cmd.includes("how much") || cmd.includes("ghc") || cmd.includes("cedi") || cmd.includes("pricing")){
@@ -1963,12 +1974,12 @@ function initAskDankDockV2(){
     if(cmd.includes("how are you")) return "I am doing great, thank you for asking. I am Dank Assistant, ready to serve you. How may I help you?";
     if(cmd.includes("bye")||cmd.includes("goodbye")) return "Goodbye, thank you for your time. I am Dank Assistant and I will always be here for you.";
     if(cmd.includes("who are you")||cmd.includes("your name")) return "I am Dank Assistant, your assistant from Dank Empire. How may I help you?";
-    if(cmd.includes("who made you")||cmd.includes("who created you")||cmd.includes("who built you")) return "I am Dank Assistant. I was built by the founder of Dank Empire, to assist him and all of his cherished users.";
+    if(cmd.includes("who made you")||cmd.includes("who created you")||cmd.includes("who built you")) return "I am Dank Assistant. I was built by the founder of Dank Empire, Stephen Nana Kankam Asiedu, also known as Steve Dankan, to assist him and all of his cherished users.";
     if(cmd.includes("dank empire")||cmd.includes("dankan empire")){
-      if(cmd.includes("group")) return "For Dankan Empire Group, the Executives are: CLE, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo.";
-      return "If you talk about Dank Empire or Dankan Empire, you are talking about the founder himself. He is the Dank Empire. So, do you want to rather talk about Dank Empire Group or Dankan Empire Group?";
+      if(cmd.includes("group")) return "For Dankan Empire Group, the Executives are: CLO, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo. The founder is Stephen Nana Kankam Asiedu, also known as Steve Dankan.";
+      return "If you talk about Dank Empire or Dankan Empire, you are talking about the founder himself, Stephen Nana Kankam Asiedu, also known as Steve Dankan. He is the Dank Empire. So, do you want to rather talk about Dank Empire Group or Dankan Empire Group?";
     }
-    if(cmd.includes("executive")||cmd.includes("ambassador")||cmd.includes("cle")||cmd.includes("ceo")) return "For Dankan Empire Group, the Executives are: CLE, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo.";
+    if(cmd.includes("executive")||cmd.includes("ambassador")) return "For Dankan Empire Group, the Executives are: CLO, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo. The founder is Stephen Nana Kankam Asiedu, also known as Steve Dankan.";
     if(cmd.includes("project")) return "The projects of Dankan Empire Group are: DankConnect, DKTV Online Studio A and DKTV Online Studio B, plus other confidential projects for 2030. Cocoman Drinks is not a project, it is a product.";
     if(cmd.includes("product")) return "The product of Dankan Empire Group is Cocoman Drinks. It has Pure, Herba and Creamer. Each has Standard, Premium and Supreme.";
     if(cmd.includes("hello")||cmd==="hi") return "Hello, I am Dank Assistant, your assistant from Dank Empire. How may I help you?";
