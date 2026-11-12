@@ -1648,7 +1648,7 @@ function openQuotes(){
 let myStatuses = [];
 let channels = [{name:"Dank Updates", followers:"0"}];
 
-// ===== DANK DOCK v16.4 - GROQ ONLY - FOUNDER LOCKED - NO WIKI =====
+// ===== DANK DOCK v16.5 - GROQ ONLY - FOUNDER LOCKED - NO WIKI - WITH LEADERS PICTURES =====
 function initAskDankDockV2(){
   const BLUE = '#2D0FFF';
   const DARK_BLUE = '#0A1433';
@@ -1891,6 +1891,28 @@ function initAskDankDockV2(){
     return `${title}<br><img src="${COCOMAN_IMGS[key]}" style="width:100%;border-radius:12px;margin-top:10px;display:block">`;
   }
 
+  // ===== DANK-EMPIRE LEADERS V16.5 - 8 PICTURES =====
+  const LEADERS = {
+    founder: [
+      "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794494167/founder_1.jpg",
+      "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794494190/IMG-20261112-WA0033.jpg",
+      "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794494209/IMG-20261112-WA0025.jpg"
+    ],
+    clo: [
+      "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794494232/IMG-20261112-WA0028.jpg",
+      "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794494250/IMG-20261112-WA0030.jpg",
+      "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794494266/IMG-20261112-WA0034.jpg"
+    ],
+    ceo: [
+      "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794494287/IMG-20261112-WA0027.jpg",
+      "https://res.cloudinary.com/aqx4n0dz/image/upload/v1794494344/IMG-20261112-WA0029.jpg"
+    ]
+  };
+  function leadersCard(urls, title){
+    let imgs = urls.map(u=>`<img src="${u}">`).join('');
+    return `${title}<br>${imgs}`;
+  }
+
   // --- GROQ ONLY - NO WIKI - FIXED MODEL 2026 ---
   async function askGroqAI(question){
     if(!DANK_AI_KEY || DANK_AI_KEY === "REPLACE_KEY_HERE" || DANK_AI_KEY.length < 20){
@@ -1927,15 +1949,34 @@ function initAskDankDockV2(){
       return "Got it. What else do you want to know? Dank Assistant is always here to assist you!";
     }
 
-    // --- FOUNDER / CLO / CEO - LOCKED V16.4 - MUST BE FIRST ---
+    // --- LEADERS PICTURES - V16.5 MUST BE FIRST BEFORE TEXT ---
+    if(cmd.includes("empire leaders") || cmd.includes("all leaders") || cmd.includes("show leaders") || cmd.includes("leaders")){
+      const all = [...LEADERS.founder, ...LEADERS.clo, ...LEADERS.ceo];
+      return leadersCard(all, "👑 DANK-EMPIRE LEADERS 👑<br><br>Founder: Steve Dankan (3)<br>CLO: Miss Quashigah (3)<br>CEO: Nana Boadu Moses (2)<br>All 8 pictures:");
+    }
+    if((cmd.includes("show") || cmd.includes("picture") || cmd.includes("pic") || cmd.includes("image") || cmd.includes("see") || cmd.includes("photo")) && cmd.includes("founder")){
+      return leadersCard(LEADERS.founder, "👑 FOUNDER - Stephen Nana Kankam Asiedu aka Steve Dankan<br>Founder of Dank Empire and Dankan Empire Group:");
+    }
+    if((cmd.includes("show") || cmd.includes("picture") || cmd.includes("pic") || cmd.includes("image") || cmd.includes("see") || cmd.includes("photo")) && (cmd.includes("clo") || cmd.includes("cle") || cmd.includes("quashigah"))){
+      return leadersCard(LEADERS.clo, "💼 CLO - Miss Quashigah<br>Chief Liaison Executive - Dankan Empire Group:");
+    }
+    if((cmd.includes("show") || cmd.includes("picture") || cmd.includes("pic") || cmd.includes("image") || cmd.includes("see") || cmd.includes("photo")) && (cmd.includes("ceo") || cmd.includes("boadu"))){
+      return leadersCard(LEADERS.ceo, "🚀 CEO - Nana Boadu Moses<br>Chief Executive Officer - Dankan Empire Group:");
+    }
+    // also allow "show founder" without extra words
+    if(cmd === "show founder") return leadersCard(LEADERS.founder, "👑 FOUNDER - Steve Dankan:");
+    if(cmd === "show clo") return leadersCard(LEADERS.clo, "💼 CLO - Miss Quashigah:");
+    if(cmd === "show ceo") return leadersCard(LEADERS.ceo, "🚀 CEO - Nana Boadu Moses:");
+
+    // --- FOUNDER / CLO / CEO - LOCKED V16.4 - TEXT ---
     if(cmd.includes("founder") || cmd.includes("who owns") || cmd.includes("who started") || cmd.includes("steve dankan") || cmd.includes("stephen") || cmd.includes("kankam") || cmd.includes("asiedu") || cmd.includes("who is dank empire") || cmd.includes("who is dankan")){
-      return "The founder of Dank Empire and Dankan Empire Group is Stephen Nana Kankam Asiedu, also popularly known as Steve Dankan. He is the visionary behind DankConnect, DKTV and Cocoman Drinks. Dank Assistant is always here to assist you!";
+      return "The founder of Dank Empire and Dankan Empire Group is Stephen Nana Kankam Asiedu, also popularly known as Steve Dankan. He is the visionary behind DankConnect, DKTV and Cocoman Drinks. Say 'show founder' to see his pictures. Dank Assistant is always here to assist you!";
     }
     if(cmd.includes("clo") || cmd.includes("cle") || cmd.includes("chief liaison") || cmd.includes("quashigah") || cmd.includes("anabel") || cmd.includes("miss quashigah")){
-      return "The CLO, Chief Liaison Executive of Dankan Empire Group is Miss Quashigah. She is the Chief Liaison Executive working with the founder Steve Dankan. Dank Assistant is always here to assist you!";
+      return "The CLO, Chief Liaison Executive of Dankan Empire Group is Miss Quashigah. She is the Chief Liaison Executive working with the founder Steve Dankan. Say 'show clo' to see her pictures. Dank Assistant is always here to assist you!";
     }
     if(cmd.includes("ceo") || cmd.includes("chief executive") || cmd.includes("nana boadu") || cmd.includes("boadu moses")){
-      return "The CEO, Chief Executive Officer of Dankan Empire Group is Nana Boadu Moses. He works with the founder Steve Dankan and CLO Miss Quashigah. Dank Assistant is always here to assist you!";
+      return "The CEO, Chief Executive Officer of Dankan Empire Group is Nana Boadu Moses. He works with the founder Steve Dankan and CLO Miss Quashigah. Say 'show ceo' to see his pictures. Dank Assistant is always here to assist you!";
     }
 
     if(cmd.includes("price") || cmd.includes("cost") || cmd.includes("how much") || cmd.includes("ghc") || cmd.includes("cedi") || cmd.includes("pricing")){
@@ -1976,7 +2017,7 @@ function initAskDankDockV2(){
     if(cmd.includes("who are you")||cmd.includes("your name")) return "I am Dank Assistant, your assistant from Dank Empire. How may I help you?";
     if(cmd.includes("who made you")||cmd.includes("who created you")||cmd.includes("who built you")) return "I am Dank Assistant. I was built by the founder of Dank Empire, Stephen Nana Kankam Asiedu, also known as Steve Dankan, to assist him and all of his cherished users.";
     if(cmd.includes("dank empire")||cmd.includes("dankan empire")){
-      if(cmd.includes("group")) return "For Dankan Empire Group, the Executives are: CLO, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo. The founder is Stephen Nana Kankam Asiedu, also known as Steve Dankan.";
+      if(cmd.includes("group")) return "For Dankan Empire Group, the Executives are: CLO, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo. The founder is Stephen Nana Kankam Asiedu, also known as Steve Dankan. Say 'show empire leaders' to see all pictures.";
       return "If you talk about Dank Empire or Dankan Empire, you are talking about the founder himself, Stephen Nana Kankam Asiedu, also known as Steve Dankan. He is the Dank Empire. So, do you want to rather talk about Dank Empire Group or Dankan Empire Group?";
     }
     if(cmd.includes("executive")||cmd.includes("ambassador")) return "For Dankan Empire Group, the Executives are: CLO, Chief Liaison Executive, Miss Quashigah, and CEO, Chief Executive Officer, Nana Boadu Moses. The Ambassadors are: Quartey Beatrice Naa Kwarkor for Ghana, Arum Emmanuel Chidera for Nigeria, and Hounkpetor Kodzovi D. for Togo. The founder is Stephen Nana Kankam Asiedu, also known as Steve Dankan.";
